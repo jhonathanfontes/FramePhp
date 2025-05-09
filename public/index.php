@@ -5,6 +5,9 @@ define('BASE_PATH', dirname(__DIR__));
 require_once BASE_PATH . '/vendor/autoload.php';
 
 try {
+    // Carregar variáveis de ambiente
+    Core\Config\Environment::load(BASE_PATH . '/.env');
+
     // Inicializar o Router
     $router = new Core\Router\Router();
 
