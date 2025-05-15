@@ -1,0 +1,13 @@
+<div class="debug-info">
+    <h3><i class="fas fa-bug"></i> Informações de Depuração:</h3>
+    <div class="debug-details">
+        <p><strong>Tipo:</strong> {{ error.type|default('Erro') }}</p>
+        <p><strong>Arquivo:</strong> {{ error.file|default('Desconhecido') }}</p>
+        <p><strong>Linha:</strong> {{ error.line|default('0') }}</p>
+    </div>
+    
+    {% if error.trace is defined %}
+    <h3><i class="fas fa-stream"></i> Stack Trace:</h3>
+    <div class="debug-trace">{{ error.trace }}</div>
+    {% endif %}
+</div>

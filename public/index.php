@@ -1,30 +1,36 @@
 <?php
-define('BASE_PATH', dirname(__DIR__));
 
-// Autoloader
-require_once BASE_PATH . '/vendor/autoload.php';
+// Autoload do Composer
+require dirname(__DIR__) . '/vendor/autoload.php';
 
-try {
-    // Carregar variáveis de ambiente
-    Core\Config\Environment::load(BASE_PATH . '/.env');
+// Inicializa as constantes
+use Core\Config\Constants;
+Constants::init();
 
-    // Inicializar o Router
-    $router = new Core\Router\Router();
+// Carrega as variáveis de ambiente
+use Core\Config\Environment;
+Environment::load(BASE_PATH . '/.env');
 
-    // Carregar as rotas do arquivo
-    $routes = require BASE_PATH . '/routes/web.php';
-    $routes($router);
+// Registra o manipulador de erros
+use Core\Error\ErrorHandler;
+ErrorHandler::register();
 
-    // Despachar a rota
+// Configurações de erro
+error_reporting(E_ALL);
+ini_set('display_errors', Environment::get('APP_DEBUG', false));
+
+// Middleware de Segurança
+$security = new \Core\Middleware\SecurityMiddleware();
+$security->handle();
+
+// Inicializa o Router
+$router = new \Core\Router\Router();
+
+// Carrega as rotas
+$routeCallback = require BASE_PATH . '/routes/web.php';
+
+// Executa o callback das rotas
+if (is_callable($routeCallback)) {
+    $routeCallback($router);
     $router->dispatch();
-} catch (Exception $e) {
-    echo "Erro: " . $e->getMessage();
-}
-
-// Inicializar o Framework
-try {
-    // Aqui vamos adicionar a inicialização do Framework
-    echo "Framework PHP iniciado com sucesso!";
-} catch (Exception $e) {
-    echo "Erro: " . $e->getMessage();
 }

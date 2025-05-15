@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Erro {{ statusCode }} - {{ app_name() }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .error-container {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .error-title {
+            color: #721c24;
+            margin-top: 0;
+        }
+        .error-details {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+        }
+        .error-trace {
+            font-family: monospace;
+            white-space: pre-wrap;
+            font-size: 14px;
+        }
+        .error-line {
+            background-color: #ffecb3;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <h1 class="error-title">Erro {{ statusCode }}</h1>
+        <p><strong>{{ error.type }}:</strong> {{ error.message }}</p>
+    </div>
+    
+    <div class="error-details">
+        <h2>Detalhes do Erro</h2>
+        <p><strong>Arquivo:</strong> {{ error.file }}</p>
+        <p><strong>Linha:</strong> {{ error.line }}</p>
+        
+        {% if error.trace is defined %}
+            <h3>Stack Trace</h3>
+            <div class="error-trace">{{ error.trace }}</div>
+        {% endif %}
+    </div>
+    
+    <footer>
+        <p>{{ app_name() }} v{{ app_version() }} - Modo de Depuração</p>
+    </footer>
+</body>
+</html>

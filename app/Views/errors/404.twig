@@ -1,0 +1,20 @@
+{% extends 'errors/layouts/error.twig' %}
+
+{% set code = 404 %}
+{% set title = 'Página Não Encontrada' %}
+{% set color = 'warning' %}
+
+{% block error_icon %}
+    <i class="fas fa-search"></i>
+{% endblock %}
+
+{% block error_help %}
+    <div class="error-help">
+        <h3><i class="fas fa-lightbulb"></i> Possíveis soluções:</h3>
+        <ul>
+            <li><i class="fas fa-check-circle"></i> Verifique se a URL está correta</li>
+            <li><i class="fas fa-check-circle"></i> A página pode ter sido movida ou excluída</li>
+            <li><i class="fas fa-check-circle"></i> Volte para a página inicial e tente navegar para o conteúdo desejado</li>
+        </ul>
+    </div>
+{% endblock %}
