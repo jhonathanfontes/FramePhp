@@ -4,6 +4,8 @@ namespace App\Controllers\Auth;
 
 use Core\Controller\BaseController;
 use App\Models\User;
+use Core\Auth\Auth;
+use Core\Http\Response;
 
 class AuthController extends BaseController
 {
@@ -220,7 +222,7 @@ class AuthController extends BaseController
     {
         session_start();
         session_destroy();
-        header('Location: ' . base_url('login'));
+        header('Location: ' . base_url('auth/login'));
         exit;
     }
 
@@ -229,5 +231,17 @@ class AuthController extends BaseController
         echo $this->render('auth/unauthorized', [
             'title' => 'Acesso Não Autorizado'
         ]);
+    }
+
+    public function showLoginForm()
+    {
+        // Verifica se o usuário já está autenticado
+        if (Auth::check()) {
+            // Redireciona para o dashboard se já estiver logado
+            return Response::redirectResponse('/dashboard');
+        }
+        
+        // Se não estiver autenticado, exibe o formulário de login normalmente
+        return $this->render('auth/login');
     }
 }

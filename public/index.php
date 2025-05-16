@@ -1,36 +1,20 @@
 <?php
 
-// Autoload do Composer
-require dirname(__DIR__) . '/vendor/autoload.php';
+// Definir caminho base
+define('BASE_PATH', dirname(__DIR__));
 
-// Inicializa as constantes
-use Core\Config\Constants;
-Constants::init();
+// Carregar o autoloader do Composer
+require BASE_PATH . '/vendor/autoload.php';
 
-// Carrega as variáveis de ambiente
-use Core\Config\Environment;
-Environment::load(BASE_PATH . '/.env');
+// Carregar variáveis de ambiente
+$dotenv = \Dotenv\Dotenv::createImmutable(BASE_PATH);
+$dotenv->load();
 
-// Registra o manipulador de erros
-use Core\Error\ErrorHandler;
-ErrorHandler::register();
+// Carregar bootstrap
+require_once BASE_PATH . '/bootstrap/app.php';
 
-// Configurações de erro
-error_reporting(E_ALL);
-ini_set('display_errors', Environment::get('APP_DEBUG', false));
-
-// Middleware de Segurança
-$security = new \Core\Middleware\SecurityMiddleware();
-$security->handle();
-
-// Inicializa o Router
+// Iniciar a aplicação
 $router = new \Core\Router\Router();
+require_once BASE_PATH . '/routes/web.php'; // Just include the file to set up routes
 
-// Carrega as rotas
-$routeCallback = require BASE_PATH . '/routes/web.php';
-
-// Executa o callback das rotas
-if (is_callable($routeCallback)) {
-    $routeCallback($router);
-    $router->dispatch();
-}
+$router->dispatch();

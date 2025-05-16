@@ -1,49 +1,46 @@
-{% extends "layouts/auth.twig" %}
+{% extends 'layouts/auth.twig' %}
 
 {% block content %}
 <div class="auth-container">
     <div class="auth-card">
-        <h1>Cadastro</h1>
+        <h2>Criar Conta</h2>
         
-        <form action="{{ base_url('register') }}" method="POST">
+        {% if error %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+        
+        <form method="POST" action="{{ base_url('register') }}">
+            <!-- Campo CSRF -->
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
             <div class="form-group">
                 <label for="name">Nome</label>
-                <input type="text" name="name" id="name" value="{{ name|default('') }}" required>
-                {% if errors.name %}
-                    <div class="invalid-feedback">{{ errors.name }}</div>
-                {% endif %}
+                <input type="text" name="name" id="name" class="form-control" value="{{ old.name }}" required>
             </div>
             
             <div class="form-group">
                 <label for="email">E-mail</label>
-                <input type="email" name="email" id="email" value="{{ email|default('') }}" required>
-                {% if errors.email %}
-                    <div class="invalid-feedback">{{ errors.email }}</div>
-                {% endif %}
+                <input type="email" name="email" id="email" class="form-control" value="{{ old.email }}" required>
             </div>
             
             <div class="form-group">
                 <label for="password">Senha</label>
-                <input type="password" name="password" id="password" required>
-                {% if errors.password %}
-                    <div class="invalid-feedback">{{ errors.password }}</div>
-                {% endif %}
+                <input type="password" name="password" id="password" class="form-control" required>
             </div>
             
             <div class="form-group">
                 <label for="password_confirmation">Confirmar Senha</label>
-                <input type="password" name="password_confirmation" id="password_confirmation" required>
-                {% if errors.password_confirmation %}
-                    <div class="invalid-feedback">{{ errors.password_confirmation }}</div>
-                {% endif %}
+                <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" required>
             </div>
             
-            <button type="submit" class="btn btn-primary btn-block">Cadastrar</button>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary btn-block">Registrar</button>
+            </div>
+            
+            <div class="auth-links">
+                <p>Já tem uma conta? <a href="{{ base_url('login') }}">Faça login</a></p>
+            </div>
         </form>
-        
-        <div class="auth-links">
-            <a href="{{ base_url('login') }}">Já tem uma conta? Faça login</a>
-        </div>
     </div>
 </div>
 {% endblock %}

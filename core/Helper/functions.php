@@ -4,7 +4,8 @@ use Core\Helper\UrlHelper;
 if (!function_exists('base_url')) {
     function base_url(?string $path = null): string
     {
-        $base = URL_BASE;
+        // Usar a variável de ambiente APP_URL
+        $base = env('APP_URL', 'http://localhost');
         
         if ($path) {
             return $base . '/' . trim($path, '/');
@@ -17,20 +18,20 @@ if (!function_exists('base_url')) {
 if (!function_exists('app_name')) {
     function app_name(): string
     {
-        return APP_NAME ?? 'FramePhp';
+        return env('APP_NAME', 'FramePhp');
     }
 }
 
 if (!function_exists('app_version')) {
     function app_version(): string
     {
-        return APP_VERSION ?? '1.0.0';
+        return env('APP_VERSION', '1.0.0');
     }
 }
 
 if (!function_exists('app_debug')) {
     function app_debug(): bool
     {
-        return UrlHelper::app_debug();
+        return env('APP_DEBUG', false);
     }
 }

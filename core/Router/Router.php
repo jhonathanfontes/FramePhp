@@ -2,6 +2,9 @@
 
 namespace Core\Router;
 
+use Core\Http\Request;
+use Core\Http\Response;
+
 class Router
 {
     private array $routes = [];
@@ -141,18 +144,60 @@ class Router
 
     public function dispatch()
     {
+        $request = new Request();
+        
         foreach ($this->routes as $route) {
             if ($this->matchRoute($route)) {
-                foreach ($route['middleware'] as $middleware) {
-                    $instance = new $middleware();
-                    $instance->handle();
+                try {
+                    // Execute middlewares
+                    $response = $this->executeMiddleware($route['middleware'] ?? [], $request, function() use ($route, $request) {
+                        return $this->executeCallback($route['callback'], $request);
+                    });
+                    
+                    if ($response instanceof Response) {
+                        $response->send();
+                        return;
+                    }
+                    
+                    echo $response;
+                    return;
+                } catch (\Exception $e) {
+                    // Log do erro
+                    error_log($e->getMessage());
+                    
+                    // Exibir erro em modo de desenvolvimento
+                    if (config('app.debug', false)) {
+                        echo '<h1>Erro:</h1>';
+                        echo '<p>' . $e->getMessage() . '</p>';
+                        echo '<pre>' . $e->getTraceAsString() . '</pre>';
+                        exit;
+                    }
+                    
+                    // Em produção, mostrar página de erro genérica
+                    echo 'Ocorreu um erro. Por favor, tente novamente mais tarde.';
+                    exit;
                 }
-                return $this->executeCallback($route['callback']);
             }
         }
+       
+        // Rota não encontrada
+        header('HTTP/1.0 404 Not Found');
+        echo '404 - Página não encontrada';
+        exit;
+    }
+    
+    private function executeMiddleware(array $middlewares, Request $request, \Closure $callback)
+    {
+        if (empty($middlewares)) {
+            return $callback();
+        }
         
-        // Rota não encontrada - usar ErrorHandler em vez de resposta direta
-        \Core\Error\ErrorHandler::handleNotFound();
+        $middleware = array_shift($middlewares);
+        $instance = new $middleware();
+        
+        return $instance->handle($request, function($request) use ($middlewares, $callback) {
+            return $this->executeMiddleware($middlewares, $request, $callback);
+        });
     }
 
     private function executeCallback($callback)

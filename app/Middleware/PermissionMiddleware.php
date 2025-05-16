@@ -2,10 +2,9 @@
 
 namespace App\Middleware;
 
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
-use Psr\Http\Server\RequestHandlerInterface;
+use Core\Http\Request;
+use Core\Http\Response;
+use Core\Middleware\MiddlewareInterface;
 
 class PermissionMiddleware implements MiddlewareInterface
 {
@@ -16,17 +15,26 @@ class PermissionMiddleware implements MiddlewareInterface
         $this->requiredRole = $role;
     }
 
-    public function process(
-        ServerRequestInterface $request,
-        RequestHandlerInterface $handler
-    ): ResponseInterface {
+    /**
+     * Processa a requisição e verifica se o usuário tem a permissão necessária
+     *
+     * @param Request $request
+     * @param \Closure $next
+     * @return Response
+     */
+    public function handle(Request $request, \Closure $next): Response
+    {
         $user = $request->getAttribute('user');
         
         if (!$user || !$this->hasPermission($user, $this->requiredRole)) {
-            throw new \Exception('Acesso não autorizado');
+            return new Response(
+                json_encode(['error' => 'Acesso não autorizado']),
+                403,
+                ['Content-Type' => 'application/json']
+            );
         }
 
-        return $handler->handle($request);
+        return $next($request);
     }
 
     private function hasPermission($user, $role): bool

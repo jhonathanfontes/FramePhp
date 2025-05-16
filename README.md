@@ -1,25 +1,30 @@
 # FramePhp
 
-FramePhp é um framework PHP leve e flexível, projetado para facilitar o desenvolvimento de aplicações web modernas.
+Um framework PHP moderno, leve e fácil de usar para desenvolvimento web.
 
-## 🚀 Características
+## Características
 
-- Roteamento simples e intuitivo
-- Sistema MVC (Model-View-Controller)
-- Gerenciamento de banco de dados com PDO
-- Sistema de templates
-- Gerenciamento de variáveis de ambiente
-- Autoload PSR-4
+- Arquitetura MVC
+- Sistema de roteamento simples e poderoso
+- ORM integrado para manipulação de banco de dados
+- Sistema de templates com Twig
+- Middleware para controle de acesso
+- Sistema de autenticação integrado
+- Validação de formulários
+- Sistema de cache
+- Tratamento de erros e exceções
+- Suporte a sessões e cookies
+- Suporte a migrações de banco de dados
 
-## 📋 Requisitos
+## Requisitos
 
-- PHP 7.4 ou superior
+- PHP 8.0 ou superior
 - Composer
-- MySQL/MariaDB
+- MySQL 5.7 ou superior (ou outro banco de dados compatível)
 
-## 🔧 Instalação
+## Instalação
 
 1. Clone o repositório:
 ```bash
-git clone https://github.com/jhonathanfontes/FramePhp.git
+git clone https://github.com/seu-usuario/framephp.git
 ```

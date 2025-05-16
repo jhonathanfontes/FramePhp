@@ -1,0 +1,44 @@
+{% extends 'layouts/app.twig' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="dashboard">
+        <h1>Dashboard</h1>
+        
+        <div class="dashboard-welcome">
+            <p>Bem-vindo ao seu painel de controle, {{ session['user']['name']|default('Usuário') }}!</p>
+        </div>
+       
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <h3>Estatísticas</h3>
+                <p>Aqui você pode ver suas estatísticas e informações importantes.</p>
+            </div>
+            
+            <div class="stat-card">
+                <h3>Atividades Recentes</h3>
+                <p>Visualize suas atividades recentes no sistema.</p>
+            </div>
+            
+            <div class="stat-card">
+                <h3>Notificações</h3>
+                <p>Você tem {{ notifications|default(0) }} notificações não lidas.</p>
+            </div>
+        </div>
+        
+        <div class="dashboard-actions">
+            <a href="{{ base_url('profile') }}" class="btn btn-primary">Editar Perfil</a>
+            <a href="{{ base_url('settings') }}" class="btn btn-secondary">Configurações</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Scripts específicos do dashboard podem ser adicionados aqui
+    console.log('Dashboard carregado com sucesso!');
+</script>
+{% endblock %}
