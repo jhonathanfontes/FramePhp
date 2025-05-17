@@ -7,18 +7,28 @@ use Core\Http\Response;
 
 class Router
 {
+    private static $instance = null;
     private array $routes = [];
     private string $requestMethod;
     private string $requestUri;
     private array $currentGroup = [];
     private ?string $prefix = null;
     private array $middleware = [];
+    private $namedRoutes = [];
 
     public function __construct()
     {
         $this->requestMethod = $_SERVER['REQUEST_METHOD'];
         $this->requestUri = str_replace('/FramePhp/public', '', parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
         $this->middleware = [];
+    }
+
+    public static function getInstance(): self
+    {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+        return self::$instance;
     }
 
     public function get(string $uri, $callback): self
@@ -114,6 +124,10 @@ class Router
         ];
 
         $this->routes[] = $route;
+
+        if (isset($route['name'])) {
+            $this->namedRoutes[$route['name']] = $route;
+        }
     }
 
     private function matchRoute(array $route): bool
@@ -180,10 +194,7 @@ class Router
             }
         }
        
-        // Rota não encontrada
-        header('HTTP/1.0 404 Not Found');
-        echo '404 - Página não encontrada';
-        exit;
+        $this->handleRouteNotFound();
     }
     
     private function executeMiddleware(array $middlewares, Request $request, \Closure $callback)
@@ -215,5 +226,43 @@ class Router
         }
 
         throw new \Exception("Callback inválido");
+    }
+
+    private function handleRouteNotFound()
+    {
+        // Rota não encontrada
+        $error = [
+            'type' => 'NotFoundError',
+            'message' => 'A página solicitada não foi encontrada',
+            'file' => __FILE__,
+            'line' => __LINE__,
+            'timestamp' => date('Y-m-d H:i:s'),
+            'trace' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)
+        ];
+
+        // Usar o ErrorHandler para renderizar a página de erro
+        $errorHandler = \Core\Error\ErrorHandler::getInstance();
+        $errorHandler->renderErrorPage($error);
+    }
+
+    public function generateUrl($name, $params = [])
+    {
+        if (!isset($this->namedRoutes[$name])) {
+            throw new \Exception("Route name '{$name}' not found");
+        }
+
+        $route = $this->namedRoutes[$name];
+        $path = $route['uri'];
+
+        // Substituir parâmetros na URL
+        foreach ($params as $key => $value) {
+            $path = str_replace('{' . $key . '}', $value, $path);
+        }
+
+        // Remover parâmetros opcionais não fornecidos
+        $path = preg_replace('/\{[^}]+\}/', '', $path);
+        $path = str_replace('//', '/', $path);
+
+        return $path;
     }
 }

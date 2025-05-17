@@ -1,0 +1,69 @@
+{% extends "layouts/admin.twig" %}
+
+{% block title %}Configurações{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Configurações</h1>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <!-- Configurações Gerais -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Configurações Gerais</h6>
+                </div>
+                <div class="card-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="app_name" class="form-label">Nome da Aplicação</label>
+                            <input type="text" class="form-control" id="app_name" value="{{ app_name() }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="app_email" class="form-label">Email de Contato</label>
+                            <input type="email" class="form-control" id="app_email" value="contato@exemplo.com">
+                        </div>
+                        <div class="mb-3">
+                            <label for="app_phone" class="form-label">Telefone</label>
+                            <input type="text" class="form-control" id="app_phone" value="(11) 99999-9999">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <!-- Configurações de Email -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Configurações de Email</h6>
+                </div>
+                <div class="card-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="mail_host" class="form-label">Servidor SMTP</label>
+                            <input type="text" class="form-control" id="mail_host" value="smtp.exemplo.com">
+                        </div>
+                        <div class="mb-3">
+                            <label for="mail_port" class="form-label">Porta</label>
+                            <input type="number" class="form-control" id="mail_port" value="587">
+                        </div>
+                        <div class="mb-3">
+                            <label for="mail_username" class="form-label">Usuário</label>
+                            <input type="text" class="form-control" id="mail_username" value="contato@exemplo.com">
+                        </div>
+                        <div class="mb-3">
+                            <label for="mail_password" class="form-label">Senha</label>
+                            <input type="password" class="form-control" id="mail_password" value="********">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

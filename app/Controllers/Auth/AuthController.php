@@ -25,37 +25,81 @@ class AuthController extends BaseController
 
     public function login()
     {
-        // Validar credenciais
-        $email = $_POST['email'] ?? '';
-        $password = $_POST['password'] ?? '';
+        try {
+            // Validar credenciais
+            $email = $_POST['email'] ?? '';
+            $password = $_POST['password'] ?? '';
 
-        // Buscar usuário pelo e-mail
-        $user = $this->userModel->findByEmail($email);
+            // Log para debug
+            error_log("Tentativa de login - Email: " . $email);
 
-        // Verificar se o usuário existe e a senha está correta
-        if ($user && password_verify($password, $user['password'])) {
-            // Iniciar sessão
-            session_start();
+            if (empty($email) || empty($password)) {
+                error_log("Email ou senha vazios");
+                echo $this->render('auth/login', [
+                    'title' => 'Login',
+                    'error' => 'Email e senha são obrigatórios',
+                    'email' => $email
+                ]);
+                return;
+            }
+
+            // Buscar usuário pelo e-mail
+            $user = $this->userModel->findByEmail($email);
+
+            // Log para debug
+            error_log("Usuário encontrado: " . ($user ? "Sim" : "Não"));
+            if ($user) {
+                error_log("Dados do usuário: " . json_encode($user));
+            }
+
+            // Verificar se o usuário existe e a senha está correta
+            if ($user && password_verify($password, $user['password'])) {
+                // Log para debug
+                error_log("Senha verificada com sucesso para o usuário: " . $user['email']);
+
+                // Preparar dados do usuário para a sessão
+                $userData = [
+                    'id' => $user['id'],
+                    'name' => $user['name'],
+                    'email' => $user['email'],
+                    'role' => $user['role']
+                ];
+
+                // Autenticar o usuário usando a classe Auth
+                Auth::login($userData);
+
+                // Log para debug
+                error_log("Usuário autenticado: " . json_encode($userData));
+                
+                // Redirecionar para o dashboard
+                header('Location: ' . base_url('dashboard'));
+                exit;
+            }
             
-            // Armazenar dados do usuário
-            $_SESSION['user'] = [
-                'id' => $user['id'],
-                'name' => $user['name'],
-                'email' => $user['email'],
-                'role' => $user['role']
-            ];
+            // Log para debug
+            error_log("Falha no login - Email: " . $email);
+            if ($user) {
+                error_log("Senha incorreta para o usuário");
+            } else {
+                error_log("Usuário não encontrado");
+            }
             
-            // Redirecionar para o dashboard
-            header('Location: ' . base_url('dashboard'));
-            exit;
+            // Credenciais inválidas
+            echo $this->render('auth/login', [
+                'title' => 'Login',
+                'error' => 'Credenciais inválidas',
+                'email' => $email
+            ]);
+        } catch (\Exception $e) {
+            error_log("Erro durante o login: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            
+            echo $this->render('auth/login', [
+                'title' => 'Login',
+                'error' => 'Ocorreu um erro durante o login. Por favor, tente novamente.',
+                'email' => $email ?? ''
+            ]);
         }
-        
-        // Credenciais inválidas
-        echo $this->render('auth/login', [
-            'title' => 'Login',
-            'error' => 'Credenciais inválidas',
-            'email' => $email
-        ]);
     }
 
     public function registerForm()

@@ -3,193 +3,271 @@
 namespace Core\Error;
 
 use Core\View\TwigManager;
+use PDOException;
 
 class ErrorHandler
 {
-    public static function register()
+    private static $errorLogFile;
+    private static $instance = null;
+
+    private function __construct()
     {
-        // Definir manipulador de erros
-        set_error_handler([self::class, 'handleError']);
-        
-        // Definir manipulador de exceções
-        set_exception_handler([self::class, 'handleException']);
-        
-        // Registrar shutdown function
-        register_shutdown_function([self::class, 'handleShutdown']);
+        self::$errorLogFile = BASE_PATH . '/storage/logs/errors.json';
+        $this->ensureLogDirectoryExists();
     }
 
-    public static function handleError($level, $message, $file, $line)
+    public static function getInstance()
     {
-        if (!(error_reporting() & $level)) {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
+    private function ensureLogDirectoryExists()
+    {
+        $logDir = dirname(self::$errorLogFile);
+        if (!file_exists($logDir)) {
+            mkdir($logDir, 0777, true);
+        }
+    }
+
+    public static function register()
+    {
+        $instance = self::getInstance();
+        set_error_handler([$instance, 'handleError']);
+        set_exception_handler([self::class, 'handleException']);
+        register_shutdown_function([$instance, 'handleShutdown']);
+    }
+
+    public function handleError($errno, $errstr, $errfile, $errline)
+    {
+        if (!(error_reporting() & $errno)) {
             return false;
         }
 
         $error = [
-            'type' => 'Erro',
-            'message' => $message,
-            'file' => $file,
-            'line' => $line,
-            'level' => $level
+            'type' => $this->getErrorType($errno),
+            'message' => $errstr,
+            'file' => $errfile,
+            'line' => $errline,
+            'timestamp' => date('Y-m-d H:i:s'),
+            'trace' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)
         ];
 
-        self::renderError($error, 500);
+        $this->logError($error);
+        $this->renderErrorPage($error);
+
         return true;
     }
 
     public static function handleException($exception)
     {
+        $instance = self::getInstance();
+        
         $error = [
             'type' => get_class($exception),
             'message' => $exception->getMessage(),
             'file' => $exception->getFile(),
             'line' => $exception->getLine(),
-            'trace' => $exception->getTraceAsString()
+            'timestamp' => date('Y-m-d H:i:s'),
+            'trace' => $exception->getTrace()
         ];
 
-        $statusCode = 500;
-        if (method_exists($exception, 'getStatusCode')) {
-            $statusCode = $exception->getStatusCode();
+        // Tratamento específico para erros de banco de dados
+        if ($exception instanceof PDOException) {
+            $error['type'] = 'DatabaseError';
+            $error['message'] = self::formatDatabaseErrorMessage($exception->getMessage());
+            $error['sqlState'] = $exception->getCode();
         }
 
-        // Verificar se é um erro de banco de dados
-        if (strpos($exception->getMessage(), 'Erro de conexão com o banco de dados') !== false) {
-            self::renderTemplate('errors/database', $error);
-            return;
-        }
-
-        self::renderError($error, $statusCode);
+        $instance->logError($error);
+        $instance->renderErrorPage($error);
     }
 
-    public static function handleShutdown()
+    private static function formatDatabaseErrorMessage($message)
+    {
+        // Mensagens amigáveis para erros comuns do banco de dados
+        $errorMessages = [
+            'Table.*doesn\'t exist' => 'A tabela necessária não existe no banco de dados. Por favor, execute as migrações do banco de dados.',
+            'Unknown column' => 'Uma coluna necessária não existe na tabela.',
+            'Duplicate entry' => 'Já existe um registro com este valor.',
+            'Cannot add or update a child row' => 'Não é possível adicionar ou atualizar este registro devido a restrições de chave estrangeira.',
+            'Access denied' => 'Acesso negado ao banco de dados. Verifique as credenciais de conexão.'
+        ];
+
+        foreach ($errorMessages as $pattern => $friendlyMessage) {
+            if (preg_match('/' . $pattern . '/i', $message)) {
+                return $friendlyMessage;
+            }
+        }
+
+        return 'Ocorreu um erro no banco de dados. Por favor, tente novamente mais tarde.';
+    }
+
+    public function handleShutdown()
     {
         $error = error_get_last();
         if ($error !== null && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
-            self::handleError($error['type'], $error['message'], $error['file'], $error['line']);
+            $this->handleError($error['type'], $error['message'], $error['file'], $error['line']);
         }
     }
 
-    public static function handleNotFound()
+    private function logError($error)
     {
-        $error = [
-            'type' => 'NotFoundError',
-            'message' => 'A página solicitada não foi encontrada.',
-            'file' => '',
-            'line' => 0
-        ];
-
-        self::renderTemplate('errors/404', $error);
-    }
-
-    private static function renderError(array $error, int $statusCode)
-    {
-        http_response_code($statusCode);
-        
-        // Determinar qual template usar com base no código de status
-        $template = 'errors/default';
-        
-        switch ($statusCode) {
-            case 404:
-                $template = 'errors/404';
-                break;
-            case 500:
-                $template = 'errors/500';
-                break;
-            // Adicione mais casos conforme necessário
+        $errors = [];
+        if (file_exists(self::$errorLogFile)) {
+            $content = file_get_contents(self::$errorLogFile);
+            if (!empty($content)) {
+                $errors = json_decode($content, true) ?? [];
+            }
         }
-        
-        // Configurações específicas para cada tipo de erro
-        $errorConfig = self::getErrorConfig($statusCode, $error);
-        
-        self::renderTemplate($template, $error, array_merge([
-            'code' => $statusCode
-        ], $errorConfig));
+
+        $errors[] = $error;
+        file_put_contents(self::$errorLogFile, json_encode($errors, JSON_PRETTY_PRINT));
     }
-    
-    private static function renderTemplate(string $template, array $error, array $data = [])
+
+    public function renderErrorPage($error)
     {
         try {
             $twig = TwigManager::getInstance();
             
-            echo $twig->render($template, array_merge([
-                'error' => $error
-            ], $data));
+            // Determinar o template e código do erro
+            $template = 'errors/500';
+            $errorCode = 500;
+            
+            // Log para debug
+            error_log("Tipo de erro: " . $error['type']);
+            error_log("Mensagem de erro: " . $error['message']);
+            
+            // Tratamento específico para erros de banco de dados
+            if ($error['type'] === 'DatabaseError') {
+                $template = 'errors/database';
+                $errorCode = 500;
+            } elseif (strpos($error['type'], 'NotFound') !== false || 
+                     strpos($error['message'], 'not found') !== false ||
+                     strpos($error['message'], 'não encontrado') !== false ||
+                     strpos($error['message'], '404') !== false) {
+                $template = 'errors/404';
+                $errorCode = 404;
+                error_log("Usando template 404");
+            }
+
+            // Log para debug
+            error_log("Renderizando página de erro - Template: {$template}, Código: {$errorCode}");
+            error_log("Dados do erro: " . json_encode($error));
+
+            // Preparar dados para o template
+            $data = [
+                'error' => [
+                    'type' => $error['type'],
+                    'message' => $error['message'],
+                    'file' => $error['file'] ?? '',
+                    'line' => $error['line'] ?? '',
+                    'trace' => $error['trace'] ?? []
+                ],
+                'errorId' => uniqid('err_'),
+                'timestamp' => date('Y-m-d H:i:s'),
+                'debug' => $_ENV['APP_DEBUG'] ?? false,
+                'errorCode' => $errorCode
+            ];
+
+            // Definir o código de status HTTP
+            http_response_code($errorCode);
+
+            // Log do template e dados
+            error_log("Template: " . $template);
+            error_log("Dados para o template: " . json_encode($data));
+
+            // Renderizar o template
+            echo $twig->render($template, $data);
         } catch (\Exception $e) {
+            // Log do erro
+            error_log("Erro ao renderizar página de erro: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            
             // Fallback para caso o Twig falhe
-            self::renderFallback($error, $data['code'] ?? 500);
+            $this->renderFallback($error);
         }
-        
         exit;
     }
-    
-    private static function renderFallback(array $error, int $statusCode)
+
+    private function renderFallback($error)
     {
-        echo '<h1>Erro ' . $statusCode . '</h1>';
-        echo '<p>' . $error['message'] . '</p>';
-        if (APP_DEBUG) {
-            echo '<p>Arquivo: ' . $error['file'] . ' (linha ' . $error['line'] . ')</p>';
-        } else {
-            echo '<p>Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.</p>';
+        header('Content-Type: text/html; charset=utf-8');
+        echo '<!DOCTYPE html>';
+        echo '<html lang="pt-BR">';
+        echo '<head>';
+        echo '<meta charset="UTF-8">';
+        echo '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
+        echo '<title>Erro - ' . htmlspecialchars($error['type']) . '</title>';
+        echo '<style>';
+        echo 'body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }';
+        echo '.error-container { max-width: 800px; margin: 0 auto; }';
+        echo '.error-header { background: #dc3545; color: white; padding: 20px; border-radius: 5px 5px 0 0; }';
+        echo '.error-body { background: #f8f9fa; padding: 20px; border: 1px solid #dee2e6; border-top: none; border-radius: 0 0 5px 5px; }';
+        echo '</style>';
+        echo '</head>';
+        echo '<body>';
+        echo '<div class="error-container">';
+        echo '<div class="error-header">';
+        echo '<h1>' . htmlspecialchars($error['type']) . '</h1>';
+        echo '</div>';
+        echo '<div class="error-body">';
+        echo '<h2>Mensagem do Erro</h2>';
+        echo '<p>' . htmlspecialchars($error['message']) . '</p>';
+        if ($_ENV['APP_DEBUG'] ?? false) {
+            echo '<h3>Detalhes</h3>';
+            echo '<ul>';
+            echo '<li><strong>Arquivo:</strong> ' . htmlspecialchars($error['file']) . '</li>';
+            echo '<li><strong>Linha:</strong> ' . htmlspecialchars($error['line']) . '</li>';
+            echo '<li><strong>Data/Hora:</strong> ' . htmlspecialchars($error['timestamp']) . '</li>';
+            if (isset($error['sqlState'])) {
+                echo '<li><strong>SQL State:</strong> ' . htmlspecialchars($error['sqlState']) . '</li>';
+            }
+            echo '</ul>';
         }
+        echo '</div>';
+        echo '</div>';
+        echo '</body>';
+        echo '</html>';
     }
 
-    private static function getErrorConfig(int $statusCode, array $error): array
+    private function getErrorType($type)
     {
-        switch ($statusCode) {
-            case 404:
-                return [
-                    'title' => 'Página Não Encontrada',
-                    'color' => 'warning',
-                    'help' => [
-                        'Verifique se a URL está correta',
-                        'A página pode ter sido movida ou excluída',
-                        'Volte para a página inicial e tente navegar para o conteúdo desejado'
-                    ]
-                ];
-                
-            case 403:
-                return [
-                    'title' => 'Acesso Proibido',
-                    'color' => 'danger',
-                    'help' => [
-                        'Você não tem permissão para acessar este recurso',
-                        'Faça login com uma conta que tenha as permissões necessárias',
-                        'Entre em contato com o administrador se acredita que isso é um erro'
-                    ]
-                ];
-                
-            case 401:
-                return [
-                    'title' => 'Não Autorizado',
-                    'color' => 'warning',
-                    'help' => [
-                        'Você precisa fazer login para acessar este recurso',
-                        'Sua sessão pode ter expirado',
-                        'Faça login novamente para continuar'
-                    ]
-                ];
-                
-            case 400:
-                return [
-                    'title' => 'Requisição Inválida',
-                    'color' => 'warning',
-                    'help' => [
-                        'A requisição enviada contém erros',
-                        'Verifique os dados enviados e tente novamente',
-                        'Se o problema persistir, entre em contato com o suporte'
-                    ]
-                ];
-                
-            case 500:
+        switch($type) {
+            case E_ERROR:
+                return 'E_ERROR';
+            case E_WARNING:
+                return 'E_WARNING';
+            case E_PARSE:
+                return 'E_PARSE';
+            case E_NOTICE:
+                return 'E_NOTICE';
+            case E_CORE_ERROR:
+                return 'E_CORE_ERROR';
+            case E_CORE_WARNING:
+                return 'E_CORE_WARNING';
+            case E_COMPILE_ERROR:
+                return 'E_COMPILE_ERROR';
+            case E_COMPILE_WARNING:
+                return 'E_COMPILE_WARNING';
+            case E_USER_ERROR:
+                return 'E_USER_ERROR';
+            case E_USER_WARNING:
+                return 'E_USER_WARNING';
+            case E_USER_NOTICE:
+                return 'E_USER_NOTICE';
+            case E_STRICT:
+                return 'E_STRICT';
+            case E_RECOVERABLE_ERROR:
+                return 'E_RECOVERABLE_ERROR';
+            case E_DEPRECATED:
+                return 'E_DEPRECATED';
+            case E_USER_DEPRECATED:
+                return 'E_USER_DEPRECATED';
             default:
-                return [
-                    'title' => 'Erro Interno do Servidor',
-                    'color' => 'danger',
-                    'help' => [
-                        'Este é um problema no servidor e não com sua requisição',
-                        'Os administradores foram notificados do problema',
-                        'Tente novamente mais tarde ou entre em contato com o suporte'
-                    ]
-                ];
+                return 'UNKNOWN';
         }
     }
 }

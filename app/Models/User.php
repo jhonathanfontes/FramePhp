@@ -15,7 +15,21 @@ class User
 
     public function findByEmail(string $email): ?array
     {
-        return $this->db->find('users', 'email = ?', [$email]);
+        try {
+            // Log para debug
+            error_log("Buscando usuário pelo email: " . $email);
+            
+            $user = $this->db->find('users', 'email = ?', [$email]);
+            
+            // Log para debug
+            error_log("Resultado da busca: " . ($user ? "Usuário encontrado" : "Usuário não encontrado"));
+            
+            return $user;
+        } catch (\Exception $e) {
+            // Log do erro
+            error_log("Erro ao buscar usuário por email: " . $e->getMessage());
+            return null;
+        }
     }
 
     public function findById(int $id): ?array

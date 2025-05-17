@@ -13,8 +13,11 @@ $dotenv->load();
 // Carregar bootstrap
 require_once BASE_PATH . '/bootstrap/app.php';
 
-// Iniciar a aplicação
+// Inicializar o Router
 $router = new \Core\Router\Router();
-require_once BASE_PATH . '/routes/web.php'; // Just include the file to set up routes
 
+// Carregar as rotas
+require_once BASE_PATH . '/routes/web.php';
+
+// Despachar a rota
 $router->dispatch();

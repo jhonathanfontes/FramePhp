@@ -20,7 +20,12 @@ class TwigManager
             mkdir($cacheDir, 0777, true);
         }
         
-        $loader = new FilesystemLoader(BASE_PATH . '/app/Views');
+        // Log para debug
+        error_log("Inicializando TwigManager");
+        error_log("Diretório de templates: " . BASE_PATH . '/app/views');
+        error_log("Diretório de cache: " . $cacheDir);
+        
+        $loader = new FilesystemLoader(BASE_PATH . '/app/views');
         $this->twig = new Environment($loader, [
             'cache' => $cacheDir,
             'debug' => config('app.debug', false),
@@ -64,7 +69,18 @@ class TwigManager
 
     public function render(string $template, array $data = []): string
     {
-        return $this->twig->render($template . '.twig', $data);
+        try {
+            // Log para debug
+            error_log("Renderizando template: " . $template);
+            error_log("Dados: " . json_encode($data));
+            
+            return $this->twig->render($template . '.twig', $data);
+        } catch (\Exception $e) {
+            error_log("Erro ao renderizar template: " . $e->getMessage());
+            error_log("Template: " . $template);
+            error_log("Stack trace: " . $e->getTraceAsString());
+            throw $e;
+        }
     }
 
 }

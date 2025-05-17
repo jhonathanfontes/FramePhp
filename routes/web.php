@@ -5,11 +5,17 @@ use App\Controllers\Auth\AuthController;
 use App\Controllers\Admin\AdminController;
 use App\Controllers\Api\ApiController;
 use App\Controllers\Client\ClientController;
+use App\Controllers\Error\ErrorController;
 use App\Middleware\AuthenticationMiddleware;
 use App\Middleware\CsrfMiddleware;
 use App\Middleware\LocaleMiddleware;
 use App\Middleware\PermissionMiddleware;
 use App\Middleware\GuestMiddleware;
+use App\Controllers\Admin\MenuController;
+
+// Rotas de erro
+$router->get('/error/{id}', [ErrorController::class, 'show'])->name('error.show');
+$router->get('/error/list', [ErrorController::class, 'list'])->name('error.list');
 
 // Rotas públicas com middleware de localização e CSRF
 $router->middleware([LocaleMiddleware::class, CsrfMiddleware::class])->group([], function ($router) {
@@ -51,6 +57,22 @@ $router->middleware([new AuthenticationMiddleware('admin', '/admin/login')])->gr
     });
     $router->get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
     $router->get('/admin/settings', [AdminController::class, 'settings'])->name('admin.settings');
+
+    $router->group(['prefix' => 'admin/menus'], function ($router) {
+        $router->get('/', [MenuController::class, 'index'])->name('admin.menus.index');
+        $router->get('/create', [MenuController::class, 'create'])->name('admin.menus.create');
+        $router->post('/store', [MenuController::class, 'store'])->name('admin.menus.store');
+        $router->get('/{id}/edit', [MenuController::class, 'edit'])->name('admin.menus.edit');
+        $router->post('/{id}/update', [MenuController::class, 'update'])->name('admin.menus.update');
+        $router->get('/{id}/destroy', [MenuController::class, 'destroy'])->name('admin.menus.destroy');
+        
+        // Rotas para submenus
+        $router->get('/{menuId}/submenus/create', [MenuController::class, 'createSubmenu'])->name('admin.menus.submenus.create');
+        $router->post('/{menuId}/submenus/store', [MenuController::class, 'storeSubmenu'])->name('admin.menus.submenus.store');
+        $router->get('/submenus/{id}/edit', [MenuController::class, 'editSubmenu'])->name('admin.menus.submenus.edit');
+        $router->post('/submenus/{id}/update', [MenuController::class, 'updateSubmenu'])->name('admin.menus.submenus.update');
+        $router->get('/submenus/{id}/destroy', [MenuController::class, 'destroySubmenu'])->name('admin.menus.submenus.destroy');
+    });
 });
 
 // Rotas protegidas para clientes

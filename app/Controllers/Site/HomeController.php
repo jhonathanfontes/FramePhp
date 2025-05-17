@@ -8,7 +8,7 @@ class HomeController extends BaseController
 {
     public function index()
     {
-        echo "Home 1";
+        return $this->render('home/index');
     }
 
     public function about()

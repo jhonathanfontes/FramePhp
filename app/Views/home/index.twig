@@ -1,0 +1,201 @@
+{% extends "layouts/app.twig" %}
+
+{% block title %}Bem-vindo - {{ app_name() }}{% endblock %}
+
+{% block styles %}
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, var(--primary-color) 0%, #224abe 100%);
+        color: white;
+        padding: 100px 0;
+        text-align: center;
+    }
+
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1.5rem;
+        margin-bottom: 2rem;
+        opacity: 0.9;
+    }
+
+    .hero-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    .btn-hero {
+        padding: 0.8rem 2rem;
+        font-size: 1.1rem;
+        border-radius: 50px;
+        transition: all 0.3s;
+    }
+
+    .btn-hero-primary {
+        background: white;
+        color: var(--primary-color);
+        border: none;
+    }
+
+    .btn-hero-primary:hover {
+        background: #f8f9fc;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .btn-hero-secondary {
+        background: transparent;
+        color: white;
+        border: 2px solid white;
+    }
+
+    .btn-hero-secondary:hover {
+        background: rgba(255,255,255,0.1);
+        transform: translateY(-2px);
+    }
+
+    .features-section {
+        padding: 80px 0;
+        background: #f8f9fc;
+    }
+
+    .feature-card {
+        background: white;
+        border-radius: 10px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s;
+        height: 100%;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .feature-icon {
+        width: 70px;
+        height: 70px;
+        background: var(--primary-color);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        margin: 0 auto 1.5rem;
+    }
+
+    .feature-title {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: var(--primary-color);
+    }
+
+    .feature-text {
+        color: #6c757d;
+        line-height: 1.6;
+    }
+
+    .cta-section {
+        background: linear-gradient(135deg, #224abe 0%, var(--primary-color) 100%);
+        color: white;
+        padding: 80px 0;
+        text-align: center;
+    }
+
+    .cta-title {
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .cta-text {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+        opacity: 0.9;
+    }
+
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+        }
+
+        .hero-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .btn-hero {
+            width: 100%;
+            max-width: 300px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <h1 class="hero-title">Bem-vindo ao {{ app_name() }}</h1>
+        <p class="hero-subtitle">Sua plataforma completa de gerenciamento</p>
+        <div class="hero-buttons">
+            <a href="/login" class="btn btn-hero btn-hero-primary">Entrar</a>
+            <a href="/register" class="btn btn-hero btn-hero-secondary">Registrar</a>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="feature-title">Análise Avançada</h3>
+                    <p class="feature-text">Acompanhe seus dados em tempo real com gráficos interativos e relatórios detalhados.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="feature-title">Gestão de Usuários</h3>
+                    <p class="feature-text">Gerencie seus usuários com facilidade, controlando permissões e acessos.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="feature-title">Segurança Total</h3>
+                    <p class="feature-text">Sua segurança é nossa prioridade, com criptografia e proteção de dados.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container">
+        <h2 class="cta-title">Comece Agora Mesmo</h2>
+        <p class="cta-text">Junte-se a milhares de usuários que já estão aproveitando nossa plataforma</p>
+        <a href="/register" class="btn btn-hero btn-hero-primary">Criar Conta Grátis</a>
+    </div>
+</section>
+{% endblock %} 

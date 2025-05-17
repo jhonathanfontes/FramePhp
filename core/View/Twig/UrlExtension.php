@@ -4,9 +4,17 @@ namespace Core\View\Twig;
 
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
+use Core\Router\Router;
 
 class UrlExtension extends AbstractExtension
 {
+    private $router;
+
+    public function __construct()
+    {
+        $this->router = Router::getInstance();
+    }
+
     /**
      * Retorna as funções disponibilizadas por esta extensão
      *
@@ -15,21 +23,18 @@ class UrlExtension extends AbstractExtension
     public function getFunctions()
     {
         return [
-            new TwigFunction('base_url', [$this, 'baseUrl']),
+            new TwigFunction('url', [$this, 'generateUrl']),
+            new TwigFunction('base_url', [$this, 'getBaseUrl']),
         ];
     }
 
-    /**
-     * Retorna a URL base da aplicação
-     *
-     * @param string $path
-     * @return string
-     */
-    public function baseUrl(string $path = '')
+    public function generateUrl($name, $params = [])
     {
-        $baseUrl = rtrim($_ENV['APP_URL'] ?? 'http://localhost', '/');
-        $path = ltrim($path, '/');
-        
-        return $path ? "{$baseUrl}/{$path}" : $baseUrl;
+        return $this->router->generateUrl($name, $params);
+    }
+
+    public function getBaseUrl()
+    {
+        return rtrim($_ENV['APP_URL'] ?? '', '/');
     }
 }

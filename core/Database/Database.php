@@ -100,12 +100,32 @@ class Database
 
     public function find(string $table, string $where, array $whereParams = [], string $columns = '*'): ?array
     {
-        $sql = "SELECT {$columns} FROM {$table} WHERE {$where} LIMIT 1";
-        
-        $stmt = $this->query($sql, $whereParams);
-        $result = $stmt->fetch();
-        
-        return $result !== false ? $result : null;
+        try {
+            // Log para debug
+            error_log("Executando query FIND - Tabela: {$table}, Where: {$where}");
+            
+            $sql = "SELECT {$columns} FROM {$table} WHERE {$where} LIMIT 1";
+            
+            // Log da query
+            error_log("SQL: " . $sql);
+            error_log("Parâmetros: " . json_encode($whereParams));
+            
+            $stmt = $this->query($sql, $whereParams);
+            $result = $stmt->fetch();
+            
+            // Log do resultado
+            error_log("Resultado: " . ($result ? "Registro encontrado" : "Nenhum registro encontrado"));
+            
+            return $result !== false ? $result : null;
+        } catch (PDOException $e) {
+            // Log do erro
+            error_log("Erro na query FIND: " . $e->getMessage());
+            error_log("SQL: " . $sql);
+            error_log("Parâmetros: " . json_encode($whereParams));
+            
+            // Lançar exceção para ser tratada pelo ErrorHandler
+            throw $e;
+        }
     }
 
     public function findAll(string $table, string $where = '1', array $whereParams = [], string $columns = '*', string $orderBy = null, int $limit = null, int $offset = null): array

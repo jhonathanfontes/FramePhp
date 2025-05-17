@@ -1,0 +1,428 @@
+{% extends "layouts/app.twig" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block styles %}
+<style>
+    :root {
+        --sidebar-width: 250px;
+        --header-height: 60px;
+        --primary-color: #4e73df;
+        --secondary-color: #858796;
+        --success-color: #1cc88a;
+        --info-color: #36b9cc;
+        --warning-color: #f6c23e;
+        --danger-color: #e74a3b;
+    }
+
+    .dashboard-container {
+        display: flex;
+        min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+        width: var(--sidebar-width);
+        background: linear-gradient(180deg, var(--primary-color) 0%, #224abe 100%);
+        color: white;
+        position: fixed;
+        height: 100vh;
+        transition: all 0.3s;
+        z-index: 1000;
+    }
+
+    .sidebar-header {
+        padding: 1rem;
+        text-align: center;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .sidebar-menu {
+        padding: 1rem 0;
+    }
+
+    .menu-item {
+        padding: 0.8rem 1.5rem;
+        display: flex;
+        align-items: center;
+        color: rgba(255,255,255,0.8);
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+
+    .menu-item:hover {
+        background: rgba(255,255,255,0.1);
+        color: white;
+    }
+
+    .menu-item.active {
+        background: rgba(255,255,255,0.2);
+        color: white;
+        border-left: 4px solid white;
+    }
+
+    .menu-item i {
+        margin-right: 0.8rem;
+        width: 20px;
+        text-align: center;
+    }
+
+    /* Main Content */
+    .main-content {
+        flex: 1;
+        margin-left: var(--sidebar-width);
+        transition: all 0.3s;
+    }
+
+    /* Header */
+    .top-header {
+        height: var(--header-height);
+        background: white;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1.5rem;
+        position: sticky;
+        top: 0;
+        z-index: 999;
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+    }
+
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    /* Cards */
+    .dashboard-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        padding: 1.5rem;
+    }
+
+    .card {
+        background: white;
+        border-radius: 0.35rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        transition: transform 0.3s;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+
+    .card-header {
+        padding: 1rem;
+        border-bottom: 1px solid #e3e6f0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .card-body {
+        padding: 1rem;
+    }
+
+    .card-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+
+    .bg-primary { background-color: var(--primary-color); }
+    .bg-success { background-color: var(--success-color); }
+    .bg-info { background-color: var(--info-color); }
+    .bg-warning { background-color: var(--warning-color); }
+
+    /* Charts */
+    .dashboard-charts {
+        padding: 1.5rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .chart-container {
+        background: white;
+        border-radius: 0.35rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        padding: 1rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .sidebar {
+            transform: translateX(-100%);
+        }
+
+        .sidebar.active {
+            transform: translateX(0);
+        }
+
+        .main-content {
+            margin-left: 0;
+        }
+
+        .dashboard-charts {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Toggle Button */
+    .sidebar-toggle {
+        display: none;
+        background: none;
+        border: none;
+        color: var(--secondary-color);
+        font-size: 1.5rem;
+        cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+        .sidebar-toggle {
+            display: block;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h4>{{ app_name() }}</h4>
+        </div>
+        <nav class="sidebar-menu">
+            <a href="/dashboard" class="menu-item active">
+                <i class="fas fa-tachometer-alt"></i>
+                Dashboard
+            </a>
+            <a href="/users" class="menu-item">
+                <i class="fas fa-users"></i>
+                Usuários
+            </a>
+            <a href="/products" class="menu-item">
+                <i class="fas fa-box"></i>
+                Produtos
+            </a>
+            <a href="/orders" class="menu-item">
+                <i class="fas fa-shopping-cart"></i>
+                Pedidos
+            </a>
+            <a href="/reports" class="menu-item">
+                <i class="fas fa-chart-bar"></i>
+                Relatórios
+            </a>
+            <a href="/settings" class="menu-item">
+                <i class="fas fa-cog"></i>
+                Configurações
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Header -->
+        <header class="top-header">
+            <div class="header-left">
+                <button class="sidebar-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h4 class="mb-0 ml-3">Dashboard</h4>
+            </div>
+            <div class="header-right">
+                <div class="dropdown">
+                    <button class="btn btn-link dropdown-toggle" type="button" id="notificationsDropdown" data-bs-toggle="dropdown">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge bg-danger">3</span>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end">
+                        <h6 class="dropdown-header">Notificações</h6>
+                        <a class="dropdown-item" href="#">
+                            <i class="fas fa-envelope fa-fw"></i> Novo pedido recebido
+                        </a>
+                        <a class="dropdown-item" href="#">
+                            <i class="fas fa-user fa-fw"></i> Novo usuário registrado
+                        </a>
+                        <a class="dropdown-item" href="#">
+                            <i class="fas fa-shopping-cart fa-fw"></i> Pedido #1234 foi entregue
+                        </a>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-link dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown">
+                        <img src="https://via.placeholder.com/32" class="rounded-circle" alt="User">
+                        <span class="ml-2">{{ auth().user.name }}</span>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end">
+                        <a class="dropdown-item" href="/profile">
+                            <i class="fas fa-user fa-fw"></i> Perfil
+                        </a>
+                        <a class="dropdown-item" href="/settings">
+                            <i class="fas fa-cog fa-fw"></i> Configurações
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="/logout">
+                            <i class="fas fa-sign-out-alt fa-fw"></i> Sair
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-cards">
+            <!-- Card 1 -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted">Vendas Totais</h6>
+                            <h3 class="mb-0">R$ 45.000</h3>
+                            <small class="text-success">
+                                <i class="fas fa-arrow-up"></i> 12% este mês
+                            </small>
+                        </div>
+                        <div class="card-icon bg-primary">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted">Novos Usuários</h6>
+                            <h3 class="mb-0">150</h3>
+                            <small class="text-success">
+                                <i class="fas fa-arrow-up"></i> 8% esta semana
+                            </small>
+                        </div>
+                        <div class="card-icon bg-success">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted">Pedidos Pendentes</h6>
+                            <h3 class="mb-0">23</h3>
+                            <small class="text-warning">
+                                <i class="fas fa-clock"></i> Aguardando processamento
+                            </small>
+                        </div>
+                        <div class="card-icon bg-warning">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted">Taxa de Conversão</h6>
+                            <h3 class="mb-0">2.4%</h3>
+                            <small class="text-danger">
+                                <i class="fas fa-arrow-down"></i> 3% este mês
+                            </small>
+                        </div>
+                        <div class="card-icon bg-info">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="dashboard-charts">
+            <!-- Chart 1 -->
+            <div class="chart-container">
+                <h5 class="card-title">Vendas por Mês</h5>
+                <canvas id="salesChart"></canvas>
+            </div>
+
+            <!-- Chart 2 -->
+            <div class="chart-container">
+                <h5 class="card-title">Distribuição de Usuários</h5>
+                <canvas id="usersChart"></canvas>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle Sidebar
+    const sidebarToggle = document.querySelector('.sidebar-toggle');
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
+
+    sidebarToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+    });
+
+    // Sales Chart
+    const salesCtx = document.getElementById('salesChart').getContext('2d');
+    new Chart(salesCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+            datasets: [{
+                label: 'Vendas 2024',
+                data: [12000, 19000, 15000, 25000, 22000, 30000],
+                borderColor: '#4e73df',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    // Users Chart
+    const usersCtx = document.getElementById('usersChart').getContext('2d');
+    new Chart(usersCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Ativos', 'Inativos', 'Novos'],
+            datasets: [{
+                data: [65, 25, 10],
+                backgroundColor: ['#1cc88a', '#e74a3b', '#36b9cc']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+});
+</script>
+{% endblock %} 
