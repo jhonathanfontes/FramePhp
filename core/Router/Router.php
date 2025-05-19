@@ -7,22 +7,40 @@ use Core\Http\Response;
 
 class Router
 {
-    private static $instance = null;
-    private array $routes = [];
-    private string $requestMethod;
-    private string $requestUri;
-    private array $currentGroup = [];
-    private ?string $prefix = null;
-    private array $middleware = [];
+    private $routes = [];
     private $namedRoutes = [];
+    private $currentGroup = [];
+    private $middleware = [];
+    private $prefix = '';
+    private $requestMethod;
+    private $requestUri;
+    private static $instance = null;
 
     public function __construct()
     {
         $this->requestMethod = $_SERVER['REQUEST_METHOD'];
-        $this->requestUri = str_replace('/FramePhp/public', '', parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
-        $this->middleware = [];
+        $this->requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+
+        // Determinar o caminho base da aplicação dinamicamente
+        $scriptName = DIRECTORY_SEPARATOR . basename(BASE_PATH) . DIRECTORY_SEPARATOR . 'public';
+        $scriptDir = dirname($scriptName);
+        $basePath = config('app.base_path', $scriptDir !== '/' ? $scriptDir : '');
+
+        if (stripos($this->requestUri, $basePath) === 0) {
+            $this->requestUri = substr($this->requestUri, strlen($basePath));
+        }
+
+        // Garantir que a URI comece com /
+        if (empty($this->requestUri) || $this->requestUri[0] !== '/') {
+            $this->requestUri = '/' . $this->requestUri;
+        }
     }
 
+    /**
+     * Obtém a instância única do Router (Singleton)
+     *
+     * @return Router
+     */
     public static function getInstance(): self
     {
         if (self::$instance === null) {
@@ -132,17 +150,39 @@ class Router
 
     private function matchRoute(array $route): bool
     {
+        // Log para debug
+        error_log("Comparando rota: {$route['method']} {$route['uri']} com URI: {$this->requestUri}");
+
+        // Para rotas simples sem parâmetros
         $routePath = '/' . trim($route['uri'], '/');
         $requestPath = '/' . trim($this->requestUri, '/');
-        
-        return $route['method'] === $this->requestMethod && 
-               $routePath === $requestPath;
+
+        error_log("Rota formatada: {$routePath}, Requisição formatada: {$requestPath}");
+
+        // Correspondência exata
+        if ($route['method'] === $this->requestMethod && $routePath === $requestPath) {
+            error_log("Correspondência exata encontrada!");
+            return true;
+        }
+
+        // Para rotas com parâmetros
+        if (strpos($route['uri'], '{') !== false) {
+            $pattern = $this->buildPatternFromRoute($route);
+            error_log("Padrão de rota: {$pattern}");
+            $result = $route['method'] === $this->requestMethod && preg_match($pattern, $requestPath);
+            if ($result) {
+                error_log("Correspondência com parâmetros encontrada!");
+            }
+            return $result;
+        }
+
+        return false;
     }
 
     private function buildPatternFromRoute(array $route): string
     {
         $uri = $route['uri'];
-        
+
         // Substitui parâmetros com padrões personalizados
         if (isset($route['patterns'])) {
             foreach ($route['patterns'] as $param => $pattern) {
@@ -152,33 +192,40 @@ class Router
 
         // Substitui parâmetros restantes com padrão padrão
         $uri = preg_replace('/\{([^}]+)\}/', '([^/]+)', $uri);
-        
+
         return "#^{$uri}$#";
     }
 
     public function dispatch()
     {
         $request = new Request();
-        
-        foreach ($this->routes as $route) {
+
+        // Adicione este log temporário
+        error_log("URI solicitada: " . $this->requestUri);
+        error_log("Método: " . $this->requestMethod);
+        error_log("Número de rotas: " . count($this->routes));
+
+        foreach ($this->routes as $key => $route) {
+            error_log("Verificando rota {$key}: {$route['method']} {$route['uri']}");
             if ($this->matchRoute($route)) {
+                error_log("Rota correspondente encontrada: {$route['uri']}");
                 try {
                     // Execute middlewares
-                    $response = $this->executeMiddleware($route['middleware'] ?? [], $request, function() use ($route, $request) {
+                    $response = $this->executeMiddleware($route['middleware'] ?? [], $request, function () use ($route, $request) {
                         return $this->executeCallback($route['callback'], $request);
                     });
-                    
+
                     if ($response instanceof Response) {
                         $response->send();
                         return;
                     }
-                    
+
                     echo $response;
                     return;
                 } catch (\Exception $e) {
                     // Log do erro
                     error_log($e->getMessage());
-                    
+
                     // Exibir erro em modo de desenvolvimento
                     if (config('app.debug', false)) {
                         echo '<h1>Erro:</h1>';
@@ -186,27 +233,27 @@ class Router
                         echo '<pre>' . $e->getTraceAsString() . '</pre>';
                         exit;
                     }
-                    
+
                     // Em produção, mostrar página de erro genérica
                     echo 'Ocorreu um erro. Por favor, tente novamente mais tarde.';
                     exit;
                 }
             }
         }
-       
+
         $this->handleRouteNotFound();
     }
-    
+
     private function executeMiddleware(array $middlewares, Request $request, \Closure $callback)
     {
         if (empty($middlewares)) {
             return $callback();
         }
-        
+
         $middleware = array_shift($middlewares);
         $instance = new $middleware();
-        
-        return $instance->handle($request, function($request) use ($middlewares, $callback) {
+
+        return $instance->handle($request, function ($request) use ($middlewares, $callback) {
             return $this->executeMiddleware($middlewares, $request, $callback);
         });
     }

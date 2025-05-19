@@ -11,4 +11,5 @@ return [
     'supported_locales' => ['pt_BR', 'en'],
     'key' => env('APP_KEY', ''),
     'cipher' => 'AES-256-CBC',
+    'base_path' => '/FramePhp/public',
 ];

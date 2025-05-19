@@ -149,7 +149,7 @@
         <h1 class="hero-title">Bem-vindo ao {{ app_name() }}</h1>
         <p class="hero-subtitle">Sua plataforma completa de gerenciamento</p>
         <div class="hero-buttons">
-            <a href="/login" class="btn btn-hero btn-hero-primary">Entrar</a>
+            <a href="{{ base_url('auth/login') }}" class="btn btn-hero btn-hero-primary">Entrar</a>
             <a href="/register" class="btn btn-hero btn-hero-secondary">Registrar</a>
         </div>
     </div>

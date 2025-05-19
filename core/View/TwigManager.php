@@ -6,7 +6,8 @@ use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 use Twig\TwigFunction;
 use Twig\Extension\DebugExtension;
-
+use Core\View\Twig\UrlExtension;
+use Core\Router\Router;
 class TwigManager
 {
     private static $instance = null;
@@ -55,7 +56,12 @@ class TwigManager
 
         // Na função que inicializa o Twig (provavelmente init() ou __construct())
         // Adicione a linha abaixo junto com as outras extensões
-        $this->twig->addExtension(new \Core\View\Twig\UrlExtension());
+        // Adicionar a extensão de URL
+      
+        
+        // Obter a instância do Router
+        $router = Router::getInstance();
+        $this->twig->addExtension(new UrlExtension($router));
         $this->twig->addExtension(new \Core\View\Twig\AuthExtension());
     }
 

@@ -181,6 +181,7 @@ class ErrorHandler
 
             // Renderizar o template
             echo $twig->render($template, $data);
+           
         } catch (\Exception $e) {
             // Log do erro
             error_log("Erro ao renderizar página de erro: " . $e->getMessage());

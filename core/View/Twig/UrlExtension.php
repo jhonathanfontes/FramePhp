@@ -10,9 +10,10 @@ class UrlExtension extends AbstractExtension
 {
     private $router;
 
-    public function __construct()
+    public function __construct(Router $router = null)
     {
-        $this->router = Router::getInstance();
+        // Obter a instância do Router do container global ou criar uma nova
+        $this->router = $router ?? new Router();
     }
 
     /**

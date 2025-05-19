@@ -21,7 +21,7 @@ class AuthMiddleware implements MiddlewareInterface
         // Verifica se o usuário está autenticado
         if (!Auth::check()) {
             // Usa o método estático redirectResponse que já retorna um objeto Response
-            return Response::redirectResponse(base_url('login'));
+            return Response::redirectResponse(base_url('auth/login'));
         }
 
         // Continua o fluxo da aplicação

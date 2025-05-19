@@ -13,6 +13,20 @@ use App\Middleware\PermissionMiddleware;
 use App\Middleware\GuestMiddleware;
 use App\Controllers\Admin\MenuController;
 
+/*
+|--------------------------------------------------------------------------
+| Todas as rotas publicas do aplicativo
+|   deve ser definidas antes das rotas protegidas
+|   e depois das rotas de API protegidas
+|   para garantir que as rotas corretas sejam
+|   chamadas.
+|--------------------------------------------------------------------------
+|
+|   $router->get('/rota', [Controller::class, 'metodo'])->name('nome-da-rota');
+|--------------------------------------------------------------------------
+*/
+
+
 // Rotas de erro
 $router->get('/error/{id}', [ErrorController::class, 'show'])->name('error.show');
 $router->get('/error/list', [ErrorController::class, 'list'])->name('error.list');
@@ -24,6 +38,8 @@ $router->middleware([LocaleMiddleware::class, CsrfMiddleware::class])->group([],
     $router->get('/home', [HomeController::class, 'index']);
     $router->get('/about', [HomeController::class, 'about'])->name('about');
     $router->get('/contact', [HomeController::class, 'contact'])->name('contact');
+
+});
 
     // Rotas de autenticação (apenas para visitantes)
     $router->middleware([GuestMiddleware::class])->group([], function ($router) {
@@ -38,7 +54,8 @@ $router->middleware([LocaleMiddleware::class, CsrfMiddleware::class])->group([],
         $router->get('/reset-password/{token}', [AuthController::class, 'resetPasswordForm'])->name('esqueci-senha');
         $router->post('/reset-password', [AuthController::class, 'resetPassword']);
     });
-});
+
+
 
 // Rotas protegidas para usuários web
 $router->middleware([new AuthenticationMiddleware('web', '/login')])->group([], function ($router) {
@@ -91,4 +108,24 @@ $router->middleware([new AuthenticationMiddleware('api')])->group([], function (
     $router->middleware([new PermissionMiddleware('admin')])->group([], function ($router) {
         $router->get('/api/admin/stats', [ApiController::class, 'adminStats'])->name('api.admin.stats');
     });
+});
+
+// Rota de teste deve vir ANTES da rota coringa
+$router->get('/teste', function() {
+    echo "Rota de teste funcionando!";
+    exit;
+});
+
+// Em vez de usar fallback, use uma rota coringa
+$router->get('.*', function() {
+    $error = [
+        'type' => 'NotFoundError',
+        'message' => 'A página solicitada não foi encontrada',
+        'file' => __FILE__,
+        'line' => __LINE__,
+        'timestamp' => date('Y-m-d H:i:s')
+    ];
+    
+    $errorHandler = \Core\Error\ErrorHandler::getInstance();
+    $errorHandler->renderErrorPage($error);
 });

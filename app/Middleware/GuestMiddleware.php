@@ -18,9 +18,8 @@ class GuestMiddleware implements MiddlewareInterface
      */
     public function handle(Request $request, \Closure $next): Response
     {
+              
         // Se o usuário estiver autenticado, redireciona para o dashboard
-  
-
         if (Auth::check()) {
             return Response::redirectResponse(base_url('dashboard'));
         }
