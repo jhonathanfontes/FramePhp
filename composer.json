@@ -10,15 +10,14 @@
         },
         "files": [
             "core/Helper/helpers.php",
-            "core/Helper/functions.php"
+            "core/Helper/functions.php",
+            "core/helpers.php"
         ]
     },
     "config": {
         "platform": {
             "php": "8.1.0"
-        },
-        "disable-tls": true,
-        "secure-http": false
+        }
     },
     "require": {
         "php": "8.1.0",

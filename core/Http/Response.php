@@ -68,13 +68,6 @@ class Response
      * @param int $statusCode
      * @return Response
      */
-    public function redirect(string $url, int $statusCode = 302): Response
-    {
-        header('Location: ' . $url, true, $statusCode);
-        // Retorna $this para permitir encadeamento de métodos e garantir
-        // que o tipo de retorno seja Response
-        return $this;
-    }
 
     public function json(array $data, int $statusCode = 200): self
     {
@@ -132,5 +125,29 @@ class Response
     public static function redirectResponse(string $url, int $statusCode = 302): self
     {
         return (new self('', $statusCode))->setHeader('Location', $url);
+    }
+
+    public static function redirect(string $url)
+    {
+        if (!isset($_SESSION)) {
+            session_start();
+        }
+        
+        header('Location: ' . $url);
+        return new static();
+    }
+
+    public function with(string $key, string $message)
+    {
+        $_SESSION['flash'][$key] = $message;
+        return $this;
+    }
+
+    public function __destruct()
+    {
+        if (isset($_SESSION['flash'])) {
+            $_SESSION['flash'] = [];
+            unset($_SESSION['flash']);
+        }
     }
 }

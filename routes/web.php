@@ -1,6 +1,7 @@
 <?php
 
 use App\Controllers\Site\HomeController;
+use App\Controllers\Site\MailController;
 use App\Controllers\Auth\AuthController;
 use App\Controllers\Admin\AdminController;
 use App\Controllers\Api\ApiController;
@@ -31,9 +32,14 @@ use App\Controllers\Admin\MenuController;
 $router->get('/error/{id}', [ErrorController::class, 'show'])->name('error.show');
 $router->get('/error/list', [ErrorController::class, 'list'])->name('error.list');
 
+
+
 // Rotas públicas com middleware de localização e CSRF
 $router->middleware([LocaleMiddleware::class, CsrfMiddleware::class])->group([], function ($router) {
+
     // Rotas públicas
+    $router->get('/mail', [MailController::class, 'index']);
+    $router->post('/mail/send', [MailController::class, 'send']);
     $router->get('/', [HomeController::class, 'index']);
     $router->get('/home', [HomeController::class, 'index']);
     $router->get('/about', [HomeController::class, 'about'])->name('about');

@@ -1,27 +1,19 @@
-<IfModule mod_rewrite.c>
-    <IfModule mod_negotiation.c>
-        Options -MultiViews -Indexes
-    </IfModule>
+RewriteEngine On
+Options All -Indexes
 
-    RewriteEngine On
-    RewriteBase /framePhp/public
+# --- Ou permitir arquivos em .well-known sem reescrita ---
+RewriteCond %{REQUEST_URI} \.well-known/
+RewriteRule - - [L]
 
-    # Handle Authorization Header
-    RewriteCond %{HTTP:Authorization} .
-    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+# Não reescrever para arquivos e pastas existentes
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
 
-    # Redirect Trailing Slashes If Not A Folder...
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_URI} (.+)/$
-    RewriteRule ^ %1 [L,R=301]
+# Não reescrever para arquivos estáticos comuns
+RewriteRule \.(jpg|jpeg|png|gif|ico|css|js|svg|webp|mp4|woff|woff2|ttf|eot|map)$ - [L]
 
-    # Send Requests To Front Controller...
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^ index.php [QSA,L]
-</IfModule>
-
-# Se o arquivo/diretório não existe, redireciona para index.php
+# Reescrever todas as outras URLs para index.php
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ index.php [QSA,L]
+RewriteRule ^(.*)$ index.php [QSA,NC,L]

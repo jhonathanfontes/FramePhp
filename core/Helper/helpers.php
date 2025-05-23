@@ -151,3 +151,18 @@ function app_version(): string
 {
     return config('app.version', '1.0.0');
 }
+
+
+if (!function_exists('redirect')) {
+    /**
+     * Redireciona para uma URL específica
+     *
+     * @param string $url URL para redirecionamento
+     * @return void
+     */
+    function redirect(string $url)
+    {
+        header('Location: ' . $url);
+        exit;
+    }
+}

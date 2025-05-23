@@ -8,6 +8,7 @@ use Twig\TwigFunction;
 use Twig\Extension\DebugExtension;
 use Core\View\Twig\UrlExtension;
 use Core\Router\Router;
+
 class TwigManager
 {
     private static $instance = null;
@@ -89,4 +90,8 @@ class TwigManager
         }
     }
 
+    public function getTwig(): Environment
+    {
+        return $this->twig;
+    }
 }

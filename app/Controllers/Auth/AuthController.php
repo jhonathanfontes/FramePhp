@@ -144,20 +144,33 @@ class AuthController extends BaseController
             return;
         }
 
-        // Criar o usuário
-        $userId = $this->userModel->create([
-            'name' => $name,
-            'email' => $email,
-            'password' => $password,
-            'role' => 'user'
-        ]);
+        try {
+            // Criar o usuário
+            $userId = $this->userModel->create([
+                'name' => $name,
+                'email' => $email,
+                'password' => $password,
+                'role' => 'user'
+            ]);
 
-        // Redirecionar para o login com mensagem de sucesso
-        echo $this->render('auth/login', [
-            'title' => 'Login',
-            'success' => 'Cadastro realizado com sucesso! Faça login para continuar.',
-            'email' => $email
-        ]);
+            // Enviar e-mail de boas-vindas
+            $emailService = new EmailService(TwigManager::getInstance());
+            $emailService->sendWelcomeEmail($email, $name);
+
+            echo $this->render('auth/login', [
+                'title' => 'Login',
+                'success' => 'Cadastro realizado com sucesso! Faça login para continuar.',
+                'email' => $email
+            ]);
+        } catch (\Exception $e) {
+            error_log("Erro no registro de usuário: " . $e->getMessage());
+            echo $this->render('auth/register', [
+                'title' => 'Cadastro',
+                'error' => 'Ocorreu um erro ao processar seu cadastro. Por favor, tente novamente.',
+                'name' => $name,
+                'email' => $email
+            ]);
+        }
     }
 
     public function forgotPasswordForm()
@@ -189,18 +202,26 @@ class AuthController extends BaseController
             return;
         }
 
-        // Gerar token de recuperação
-        $token = bin2hex(random_bytes(32));
-        $this->userModel->createPasswordReset($email, $token);
+        try {
+            // Gerar token de recuperação
+            $token = bin2hex(random_bytes(32));
+            $this->userModel->createPasswordReset($email, $token);
 
-        // Em produção, enviar e-mail com o link de recuperação
-        // $resetLink = base_url("reset-password/{$token}");
-        // mail($email, 'Recuperação de Senha', "Clique no link para redefinir sua senha: {$resetLink}");
+            // Enviar e-mail de recuperação
+            $emailService = new EmailService(TwigManager::getInstance());
+            $emailService->sendPasswordResetEmail($email, $user['name'], $token);
 
-        echo $this->render('auth/forgot-password', [
-            'title' => 'Recuperar Senha',
-            'success' => 'Enviamos um e-mail com instruções para recuperar sua senha.'
-        ]);
+            echo $this->render('auth/forgot-password', [
+                'title' => 'Recuperar Senha',
+                'success' => 'Enviamos um e-mail com instruções para recuperar sua senha.'
+            ]);
+        } catch (\Exception $e) {
+            error_log("Erro no processo de recuperação de senha: " . $e->getMessage());
+            echo $this->render('auth/forgot-password', [
+                'title' => 'Recuperar Senha',
+                'error' => 'Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente.'
+            ]);
+        }
     }
 
     public function resetPasswordForm($token)

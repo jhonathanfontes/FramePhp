@@ -1,0 +1,9 @@
+{% extends "emails/layouts/base.twig" %}
+
+{% block title %}{{ subject|default(app_name()) }}{% endblock %}
+
+{% block content %}
+    <h2>Olá {{ name }}!</h2>
+    {{ message|raw }}
+    <p>Atenciosamente,<br>Equipe {{ app_name() }}</p>
+{% endblock %}

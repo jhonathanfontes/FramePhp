@@ -1,0 +1,14 @@
+{% extends "emails/layouts/base.twig" %}
+
+{% block title %}Bem-vindo ao {{ app_name() }}{% endblock %}
+
+{% block content %}
+    <h2>Olá {{ name }}!</h2>
+    <p>Seja bem-vindo ao {{ app_name() }}! Estamos muito felizes em ter você conosco.</p>
+    <p>Sua conta foi criada com sucesso. Você já pode fazer login e começar a usar nossa plataforma.</p>
+    
+    <a href="{{ base_url('login') }}" class="button">Fazer Login</a>
+    
+    <p>Se tiver alguma dúvida, não hesite em nos contatar.</p>
+    <p>Atenciosamente,<br>Equipe {{ app_name() }}</p>
+{% endblock %}
