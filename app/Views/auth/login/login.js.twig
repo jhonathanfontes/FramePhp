@@ -1,0 +1,17 @@
+// JavaScript específico para a página de login
+document.addEventListener('DOMContentLoaded', function() {
+    const loginForm = document.querySelector('form');
+    
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            // Validação do formulário de login
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                e.preventDefault();
+                alert('Por favor, preencha todos os campos.');
+            }
+        });
+    }
+});

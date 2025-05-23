@@ -18,9 +18,9 @@ class AuthController extends BaseController
 
     public function loginForm()
     { 
-        echo $this->render('auth/login', [
-            'title' => 'Login'
-        ]);
+       echo $this->render('auth/login', [
+    'title' => 'Login'
+]);
     }
 
     public function login()

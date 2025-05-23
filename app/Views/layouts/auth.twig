@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }} - {{ app_name() }}</title>
     <link rel="stylesheet" href="{{ base_url('assets/css/auth.css') }}">
+    
+    {% if page_css %}
+        <style>
+            {% include page_css %}
+        </style>
+    {% endif %}
 </head>
 <body>
     <div class="main-container">
@@ -14,5 +20,11 @@
     <footer class="auth-footer">
         <p>&copy; {{ "now"|date("Y") }} {{ app_name() }} v{{ app_version() }}</p>
     </footer>
+    
+    {% if page_js %}
+        <script>
+            {% include page_js %}
+        </script>
+    {% endif %}
 </body>
 </html>

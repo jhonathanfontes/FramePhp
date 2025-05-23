@@ -24,10 +24,10 @@ class TwigManager
         
         // Log para debug
         error_log("Inicializando TwigManager");
-        error_log("Diretório de templates: " . BASE_PATH . '/app/views');
+        error_log("Diretório de templates: " . BASE_VIEW);
         error_log("Diretório de cache: " . $cacheDir);
         
-        $loader = new FilesystemLoader(BASE_PATH . '/app/views');
+        $loader = new FilesystemLoader(BASE_VIEW);
         $this->twig = new Environment($loader, [
             'cache' => $cacheDir,
             'debug' => config('app.debug', false),
@@ -74,6 +74,7 @@ class TwigManager
         return self::$instance;
     }
 
+    // E em outros lugares onde você usa o caminho das views
     public function render(string $template, array $data = []): string
     {
         try {
@@ -81,7 +82,59 @@ class TwigManager
             error_log("Renderizando template: " . $template);
             error_log("Dados: " . json_encode($data));
             
-            return $this->twig->render($template . '.twig', $data);
+            // Verificar se existem arquivos CSS e JS associados ou pastas
+            $viewsPath = BASE_VIEW . '/';
+            $templatePath = str_replace('/', DIRECTORY_SEPARATOR, $template);
+            
+            // Extrair o nome do template da última parte do caminho
+            $pathParts = explode(DIRECTORY_SEPARATOR, $templatePath);
+            $templateName = end($pathParts);
+            
+            // Verificar se existe um arquivo HTML ou uma pasta
+            $htmlFile = $templatePath . '.html.twig';
+            $templateDir = $templatePath;
+            
+            // Se for uma pasta, procurar por index.html.twig ou templateName.html.twig dentro dela
+            if (is_dir($viewsPath . $templateDir)) {
+                if (file_exists($viewsPath . $templateDir . DIRECTORY_SEPARATOR . 'index.html.twig')) {
+                    $htmlFile = $templateDir . DIRECTORY_SEPARATOR . 'index.html.twig';
+                } elseif (file_exists($viewsPath . $templateDir . DIRECTORY_SEPARATOR . $templateName . '.html.twig')) {
+                    $htmlFile = $templateDir . DIRECTORY_SEPARATOR . $templateName . '.html.twig';
+                }
+            }         
+
+            // Verificar CSS
+            $cssFile = null;
+            if (file_exists($viewsPath . $templatePath . '.css.twig')) {
+                $cssFile = $templatePath . '.css.twig';
+            } elseif (is_dir($viewsPath . $templateDir)) {
+                if (file_exists($viewsPath . $templateDir . DIRECTORY_SEPARATOR . 'index.css.twig')) {
+                    $cssFile = $templateDir . DIRECTORY_SEPARATOR . 'index.css.twig';
+                } elseif (file_exists($viewsPath . $templateDir . DIRECTORY_SEPARATOR . $templateName . '.css.twig')) {
+                    $cssFile = $templateDir . DIRECTORY_SEPARATOR . $templateName . '.css.twig';
+                }
+            }
+
+            // Verificar JS
+            $jsFile = null;
+            if (file_exists($viewsPath . $templatePath . '.js.twig')) {
+                $jsFile = $templatePath . '.js.twig';
+            } elseif (is_dir($viewsPath . $templateDir)) {
+                if (file_exists($viewsPath . $templateDir . DIRECTORY_SEPARATOR . 'index.js.twig')) {
+                    $jsFile = $templateDir . DIRECTORY_SEPARATOR . 'index.js.twig';
+                } elseif (file_exists($viewsPath . $templateDir . DIRECTORY_SEPARATOR . $templateName . '.js.twig')) {
+                    $jsFile = $templateDir . DIRECTORY_SEPARATOR . $templateName . '.js.twig';
+                }
+            }
+            
+            // Adicionar informações sobre arquivos CSS e JS aos dados
+            $data['page_css'] = $cssFile;
+            $data['page_js'] = $jsFile;
+            
+            // Determinar qual arquivo renderizar
+            $fileToRender = file_exists($viewsPath . $htmlFile) ? $htmlFile : $template . '.twig';
+            
+            return $this->twig->render($fileToRender, $data);
         } catch (\Exception $e) {
             error_log("Erro ao renderizar template: " . $e->getMessage());
             error_log("Template: " . $template);
