@@ -18,7 +18,10 @@ class GuestMiddleware implements MiddlewareInterface
      */
     public function handle(Request $request, \Closure $next): Response
     {
-              
+        // Log para debug
+        error_log("GuestMiddleware - Auth::check(): " . (Auth::check() ? "true" : "false"));
+        error_log("GuestMiddleware - Sessão: " . json_encode($_SESSION));
+        
         // Se o usuário estiver autenticado, redireciona para o dashboard
         if (Auth::check()) {
             return Response::redirectResponse(base_url('dashboard'));

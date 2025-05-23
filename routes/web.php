@@ -64,8 +64,8 @@ $router->middleware([LocaleMiddleware::class, CsrfMiddleware::class])->group([],
 
 
 // Rotas protegidas para usuários web
-$router->middleware([new AuthenticationMiddleware('web', '/login')])->group([], function ($router) {
-    $router->get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
+$router->middleware([new AuthenticationMiddleware('web', '/auth/login')])->group([], function ($router) {
+    $router->get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
     $router->get('/profile', [HomeController::class, 'profile'])->name('profile');
     $router->post('/profile/update', [HomeController::class, 'updateProfile'])->name('profile.update');
 

@@ -4,8 +4,10 @@ namespace App\Controllers\Auth;
 
 use Core\Controller\BaseController;
 use App\Models\User;
+use App\Services\EmailService;
 use Core\Auth\Auth;
 use Core\Http\Response;
+use Core\View\TwigManager;
 
 class AuthController extends BaseController
 {
@@ -66,10 +68,12 @@ class AuthController extends BaseController
                 ];
 
                 // Autenticar o usuário usando a classe Auth
+                // Após autenticar o usuário
                 Auth::login($userData);
-
-                // Log para debug
-                error_log("Usuário autenticado: " . json_encode($userData));
+                
+                // Log para debug - verificar se a sessão foi criada corretamente
+                error_log("Sessão após login: " . json_encode($_SESSION));
+                error_log("Auth::check() após login: " . (Auth::check() ? "true" : "false"));
                 
                 // Redirecionar para o dashboard
                 header('Location: ' . base_url('dashboard'));
@@ -285,8 +289,10 @@ class AuthController extends BaseController
 
     public function logout()
     {
-        session_start();
-        session_destroy();
+        // Usar o método Auth::logout() em vez de session_destroy() diretamente
+        Auth::logout();
+        
+        // Redirecionar para a página de login
         header('Location: ' . base_url('auth/login'));
         exit;
     }

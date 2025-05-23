@@ -18,6 +18,10 @@ class AuthMiddleware implements MiddlewareInterface
      */
     public function handle(Request $request, \Closure $next): Response
     {
+        // Log para debug
+        error_log("AuthMiddleware - Auth::check(): " . (Auth::check() ? "true" : "false"));
+        error_log("AuthMiddleware - Sessão: " . json_encode($_SESSION));
+        
         // Verifica se o usuário está autenticado
         if (!Auth::check()) {
             // Usa o método estático redirectResponse que já retorna um objeto Response
