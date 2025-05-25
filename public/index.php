@@ -1,27 +1,18 @@
 <?php
 
-// Definir caminho base
+// Define base path
 define('BASE_PATH', dirname(__DIR__));
 
-// Carregar bootstrap
-require_once BASE_PATH . '/bootstrap/app.php';
-
-
-// Carregar o autoloader do Composer
+// Load Composer's autoloader
 require BASE_PATH . '/vendor/autoload.php';
 
-// Carregar variáveis de ambiente
+// Load environment variables
 $dotenv = \Dotenv\Dotenv::createImmutable(BASE_PATH);
 $dotenv->load();
 
-// Carregar bootstrap
+use Core\Config\Constants;
+Constants::init();
+
+// Load bootstrap
 require_once BASE_PATH . '/bootstrap/app.php';
 
-// Inicializar o Router
-$router = new \Core\Router\Router();
-
-// Carregar as rotas
-require_once BASE_PATH . '/routes/web.php';
-
-// Despachar a rota
-$router->dispatch();

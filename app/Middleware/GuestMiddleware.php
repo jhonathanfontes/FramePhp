@@ -9,33 +9,16 @@ use Core\Middleware\MiddlewareInterface;
 
 class GuestMiddleware implements MiddlewareInterface
 {
-    /**
-     * Processa a requisição e verifica se o usuário NÃO está autenticado
-     *
-     * @param Request $request
-     * @param \Closure $next
-     * @return Response
-     */
     public function handle(Request $request, \Closure $next): Response
     {
-        // Log para debug
         error_log("GuestMiddleware - Auth::check(): " . (Auth::check() ? "true" : "false"));
         error_log("GuestMiddleware - Sessão: " . json_encode($_SESSION));
         
-        // Se o usuário estiver autenticado, redireciona para o dashboard
-        if (Auth::check()) {
+        // Verifica se o usuário está autenticado e não está já em uma rota protegida
+        if (Auth::check() && !str_starts_with($request->getPath(), '/dashboard')) {
             return Response::redirectResponse(base_url('dashboard'));
         }
         
-        // Se não estiver autenticado, continua normalmente
-        $response = $next($request);
-        
-        // Verifica se o retorno é um objeto Response
-        if (!($response instanceof Response)) {
-            // Se não for, cria um novo objeto Response com o conteúdo retornado
-            return new Response((string) $response);
-        }
-        
-        return $response;
+        return $next($request);
     }
 }
