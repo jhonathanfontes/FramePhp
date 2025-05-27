@@ -7,11 +7,6 @@ use App\Controllers\Admin\AdminController;
 use App\Controllers\Api\ApiController;
 use App\Controllers\Client\ClientController;
 use App\Controllers\Error\ErrorController;
-use App\Middleware\AuthenticationMiddleware;
-use App\Middleware\CsrfMiddleware;
-use App\Middleware\LocaleMiddleware;
-use App\Middleware\PermissionMiddleware;
-use App\Middleware\GuestMiddleware;
 use App\Controllers\Admin\MenuController;
 
 /*
@@ -26,34 +21,6 @@ use App\Controllers\Admin\MenuController;
 |   $router->get('/rota', [Controller::class, 'metodo'])->name('nome-da-rota');
 |--------------------------------------------------------------------------
 */
-
-// Registrar middlewares no container
-$container = \Core\Container\Container::getInstance();
-
-$container->bindMiddleware('auth.web', function() {
-    return new AuthenticationMiddleware('web', '/auth/login');
-});
-$container->bindMiddleware('auth.admin', function() {
-    return new AuthenticationMiddleware('admin', '/admin/login');
-});
-$container->bindMiddleware('auth.client', function() {
-    return new AuthenticationMiddleware('client', '/client/login');
-});
-$container->bindMiddleware('auth.api', function() {
-    return new AuthenticationMiddleware('api');
-});
-$container->bindMiddleware('csrf', function() {
-    return new CsrfMiddleware();
-});
-$container->bindMiddleware('locale', function() {
-    return new LocaleMiddleware();
-});
-$container->bindMiddleware('guest', function() {
-    return new GuestMiddleware();
-});
-$container->bindMiddleware('permission.admin', function() {
-    return new PermissionMiddleware('admin');
-});
 
 // Rotas de erro
 $router->get('/error/{id}', [ErrorController::class, 'show'])->name('error.show');
@@ -72,25 +39,24 @@ $router->middleware(['locale', 'csrf'])->group([], function ($router) {
 
 // Rotas de autenticação (apenas para visitantes)
 $router->middleware(['guest'])->group([], function ($router) {
+    
     $router->group(['prefix' => 'auth'], function ($router) {
         $router->get('/login', [AuthController::class, 'loginForm'])->name('login');
         $router->post('/login', [AuthController::class, 'login']);
     });
+
     $router->get('/register', [AuthController::class, 'registerForm'])->name('register');
     $router->post('/register', [AuthController::class, 'register']);
     $router->get('/forgot-password', [AuthController::class, 'forgotPasswordForm'])->name('forgot-password');
     $router->post('/forgot-password', [AuthController::class, 'forgotPassword']);
     $router->get('/reset-password/{token}', [AuthController::class, 'resetPasswordForm'])->name('esqueci-senha');
     $router->post('/reset-password', [AuthController::class, 'resetPassword']);
+    
 });
 
 // Rotas protegidas para usuários web
 $router->middleware(['auth.web'])->group([], function ($router) {
-    $router->get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
-    $router->get('/profile', [HomeController::class, 'dashboard'])->name('profile');
-    $router->post('/profile/update', [HomeController::class, 'updateProfile'])->name('profile.update');
-    $router->get('/logout', [AuthController::class, 'logout'])->name('logout');
-    $router->get('/unauthorized', [AuthController::class, 'unauthorized'])->name('unauthorized');
+    $router->get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 });
 
 // Rotas protegidas para administradores

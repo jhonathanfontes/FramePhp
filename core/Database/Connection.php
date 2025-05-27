@@ -14,11 +14,12 @@ class Connection
     private function __construct()
     {
         try {
-            $host = Environment::get('DB_HOST', '127.0.0.1');
-            $db   = Environment::get('DB_DATABASE', 'framephp');
-            $user = Environment::get('DB_USERNAME', 'root');
-            $pass = Environment::get('DB_PASSWORD', '');
-            $dsn  = "mysql:host={$host};dbname={$db};charset=utf8mb4";
+            $host = env('DB_HOST', '127.0.0.1');
+            $port = env('DB_PORT', '3306');
+            $db   = env('DB_DATABASE', 'bd_model');
+            $user = env('DB_USERNAME', 'root');
+            $pass = env('DB_PASSWORD', '');
+            $dsn  = "mysql:host={$host};port={$port};dbname={$db};charset=utf8mb4";
 
             $this->pdo = new PDO($dsn, $user, $pass, [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,

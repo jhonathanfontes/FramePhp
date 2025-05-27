@@ -4,195 +4,135 @@ namespace Core\Router;
 
 use Core\Http\Request;
 use Core\Http\Response;
+use Core\Container\Container;
 
 class Router
 {
-    private $routes = [];
-    private $namedRoutes = [];
-    private $currentGroup = [];
-    private $middleware = [];
-    private $prefix = '';
-    private $requestMethod;
-    private $requestUri;
-    private static $instance = null;
+    private array $routes = [];
+    protected array $namedRoutes = [];
+    protected ?string $prefix = null;
+    protected array $middleware = [];
+    protected $fallback = null;
+    private  string $requestMethod;
+    private  string $requestPath;
+    protected bool $useAutoRouting = true; // Nova propriedade para habilitar/desabilitar o auto-routing
+    protected string $defaultController = 'Home'; // Controlador padrão
+    protected string $defaultMethod = 'index'; // Método padrão
+    protected array $currentGroup = []; // Added missing property
 
-    public function __construct()
+    private static ?self $instance = null;
+
+    public function __construct(Request $request = null)
     {
-        $this->requestMethod = $_SERVER['REQUEST_METHOD'];
-        $this->requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $this->requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
+        $this->requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
-        // Determinar o caminho base da aplicação dinamicamente
-        $scriptName = DIRECTORY_SEPARATOR . basename(BASE_PATH) . DIRECTORY_SEPARATOR . 'public';
-        $scriptDir = dirname($scriptName);
-        $basePath = config('app.base_path', $scriptDir !== '/' ? $scriptDir : '');
-
-        if (stripos($this->requestUri, $basePath) === 0) {
-            $this->requestUri = substr($this->requestUri, strlen($basePath));
-        }
-
-        // Garantir que a URI comece com /
-        if (empty($this->requestUri) || $this->requestUri[0] !== '/') {
-            $this->requestUri = '/' . $this->requestUri;
+        $cacheFile = defined('BASE_PATH') ? BASE_PATH . '/bootstrap/cache/routes.php' : '';
+        if ($cacheFile && file_exists($cacheFile) && config('app.env') === 'production') {
+            $this->routes = require $cacheFile;
+            foreach ($this->routes as $route) {
+                if (isset($route['name'])) {
+                    $this->namedRoutes[$route['name']] = $route;
+                }
+            }
         }
     }
-
-    /**
-     * Obtém a instância única do Router (Singleton)
-     *
-     * @return Router
-     */
     public static function getInstance(): self
     {
         if (self::$instance === null) {
             self::$instance = new self();
         }
+
         return self::$instance;
+    }
+
+    public function getRoutes(): array
+    {
+        return $this->routes;
     }
 
     public function get(string $uri, $callback): self
     {
-        $this->add('GET', $uri, $callback);
-        return $this;
+        return $this->addRoute('GET', $uri, $callback);
     }
-
     public function post(string $uri, $callback): self
     {
-        $this->add('POST', $uri, $callback);
-        return $this;
+        return $this->addRoute('POST', $uri, $callback);
     }
-
     public function put(string $uri, $callback): self
     {
-        $this->add('PUT', $uri, $callback);
-        return $this;
+        return $this->addRoute('PUT', $uri, $callback);
     }
-
     public function delete(string $uri, $callback): self
     {
-        $this->add('DELETE', $uri, $callback);
+        return $this->addRoute('DELETE', $uri, $callback);
+    }
+
+    protected function addRoute(string $method, string $uri, $callback): self
+    {
+        $uri = $this->prefix ? trim($this->prefix . '/' . trim($uri, '/'), '/') : trim($uri, '/');
+        $route = [
+            'method' => $method,
+            'uri' => $uri,
+            'callback' => $callback,
+            'middleware' => $this->middleware,
+        ];
+        if (strpos($uri, '{') !== false) {
+            $route['regex'] = $this->buildPatternFromRoute($route);
+        }
+        $this->routes[] = $route;
         return $this;
     }
 
     public function prefix(string $prefix): self
     {
-        $this->prefix = $prefix;
+        $this->prefix = trim($prefix, '/');
         return $this;
     }
 
     public function middleware($middleware): self
     {
-        if (is_array($middleware)) {
-            $this->middleware = array_merge($this->middleware ?? [], $middleware);
-        } else {
-            $this->middleware[] = $middleware;
-        }
+        $this->middleware = array_merge($this->middleware, (array) $middleware);
         return $this;
     }
 
     public function group(array $attributes, callable $callback): void
     {
-        $previousGroup = $this->currentGroup;
-        $previousMiddleware = $this->middleware;
-        $previousPrefix = $this->prefix;
+        $previous = [$this->currentGroup, $this->middleware, $this->prefix];
 
         $this->currentGroup = array_merge($this->currentGroup, $attributes);
-
-        if (isset($attributes['prefix'])) {
-            $this->prefix = ($previousPrefix ? $previousPrefix . '/' : '') . trim($attributes['prefix'], '/');
-        }
-
+        $this->prefix = isset($attributes['prefix']) ? trim($this->prefix . '/' . trim($attributes['prefix'], '/'), '/') : $this->prefix;
         if (isset($attributes['middleware'])) {
             $this->middleware($attributes['middleware']);
         }
 
         $callback($this);
 
-        $this->currentGroup = $previousGroup;
-        $this->middleware = $previousMiddleware;
-        $this->prefix = $previousPrefix;
-    }
-
-    public function where(array $patterns): self
-    {
-        $route = end($this->routes);
-        $route['patterns'] = $patterns;
-        $this->routes[key($this->routes)] = $route;
-        return $this;
+        [$this->currentGroup, $this->middleware, $this->prefix] = $previous;
     }
 
     public function name(string $name): self
     {
-        $route = end($this->routes);
-        $route['name'] = $name;
-        $this->routes[key($this->routes)] = $route;
+        $lastIndex = array_key_last($this->routes);
+        $this->routes[$lastIndex]['name'] = $name;
+        $this->namedRoutes[$name] = $this->routes[$lastIndex];
         return $this;
     }
 
-    private function add(string $method, string $uri, $callback): void
+    public function where(array $patterns): self
     {
-        if ($this->prefix) {
-            $uri = trim($this->prefix . '/' . trim($uri, '/'), '/');
-        }
-
-        $route = [
-            'method' => $method,
-            'uri' => $uri,
-            'callback' => $callback,
-            'middleware' => $this->middleware ?? []
-        ];
-
-        $this->routes[] = $route;
-
-        if (isset($route['name'])) {
-            $this->namedRoutes[$route['name']] = $route;
-        }
+        $lastIndex = array_key_last($this->routes);
+        $this->routes[$lastIndex]['patterns'] = $patterns;
+        return $this;
     }
 
-    private function matchRoute(array $route): bool
-    {
-        // Log para debug
-        error_log("Comparando rota: {$route['method']} {$route['uri']} com URI: {$this->requestUri}");
-
-        // Para rotas simples sem parâmetros
-        $routePath = '/' . trim($route['uri'], '/');
-        $requestPath = '/' . trim($this->requestUri, '/');
-
-        error_log("Rota formatada: {$routePath}, Requisição formatada: {$requestPath}");
-
-        // Correspondência exata
-        if ($route['method'] === $this->requestMethod && $routePath === $requestPath) {
-            error_log("Correspondência exata encontrada!");
-            return true;
-        }
-
-        // Para rotas com parâmetros
-        if (strpos($route['uri'], '{') !== false) {
-            $pattern = $this->buildPatternFromRoute($route);
-            error_log("Padrão de rota: {$pattern}");
-            $result = $route['method'] === $this->requestMethod && preg_match($pattern, $requestPath);
-            if ($result) {
-                error_log("Correspondência com parâmetros encontrada!");
-            }
-            return $result;
-        }
-
-        return false;
-    }
-
-    private function buildPatternFromRoute(array $route): string
+    protected function buildPatternFromRoute(array $route): string
     {
         $uri = $route['uri'];
-
-        // Substitui parâmetros com padrões personalizados
-        if (isset($route['patterns'])) {
-            foreach ($route['patterns'] as $param => $pattern) {
-                $uri = str_replace("{{$param}}", "($pattern)", $uri);
-            }
+        foreach ($route['patterns'] ?? [] as $param => $pattern) {
+            $uri = str_replace("{{$param}}", "({$pattern})", $uri);
         }
-
-        // Substitui parâmetros restantes com padrão padrão
-        $uri = preg_replace('/\{([^}]+)\}/', '([^/]+)', $uri);
-
+        $uri = preg_replace('/\{[^}]+\}/', '([^/]+)', $uri);
         return "#^{$uri}$#";
     }
 
@@ -200,84 +140,72 @@ class Router
     {
         $request = new Request();
 
-        // Adicione este log temporário
-        error_log("URI solicitada: " . $this->requestUri);
-        error_log("Método: " . $this->requestMethod);
-        error_log("Número de rotas: " . count($this->routes));
-
-        foreach ($this->routes as $key => $route) {
-            error_log("Verificando rota {$key}: {$route['method']} {$route['uri']}");
+        foreach ($this->routes as $route) {
             if ($this->matchRoute($route)) {
-                error_log("Rota correspondente encontrada: {$route['uri']}");
-                try {
-                    // Execute middlewares
-                    $response = $this->executeMiddleware($route['middleware'] ?? [], $request, function () use ($route, $request) {
-                        return $this->executeCallback($route['callback'], $request);
-                    });
-
-                    if ($response instanceof Response) {
-                        $response->send();
-                        return;
-                    }
-
-                    echo $response;
-                    return;
-                } catch (\Exception $e) {
-                    // Log do erro
-                    error_log($e->getMessage());
-
-                    // Exibir erro em modo de desenvolvimento
-                    if (config('app.debug', false)) {
-                        echo '<h1>Erro:</h1>';
-                        echo '<p>' . $e->getMessage() . '</p>';
-                        echo '<pre>' . $e->getTraceAsString() . '</pre>';
-                        exit;
-                    }
-
-                    // Em produção, mostrar página de erro genérica
-                    echo 'Ocorreu um erro. Por favor, tente novamente mais tarde.';
-                    exit;
-                }
+                return $this->handle($route, $request);
             }
+        }
+
+        if ($this->useAutoRouting && ($response = $this->autoRoute($request)) !== false) {
+            echo $response;
+            return;
         }
 
         $this->handleRouteNotFound();
     }
 
-    private function executeMiddleware(array $middlewares, Request $request, \Closure $callback)
+    protected function matchRoute(array $route): bool
     {
-        if (empty($middlewares)) {
-            return $callback();
+        $requestPath = '/' . trim($this->requestPath ?? '', '/');
+        $routePath = '/' . trim($route['uri'] ?? '', '/');
+
+        if ($route['method'] === $this->requestMethod && $routePath === $requestPath) {
+            return true;
         }
 
-        $middleware = array_shift($middlewares);
-        $instance = new $middleware();
-
-        return $instance->handle($request, function ($request) use ($middlewares, $callback) {
-            return $this->executeMiddleware($middlewares, $request, $callback);
-        });
+        return isset($route['regex']) && $route['method'] === $this->requestMethod && preg_match($route['regex'], $requestPath);
     }
 
-    private function executeCallback($callback)
+    protected function handle(array $route, Request $request)
     {
-        if (is_callable($callback)) {
-            return call_user_func($callback);
+        try {
+            $response = (new \Core\Middleware\Pipeline())
+                ->send($request)
+                ->through($this->resolveMiddlewares($route['middleware'] ?? []))
+                ->then(fn($request) => $this->executeCallback($route['callback'], $request));
+
+            $response instanceof Response ? $response->send() : print ($response);
+        } catch (\Throwable $e) {
+            if (config('app.debug', false)) {
+                echo "<h1>Erro:</h1><p>{$e->getMessage()}</p><pre>{$e->getTraceAsString()}</pre>";
+            } else {
+                echo 'Ocorreu um erro. Por favor, tente novamente mais tarde.';
+            }
         }
+    }
+
+    protected function resolveMiddlewares(array $aliases): array
+    {
+        $container = Container::getInstance();
+        return array_map(fn($alias) => $container->resolveMiddleware($alias), $aliases);
+    }
+
+    protected function executeCallback($callback, Request $request)
+    {
+        if (is_callable($callback))
+            return $callback($request);
 
         if (is_array($callback)) {
             [$controller, $method] = $callback;
-            if (is_string($controller)) {
-                $controller = new $controller();
-            }
-            return call_user_func([$controller, $method]);
+            $instance = is_string($controller) ? new $controller() : $controller;
+            return $instance->{$method}($request);
         }
 
         throw new \Exception("Callback inválido");
     }
 
-    private function handleRouteNotFound()
+    protected function handleRouteNotFound(): void
     {
-        // Rota não encontrada
         $error = [
             'type' => 'NotFoundError',
             'message' => 'A página solicitada não foi encontrada',
@@ -287,29 +215,47 @@ class Router
             'trace' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)
         ];
 
-        // Usar o ErrorHandler para renderizar a página de erro
-        $errorHandler = \Core\Error\ErrorHandler::getInstance();
-        $errorHandler->renderErrorPage($error);
+        \Core\Error\ErrorHandler::getInstance()->renderErrorPage($error);
     }
 
-    public function generateUrl($name, $params = [])
+    public function generateUrl($name, $params = []): string
     {
         if (!isset($this->namedRoutes[$name])) {
-            throw new \Exception("Route name '{$name}' not found");
+            throw new \Exception("Rota '{$name}' não encontrada. Disponíveis: " . implode(', ', array_keys($this->namedRoutes)));
         }
 
-        $route = $this->namedRoutes[$name];
-        $path = $route['uri'];
-
-        // Substituir parâmetros na URL
+        $uri = $this->namedRoutes[$name]['uri'];
         foreach ($params as $key => $value) {
-            $path = str_replace('{' . $key . '}', $value, $path);
+            $uri = str_replace("{{$key}}", $value, $uri);
         }
 
-        // Remover parâmetros opcionais não fornecidos
-        $path = preg_replace('/\{[^}]+\}/', '', $path);
-        $path = str_replace('//', '/', $path);
+        return '/' . ltrim($uri, '/');
+    }
 
-        return $path;
+    public function setFallback(callable $callback): void
+    {
+        $this->fallback = $callback;
+    }
+
+    protected function autoRoute(Request $request)
+    {
+        $path = trim($request->getPath(), '/');
+        $segments = explode('/', $path);
+
+        $controller = ucfirst($segments[0] ?? $this->defaultController);
+        $method = $segments[1] ?? $this->defaultMethod;
+        $params = array_slice($segments, 2);
+
+        return $this->executeController($controller, $method, $params, $request);
+    }
+
+    protected function executeController(string $controllerClass, string $method, array $params, Request $request)
+    {
+        $class = "App\\Controllers\\{$controllerClass}";
+        if (!class_exists($class))
+            return false;
+
+        $instance = new $class();
+        return method_exists($instance, $method) ? $instance->{$method}($request, ...$params) : false;
     }
 }

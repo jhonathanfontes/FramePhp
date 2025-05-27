@@ -45,7 +45,7 @@ class DashboardController extends BaseController
                 'data' => [65, 25, 10]
             ]
         ];
-
+    
         // Renderizar a view
         return $this->render('dashboard/index', [
             'dashboardData' => $dashboardData,

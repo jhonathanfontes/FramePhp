@@ -1,6 +1,6 @@
 <?php
 
-namespace Core\Middleware;
+namespace App\Middleware;
 
 class SecurityMiddleware
 {

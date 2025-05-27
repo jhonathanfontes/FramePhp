@@ -4,7 +4,7 @@ namespace App\Middleware;
 
 use Core\Http\Request;
 use Core\Http\Response;
-use Core\Middleware\MiddlewareInterface;
+use Core\Interface\MiddlewareInterface;
 
 class PermissionMiddleware implements MiddlewareInterface
 {
