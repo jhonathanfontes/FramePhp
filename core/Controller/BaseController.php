@@ -3,6 +3,7 @@
 namespace Core\Controller;
 
 use Core\View\TwigManager;
+use Core\Http\Response;
 
 class BaseController
 {

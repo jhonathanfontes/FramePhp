@@ -20,9 +20,9 @@ class WebPolicy implements PolicyInterface
             return Response::redirectResponse(base_url('auth/login'));
         }
 
-        // if (Auth::user()['type'] !== 'web') {
-        //     return Response::redirectResponse(base_url('unauthorized'));
-        // }
+        if (Auth::user()['type'] !== 'web') {
+            return Response::redirectResponse(base_url('unauthorized'));
+        }
 
         return null;
     }

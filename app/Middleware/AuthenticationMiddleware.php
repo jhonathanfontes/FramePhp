@@ -41,6 +41,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
         
         // Verifica a autorização usando a policy
         $response = $policyClass::check($request);
+
         if ($response !== null) {
             return $response;
         }

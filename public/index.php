@@ -32,3 +32,4 @@ $container = \Core\Container\Container::getInstance();
 
 // Load bootstrap
 require_once BASE_PATH . '/bootstrap/app.php';
+

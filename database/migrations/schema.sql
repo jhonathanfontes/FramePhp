@@ -29,3 +29,39 @@ CREATE TABLE IF NOT EXISTS password_resets (
 -- Senha: senha123 (em produção, use password_hash)
 INSERT INTO users (name, email, password, role) VALUES 
 ('Administrador', 'admin@example.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin');
+
+CREATE TABLE `cad_usuario` (
+  `id_usuario` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `use_nome` VARCHAR(100) NOT NULL,
+  `use_apelido` VARCHAR(50) DEFAULT NULL,
+  `use_username` VARCHAR(50) NOT NULL UNIQUE,
+  `use_password` VARCHAR(255) NOT NULL,
+  `use_email` VARCHAR(100) NOT NULL UNIQUE,
+  `use_telefone` VARCHAR(20) DEFAULT NULL,
+  `use_avatar` VARCHAR(255) DEFAULT NULL,
+  `use_sexo` ENUM('M', 'F', 'O') DEFAULT NULL,
+  `status` TINYINT(1) NOT NULL DEFAULT 1,
+  `permissao_id` INT UNSIGNED DEFAULT NULL,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `created_user_id` INT UNSIGNED DEFAULT NULL,
+  `updated_at` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `updated_user_id` INT UNSIGNED DEFAULT NULL,
+  `deleted_at` DATETIME DEFAULT NULL,
+  `deleted_user_id` INT UNSIGNED DEFAULT NULL,
+  PRIMARY KEY (`id_usuario`),
+  INDEX `idx_permissao` (`permissao_id`),
+  INDEX `idx_created_user` (`created_user_id`),
+  INDEX `idx_updated_user` (`updated_user_id`),
+  INDEX `idx_deleted_user` (`deleted_user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE `password_resets` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `email` VARCHAR(100) NOT NULL,
+  `token` VARCHAR(255) NOT NULL,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  INDEX `idx_email` (`email`),
+  UNIQUE KEY `uniq_token` (`token`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

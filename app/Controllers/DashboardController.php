@@ -47,7 +47,7 @@ class DashboardController extends BaseController
         ];
     
         // Renderizar a view
-        return $this->render('dashboard/index', [
+        echo $this->render('dashboard/index', [
             'dashboardData' => $dashboardData,
             'chartData' => $chartData
         ]);
