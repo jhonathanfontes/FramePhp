@@ -135,8 +135,16 @@ class Request
         return $this->server['HTTP_REFERER'] ?? null;
     }
 
-    public function getIp(): string
+    public function getClientIp(): string
     {
+        if (!empty($this->server['HTTP_CLIENT_IP'])) {
+            return $this->server['HTTP_CLIENT_IP'];
+        }
+        
+        if (!empty($this->server['HTTP_X_FORWARDED_FOR'])) {
+            return $this->server['HTTP_X_FORWARDED_FOR'];
+        }
+        
         return $this->server['REMOTE_ADDR'] ?? '0.0.0.0';
     }
 

@@ -50,5 +50,9 @@ class Constants
         if (!defined('APP_DEBUG')) {
             define('APP_DEBUG', $env['APP_DEBUG'] ?? true);
         }
+
+        if (!defined('BASE_VIEW')) {
+            define('BASE_VIEW', BASE_PATH . '/app/views');
+        }
     }
 }

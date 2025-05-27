@@ -26,5 +26,5 @@ Um framework PHP moderno, leve e fácil de usar para desenvolvimento web.
 
 1. Clone o repositório:
    ```bash
-   git clone https://github.com/seu-usuario/framephp.git
+   git clone https://github.com/jhonathanfontes/framephp.git
    ```

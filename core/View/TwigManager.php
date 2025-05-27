@@ -38,6 +38,7 @@ class TwigManager
         $this->twig->addExtension(new DebugExtension());
 
         // Adicionar variáveis globais
+        \Core\Session\Session::start(); // Ensure session is started
         $this->twig->addGlobal('session', $_SESSION);
 
         // Adicionar funções globais

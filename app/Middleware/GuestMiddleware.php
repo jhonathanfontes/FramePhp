@@ -5,35 +5,24 @@ namespace App\Middleware;
 use Core\Auth\Auth;
 use Core\Http\Request;
 use Core\Http\Response;
-use Core\Middleware\MiddlewareInterface;
+use Core\Interface\MiddlewareInterface;
 
 class GuestMiddleware implements MiddlewareInterface
 {
-    /**
-     * Processa a requisição e verifica se o usuário NÃO está autenticado
-     *
-     * @param Request $request
-     * @param \Closure $next
-     * @return Response
-     */
     public function handle(Request $request, \Closure $next): Response
     {
-        // Log para debug
-        error_log("GuestMiddleware - Auth::check(): " . (Auth::check() ? "true" : "false"));
-        error_log("GuestMiddleware - Sessão: " . json_encode($_SESSION));
-        
-        // Se o usuário estiver autenticado, redireciona para o dashboard
-        if (Auth::check()) {
-            return Response::redirectResponse(base_url('dashboard'));
+        // Verifica se o usuário está autenticado
+        if (!Auth::check()) {
+            // Se estiver autenticado, redireciona para o dashboard
+            return Response::redirectResponse(base_url('auth/login'));
         }
         
-        // Se não estiver autenticado, continua normalmente
+        // Executa o próximo middleware apenas se for um visitante
         $response = $next($request);
         
-        // Verifica se o retorno é um objeto Response
-        if (!($response instanceof Response)) {
-            // Se não for, cria um novo objeto Response com o conteúdo retornado
-            return new Response((string) $response);
+        // Se o próximo middleware não retornou um Response, cria um novo
+        if (!$response instanceof Response) {
+            $response = new Response((string) $response);
         }
         
         return $response;
