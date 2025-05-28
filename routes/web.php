@@ -62,14 +62,18 @@ $router->middleware([GuestMiddleware::class])
 // Rotas protegidas para usuários web
 $router->middleware([AuthenticationMiddleware::class])->group([], function ($router) {
     $router->get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    $router->get('/logout', [AuthController::class, 'logout'])->name('logout');
+
 });
 
 // Rotas protegidas para administradores
-$router->middleware(['auth.admin'])->group([], function ($router) {
-    $router->group(['prefix' => 'admin'], function ($router) {
+$router->middleware(['auth.admin'])
+->group(['prefix' => 'admin'], function ($router) {
         $router->get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
         $router->get('/users', [AdminController::class, 'users'])->name('admin.users');
         $router->get('/settings', [AdminController::class, 'settings'])->name('admin.settings');
+        $router->get('/logout', [AuthController::class, 'logout'])->name('admin.logout');
+
 
         // Rotas para menus
         $router->group(['prefix' => 'menus'], function ($router) {
@@ -88,7 +92,6 @@ $router->middleware(['auth.admin'])->group([], function ($router) {
             $router->get('/submenus/{id}/destroy', [MenuController::class, 'destroySubmenu'])->name('admin.menus.submenus.destroy');
         });
     });
-});
 
 // Rotas protegidas para clientes
 $router->middleware(['auth.client'])->group([], function ($router) {

@@ -16,12 +16,22 @@ class WebPolicy implements PolicyInterface
     public static function check(Request $request): ?Response
     {
 
+        // Verifica se o usuário está autenticado
+        if (!Auth::check()) {
+            return Response::redirect(base_url('auth/login'));
+        }
+
+        if (Auth::user()['type'] == 'admin') {
+            return Response::redirect(base_url('admin/dashboard'));
+        }
+
+        return null;
         if (!Auth::check()) {
             return Response::redirectResponse(base_url('auth/login'));
         }
 
-        if (Auth::user()['type'] !== 'web') {
-            return Response::redirectResponse(base_url('unauthorized'));
+        if (Auth::user()['type'] == 'admin') {
+            return Response::redirectResponse(base_url('admin/dashboard'));
         }
 
         return null;

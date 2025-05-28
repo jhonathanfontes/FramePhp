@@ -3,6 +3,7 @@
 $request = new \Core\Http\Request();
 $router = new \Core\Router\Router($request);
 
+
 // Load routes
 require_once BASE_PATH . '/routes/web.php';
 

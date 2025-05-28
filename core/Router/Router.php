@@ -8,7 +8,6 @@ use Core\Http\Request;
 class Router
 {
     private static $instance;
-
     private array $routes = [];
     private array $middlewares = [];
     private array $policies = [];
@@ -139,8 +138,17 @@ class Router
         $this->fallback = $callback;
     }
 
-    public function generateUrl(string $name, array $params = []): ?string
+    public function generateUrl(string $name, ?array $params = []): ?string
     {
+  
+        // Check if the route name exists in the namedRoutes array
+        if (!isset($this->namedRoutes[$name])) {
+            return null;
+        }
+        
+        $url = $this->namedRoutes[$name];
+
+        // Check if the route name exists in the namedRoutes array
         if (!isset($this->namedRoutes[$name])) {
             return null;
         }
@@ -148,16 +156,15 @@ class Router
         $url = $this->namedRoutes[$name];
 
         // Replace parameters in the URL
-        foreach ($params as $key => $value) {
-            $placeholder = '{' . $key . '}';
-            if (str_contains($url, $placeholder)) {
-                $url = str_replace($placeholder, $value, $url);
-                unset($params[$key]); // Remove used parameter
-            }
-        }
-
-        // Append any remaining parameters as a query string
         if (!empty($params)) {
+            foreach ($params as $key => $value) {
+                $placeholder = '{' . $key . '}';
+                if (str_contains($url, $placeholder)) {
+                    $url = str_replace($placeholder, $value, $url);
+                    unset($params[$key]); // Remove used parameter
+                }
+            }
+
             $url .= '?' . http_build_query($params);
         }
 

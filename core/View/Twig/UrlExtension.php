@@ -10,10 +10,8 @@ class UrlExtension extends AbstractExtension
 {
     private $router;
 
-    public function __construct(Router $router = null)
+    public function __construct()
     {
-        // Obter a instância do Router do container global ou criar uma nova
-        $this->router = $router ?? new Router();
     }
 
     /**
@@ -29,9 +27,11 @@ class UrlExtension extends AbstractExtension
         ];
     }
 
-    public function generateUrl($name, $params = [])
+    public function generateUrl(string $name, ?array $params = []): ?string
     {
-        return $this->router->generateUrl($name, $params);
+        $request = new \Core\Http\Request();
+        $router = new \Core\Router\Router($request);
+        return $router->generateUrl($name, $params);
     }
 
     public function getBaseUrl()

@@ -9,13 +9,13 @@ use App\Policies\WebPolicy;
 use App\Policies\AdminPolicy;
 use App\Policies\ApiPolicy;
 
+
 class AuthenticationMiddleware implements MiddlewareInterface
 {
     private $policy;
 
     public function __construct(string $type = 'web')
     {
-   
         $this->policy = $this->resolvePolicy($type);
     }
 
@@ -36,17 +36,25 @@ class AuthenticationMiddleware implements MiddlewareInterface
 
     public function handle(Request $request, \Closure $next): Response
     {
-        
+        // $policyClass = $this->policy;
         $policyClass = $this->policy;
         
         // Verifica a autorização usando a policy
         $response = $policyClass::check($request);
 
+
         if ($response !== null) {
             return $response;
         }
 
-        // Continua o fluxo se autorizado
-        return $next($request);
+         // Continua o fluxo se autorizado
+         $response = $next($request); // Executa o próximo passo
+
+         // Garante que o valor final retornado seja um objeto Response
+         if (!$response instanceof Response) {
+             $response = new Response((string) $response);
+         }
+     
+         return $response; // Sempre retorna um Response
     }
 }
