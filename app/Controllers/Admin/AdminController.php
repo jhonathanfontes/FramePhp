@@ -13,7 +13,7 @@ class AdminController extends BaseController
 
     public function users()
     {
-        return $this->render('admin/users/index');
+        echo $this->render('admin/users/index');
     }
 
     public function settings()

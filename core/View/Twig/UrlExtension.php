@@ -4,7 +4,6 @@ namespace Core\View\Twig;
 
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
-use Core\Router\Router;
 
 class UrlExtension extends AbstractExtension
 {
@@ -29,8 +28,7 @@ class UrlExtension extends AbstractExtension
 
     public function generateUrl(string $name, ?array $params = []): ?string
     {
-        $request = new \Core\Http\Request();
-        $router = new \Core\Router\Router($request);
+        $router = \Core\Router\Router::getInstance();
         return $router->generateUrl($name, $params);
     }
 

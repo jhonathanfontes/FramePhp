@@ -1,11 +1,10 @@
 <?php
 
 $request = new \Core\Http\Request();
-$router = new \Core\Router\Router($request);
-
+$router = \Core\Router\Router::getInstance(); // Usar getInstance para popular Router::$instance
 
 // Load routes
-require_once BASE_PATH . '/routes/web.php';
+require_once BASE_PATH . '/routes/router.php';
 
 // Dispatch route
 $router->dispatch();

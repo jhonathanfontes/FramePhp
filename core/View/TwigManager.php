@@ -134,7 +134,6 @@ class TwigManager
             
             // Determinar qual arquivo renderizar
             $fileToRender = file_exists($viewsPath . $htmlFile) ? $htmlFile : $template . '.twig';
-            
             return $this->twig->render($fileToRender, $data);
         } catch (\Exception $e) {
             error_log("Erro ao renderizar template: " . $e->getMessage());

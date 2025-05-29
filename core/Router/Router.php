@@ -1,6 +1,4 @@
 <?php
-// core/Router/Router.php
-
 namespace Core\Router;
 
 use Core\Http\Request;
@@ -14,14 +12,13 @@ class Router
     private string $prefix = '';
     private string $currentName = '';
     private array $namedRoutes = [];
-    private $fallback; // adiciona no início da classe
+    private $fallback;
+
+    private function __construct() {}
 
     public static function getInstance(): self
     {
-        if (self::$instance === null) {
-            self::$instance = new self();
-        }
-        return self::$instance;
+        return self::$instance ??= new self();
     }
 
     public function middleware(array $middlewares): static
@@ -66,22 +63,41 @@ class Router
     private function addRoute(string $method, string $uri, array|callable $callback): static
     {
         $fullUri = rtrim($this->prefix . '/' . trim($uri, '/'), '/') ?: '/';
-
+    
         $route = [
             'uri' => $fullUri,
             'callback' => $callback,
-            'middlewares' => $this->middlewares
+            'middlewares' => $this->middlewares,
+            'method' => $method,
         ];
-
-        if ($this->currentName) {
-            $this->namedRoutes[$this->currentName] = $fullUri;
-            $this->currentName = '';
+    
+        // Define o nome da rota: usa o nome manual ou gera automaticamente baseado na URI
+        $routeName = $this->currentName ?: $this->generateDefaultNameFromUri($fullUri);
+    
+        // Registra a rota nomeada (com verificação de duplicidade)
+        if (isset($this->namedRoutes[$routeName])) {
+            error_log("Rota nomeada duplicada detectada: '{$routeName}' já está associada a '{$this->namedRoutes[$routeName]}'.", E_USER_WARNING);
+        } else {
+            $this->namedRoutes[$routeName] = $fullUri;
         }
-
+    
+        $this->currentName = ''; // limpa o nome temporário
+    
         $this->routes[$method][] = $route;
-
+    
         return $this;
     }
+    
+    private function generateDefaultNameFromUri(string $uri): string
+{
+    // Remove a barra inicial e substitui as demais por underlines
+    $name = ltrim($uri, '/');
+    $name = str_replace('/', '_', $name);
+
+    // Se a URI for "/", nomeia como "home" por padrão
+    return $name === '' ? 'home' : $name;
+}
+
 
     public function dispatch(): void
     {
@@ -97,35 +113,38 @@ class Router
             if (preg_match($pattern, $currentUri, $matches)) {
                 array_shift($matches);
 
-                // Definir $callback antes de usar nos middlewares
                 $callback = $route['callback'];
 
                 foreach ($route['middlewares'] as $middleware) {
                     if (class_exists($middleware)) {
                         (new $middleware())->handle($request, function ($request) use ($callback, $matches) {
-                            if (is_array($callback)) {
-                                [$class, $method] = $callback;
-                                return call_user_func_array([new $class, $method], $matches);
-                            }
-                            return call_user_func($callback, $request);
+                            return $this->invokeCallback($callback, $matches, $request);
                         });
+                        return;
                     }
                 }
 
-                $callback = $route['callback'];
-                if (is_array($callback)) {
-                    [$class, $method] = $callback;
-                    call_user_func_array([new $class, $method], $matches);
-                    return;
-                }
-
-                call_user_func_array($callback, $matches);
+                $this->invokeCallback($callback, $matches, $request);
                 return;
             }
         }
 
-        http_response_code(404);
-        echo "404 - Página não encontrada";
+        if ($this->fallback) {
+            call_user_func($this->fallback);
+        } else {
+            http_response_code(404);
+            echo "404 - Página não encontrada (Fallback não definido)";
+        }
+    }
+
+    private function invokeCallback(array|callable $callback, array $matches, Request $request): mixed
+    {
+        if (is_array($callback)) {
+            [$class, $method] = $callback;
+            return call_user_func_array([new $class, $method], $matches);
+        }
+
+        return call_user_func($callback, $request, ...$matches);
     }
 
     public function route(string $name): ?string
@@ -140,34 +159,27 @@ class Router
 
     public function generateUrl(string $name, ?array $params = []): ?string
     {
-  
-        // Check if the route name exists in the namedRoutes array
-        if (!isset($this->namedRoutes[$name])) {
-            return null;
-        }
-        
-        $url = $this->namedRoutes[$name];
-
-        // Check if the route name exists in the namedRoutes array
-        if (!isset($this->namedRoutes[$name])) {
-            return null;
+        if (!array_key_exists($name, $this->namedRoutes)) {
+            return null; // Não lança exceção diretamente, retorna null se preferir
         }
 
         $url = $this->namedRoutes[$name];
 
-        // Replace parameters in the URL
-        if (!empty($params)) {
-            foreach ($params as $key => $value) {
-                $placeholder = '{' . $key . '}';
-                if (str_contains($url, $placeholder)) {
-                    $url = str_replace($placeholder, $value, $url);
-                    unset($params[$key]); // Remove used parameter
-                }
+        // Substitui parâmetros na URL
+        foreach ($params as $key => $value) {
+            $placeholder = '{' . $key . '}';
+            if (strpos($url, $placeholder) !== false) {
+                $url = str_replace($placeholder, urlencode($value), $url);
+                unset($params[$key]);
             }
+        }
 
+        // Adiciona query string se houver
+        if (!empty($params)) {
             $url .= '?' . http_build_query($params);
         }
 
         return $url;
     }
+    
 }
