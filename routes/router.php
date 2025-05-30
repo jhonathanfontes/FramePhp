@@ -62,7 +62,7 @@ $router->middleware([GuestMiddleware::class])
 // Rotas protegidas para usuários web
 $router->middleware([AuthenticationMiddleware::class])->group([], function ($router) {
     $router->get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-    $router->get('/logout', [AuthController::class, 'logout'])->name('sair');
+    $router->get('/logout', [AuthController::class, 'logout'])->name('logout');
 
 });
 
@@ -72,7 +72,7 @@ $router->middleware(['auth.admin'])
         $router->get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
         $router->get('/users', [AdminController::class, 'users'])->name('admin.users');
         $router->get('/settings', [AdminController::class, 'settings'])->name('admin.settings');
-        $router->get('/logout', [AuthController::class, 'logout'])->name('admin.logout');
+        $router->get('/logout', [AuthController::class, 'logout'])->name('admin_logout');
 
 
         // Rotas para menus
