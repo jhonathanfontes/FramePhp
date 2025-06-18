@@ -2,62 +2,90 @@
 
 namespace Core\Container;
 
+use ReflectionClass;
+use ReflectionParameter;
+
 class Container
 {
     private static $instance = null;
-    private $bindings = [];
-    private $middlewares = [];
-    
-    private function __construct()
-    {
-        // Singleton
-    }
-    
-    public static function getInstance()
+    private array $bindings = [];
+
+    private function __construct() {}
+
+    public static function getInstance(): self
     {
         if (self::$instance === null) {
-            self::$instance = new self(); // Só acontece 1x
+            self::$instance = new self();
         }
         return self::$instance;
     }
-    
-    public function bind(string $abstract, $concrete)
+
+    /**
+     * Registra uma dependência no contêiner.
+     */
+    public function bind(string $abstract, $concrete): void
     {
         $this->bindings[$abstract] = $concrete;
     }
-    
-    public function bindMiddleware(string $alias, $middleware)
+
+    /**
+     * Resolve (cria) uma instância de uma classe.
+     */
+    public function make(string $class)
     {
-        $this->middlewares[$alias] = $middleware;
+        // Se houver um 'binding' customizado, usa ele.
+        if (isset($this->bindings[$class])) {
+            $concrete = $this->bindings[$class];
+            return ($concrete instanceof \Closure) ? $concrete($this) : $concrete;
+        }
+
+        // Caso contrário, tenta resolver automaticamente.
+        return $this->resolve($class);
     }
-    
-    public function make(string $abstract)
+
+    /**
+     * Usa Reflection para construir a classe e suas dependências.
+     */
+    protected function resolve(string $class)
     {
-        if (!isset($this->bindings[$abstract])) {
-            throw new \Exception("Binding não encontrado para: {$abstract}");
+        $reflector = new ReflectionClass($class);
+
+        if (!$reflector->isInstantiable()) {
+            throw new \Exception("A classe [{$class}] não é instanciável.");
         }
-        
-        $concrete = $this->bindings[$abstract];
-        
-        if ($concrete instanceof \Closure) {
-            return $concrete();
+
+        $constructor = $reflector->getConstructor();
+
+        // Se não há construtor, basta criar a classe.
+        if (is_null($constructor)) {
+            return new $class;
         }
-        
-        return $concrete;
+
+        // Se há um construtor, resolve suas dependências recursivamente.
+        $dependencies = $this->resolveDependencies($constructor->getParameters());
+
+        return $reflector->newInstanceArgs($dependencies);
     }
-    
-    public function resolveMiddleware(string $alias)
+
+    /**
+     * Resolve os parâmetros do construtor.
+     */
+    protected function resolveDependencies(array $parameters): array
     {
-        if (!isset($this->middlewares[$alias])) {
-            throw new \Exception("Middleware não encontrado para alias: {$alias}");
+        $dependencies = [];
+
+        foreach ($parameters as $parameter) {
+            $type = $parameter->getType();
+
+            if ($type && !$type->isBuiltin()) {
+                // Se o parâmetro é uma classe, resolve-a com o container.
+                $dependencies[] = $this->make($type->getName());
+            } elseif ($parameter->isDefaultValueAvailable()) {
+                // Se tem um valor padrão, usa ele.
+                $dependencies[] = $parameter->getDefaultValue();
+            }
         }
-        
-        $middleware = $this->middlewares[$alias];
-        
-        if ($middleware instanceof \Closure) {
-            return $middleware();
-        }
-        
-        return $middleware;
+
+        return $dependencies;
     }
 }

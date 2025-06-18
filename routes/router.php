@@ -42,7 +42,7 @@ $router->group(['prefix' => 'auth', 'middleware' => ['guest', 'csrf']], function
 // 'permission:admin' para garantir que ele tem a permissão de administrador.
 $router->group([
     'prefix' => 'admin',
-    'middleware' => ['auth', 'permission:1', 'csrf']
+    'middleware' => ['auth', 'permission:admin', 'csrf']
 ], function ($router) {
     $router->get('/logout', [AuthController::class, 'logout'])->name('logout');
     $router->get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');

@@ -1,21 +1,21 @@
 <?php
 
-// Iniciar sessão antes de qualquer saída
+// bootstrap/app.php
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$request = new \Core\Http\Request();
-$router = \Core\Router\Router::getInstance();
+// Inicia o container de DI
+\Core\Container\Container::getInstance();
 
-// Load routes
-require_once BASE_PATH . '/routes/router.php';
-
-// Registrar manipulador de erros
+// Inicia o Error Handler e o Translator
 \Core\Error\ErrorHandler::register();
-
-// Inicializar o Translator
 \Core\Translation\Translator::getInstance();
 
-// Dispatch route
+// Carrega as definições de rota
+require_once BASE_PATH . '/routes/router.php';
+
+// Obtém a instância do roteador e dispara a rota
+$router = \Core\Router\Router::getInstance();
 $router->dispatch();
