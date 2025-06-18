@@ -146,12 +146,40 @@
 <!-- Hero Section -->
 <section class="hero-section">
     <div class="container">
-        <h1 class="hero-title">Bem-vindo ao {{ app_name() }}</h1>
-        <p class="hero-subtitle">Sua plataforma completa de gerenciamento</p>
-        <div class="hero-buttons">
-            <a href="{{ url('AdminLogin') }}" class="btn btn-hero btn-hero-primary">Entrar</a>
-            <a href="/register" class="btn btn-hero btn-hero-secondary">Registrar</a>
-        </div>
+
+        {# A função auth() retorna os dados do usuário se ele estiver logado, ou null (falso) se não estiver. #}
+        {% if auth() %}
+        
+            {# --- Conteúdo para USUÁRIOS LOGADOS --- #}
+
+            {# Usamos auth().name para acessar o nome do usuário que está na sessão. #}
+            <h1 class="hero-title">Bem-vindo(a) de volta, {{ auth().name }}!</h1>
+            <p class="hero-subtitle">Acesse seu painel para gerenciar suas atividades.</p>
+            <div class="hero-buttons">
+                {# Botão que leva para o dashboard de administrador. #}
+                <a href="{{ url('admin.dashboard') }}" class="btn btn-hero btn-hero-primary">Acessar o Painel</a>
+                {{ dump(auth()) }}
+                {# Adicionando um botão de logout por conveniência. #}
+                <form action="{{ url('logout') }}" method="POST" style="display: inline;">
+                    {# É importante incluir o token CSRF no formulário de logout por segurança. #}
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-hero btn-hero-secondary">Sair</button>
+                </form>
+            </div>
+
+        {% else %}
+
+            {# --- Conteúdo para VISITANTES (NÃO LOGADOS) --- #}
+
+            <h1 class="hero-title">Bem-vindo ao {{ app_name() }}</h1>
+            <p class="hero-subtitle">Sua plataforma completa de gerenciamento</p>
+            <div class="hero-buttons">
+                <a href="{{ url('AdminLogin') }}" class="btn btn-hero btn-hero-primary">Entrar</a>
+                <a href="{{ url('register') }}" class="btn btn-hero btn-hero-secondary">Registrar</a>
+            </div>
+
+        {% endif %}
+
     </div>
 </section>
 

@@ -8,12 +8,12 @@ class AdminController extends BaseController
 {
     public function dashboard()
     {
-        echo $this->render('admin/dashboard/index');
+        return $this->render('admin/dashboard');
     }
 
     public function users()
     {
-        echo $this->render('admin/users/index');
+        return $this->render('admin/users/index');
     }
 
     public function settings()

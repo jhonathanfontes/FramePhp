@@ -9,7 +9,7 @@
             <div class="alert alert-danger">{{ error_message }}</div>
         {% endif %}
         
-        <form method="POST" action="{{ base_url('register') }}">
+        <form method="POST" action="{{ base_url('auth/register') }}">
             <!-- Campo CSRF -->
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             

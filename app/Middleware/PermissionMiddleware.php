@@ -2,43 +2,49 @@
 
 namespace App\Middleware;
 
+use Core\Auth\Auth;
 use Core\Http\Request;
 use Core\Http\Response;
 use Core\Interface\MiddlewareInterface;
 
 class PermissionMiddleware implements MiddlewareInterface
 {
-    private $requiredRole;
-
-    public function __construct(string $role)
-    {
-        $this->requiredRole = $role;
-    }
+    protected array $requiredRoles;
 
     /**
-     * Processa a requisição e verifica se o usuário tem a permissão necessária
-     *
-     * @param Request $request
-     * @param \Closure $next
-     * @return Response
+     * O construtor aceita as permissões necessárias definidas na rota.
+     * Ex: 'permission:admin,manager' fará com que $roles seja ['admin', 'manager'].
      */
+    public function __construct(...$roles)
+    {
+        $this->requiredRoles = $roles;
+    }
+
     public function handle(Request $request, \Closure $next): Response
     {
-        $user = $request->getAttribute('user');
-        
-        if (!$user || !$this->hasPermission($user, $this->requiredRole)) {
-            return new Response(
-                json_encode(['error' => 'Acesso não autorizado']),
-                403,
-                ['Content-Type' => 'application/json']
-            );
+        $user = Auth::user();
+
+        // Verifica se o usuário tem a permissão necessária.
+        if (!$user || empty($user['role']) || !$this->hasPermission($user)) {
+            // Se for uma requisição de API, retorna um erro JSON.
+            if ($request->isAjax() || str_contains($request->getUri(), '/api/')) {
+                 return Response::jsonResponse(['error' => 'Acesso não autorizado.'], 403);
+            }
+            
+            // Para requisições web, redireciona para uma página de dashboard
+            // com uma mensagem de erro, impedindo o acesso indevido.
+            return Response::redirectResponse(base_url('dashboard'))->with('error', 'Você não tem permissão para acessar esta área.');
         }
 
+        // Permissão concedida, a requisição continua para o controlador.
         return $next($request);
     }
 
-    private function hasPermission($user, $role): bool
+    /**
+     * Verifica se a role do usuário está na lista de roles exigidas pela rota.
+     */
+    private function hasPermission($user): bool
     {
-        return in_array($role, $user->roles ?? []);
+        return in_array($user['role'], $this->requiredRoles);
     }
 }

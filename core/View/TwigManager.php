@@ -16,7 +16,6 @@ class TwigManager
 
     private function __construct()
     {
-        // Criar diretório de cache se não existir
         $cacheDir = BASE_PATH . '/storage/cache/twig';
         if (!is_dir($cacheDir)) {
             mkdir($cacheDir, 0777, true);
@@ -29,34 +28,24 @@ class TwigManager
             'auto_reload' => true
         ]);
 
-        // Adicionar a extensão de depuração
         $this->twig->addExtension(new DebugExtension());
 
-        // Adicionar variáveis globais
-        \Core\Session\Session::start(); // Ensure session is started
-        $this->twig->addGlobal('session', $_SESSION);
+        \Core\Session\Session::start();
+        $this->twig->addGlobal('session', $_SESSION ?? []);
 
-        // Adicionar funções globais
-        $this->twig->addFunction(new TwigFunction('base_url', 'base_url'));
+        // Registra as funções globais para serem usadas nos templates.
+        // O segundo argumento de TwigFunction é o nome da função PHP global a ser chamada.
         $this->twig->addFunction(new TwigFunction('app_name', 'app_name'));
         $this->twig->addFunction(new TwigFunction('app_version', 'app_version'));
-        
-        // Adicionar funções de tradução
         $this->twig->addFunction(new TwigFunction('trans', 'trans'));
         $this->twig->addFunction(new TwigFunction('__', '__'));
         $this->twig->addFunction(new TwigFunction('get_locale', 'get_locale'));
         
-        // Outras funções úteis
         $this->twig->addFunction(new TwigFunction('csrf_token', function() {
             return $_SESSION['csrf_token'] ?? '';
         }));
-
-        // Na função que inicializa o Twig (provavelmente init() ou __construct())
-        // Adicione a linha abaixo junto com as outras extensões
-        // Adicionar a extensão de URL
-      
         
-        // Obter a instância do Router
+        // Mantém as correções anteriores da UrlExtension e AuthExtension
         $router = Router::getInstance();
         $this->twig->addExtension(new UrlExtension($router));
         $this->twig->addExtension(new \Core\View\Twig\AuthExtension());
@@ -70,24 +59,18 @@ class TwigManager
         return self::$instance;
     }
 
-    // E em outros lugares onde você usa o caminho das views
     public function render(string $template, array $data = []): string
     {
         try {
-              
-            // Verificar se existem arquivos CSS e JS associados ou pastas
             $viewsPath = BASE_VIEW . '/';
             $templatePath = str_replace('/', DIRECTORY_SEPARATOR, $template);
             
-            // Extrair o nome do template da última parte do caminho
             $pathParts = explode(DIRECTORY_SEPARATOR, $templatePath);
             $templateName = end($pathParts);
             
-            // Verificar se existe um arquivo HTML ou uma pasta
             $htmlFile = $templatePath . '.html.twig';
             $templateDir = $templatePath;
             
-            // Se for uma pasta, procurar por index.html.twig ou templateName.html.twig dentro dela
             if (is_dir($viewsPath . $templateDir)) {
                 if (file_exists($viewsPath . $templateDir . DIRECTORY_SEPARATOR . 'index.html.twig')) {
                     $htmlFile = $templateDir . DIRECTORY_SEPARATOR . 'index.html.twig';
@@ -96,7 +79,6 @@ class TwigManager
                 }
             }         
 
-            // Verificar CSS
             $cssFile = null;
             if (file_exists($viewsPath . $templatePath . '.css.twig')) {
                 $cssFile = $templatePath . '.css.twig';
@@ -108,7 +90,6 @@ class TwigManager
                 }
             }
 
-            // Verificar JS
             $jsFile = null;
             if (file_exists($viewsPath . $templatePath . '.js.twig')) {
                 $jsFile = $templatePath . '.js.twig';
@@ -120,11 +101,9 @@ class TwigManager
                 }
             }
             
-            // Adicionar informações sobre arquivos CSS e JS aos dados
             $data['page_css'] = $cssFile;
             $data['page_js'] = $jsFile;
             
-            // Determinar qual arquivo renderizar
             $fileToRender = file_exists($viewsPath . $htmlFile) ? $htmlFile : $template . '.twig';
             return $this->twig->render($fileToRender, $data);
         } catch (\Exception $e) {

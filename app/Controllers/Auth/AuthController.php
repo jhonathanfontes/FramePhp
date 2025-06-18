@@ -19,10 +19,10 @@ class AuthController extends BaseController
     }
 
     public function loginForm()
-    { 
-       echo $this->render('auth/login', [
-    'title' => 'Login'
-]);
+    {
+        return $this->render('auth/login', [
+            'title' => 'Login'
+        ]);
     }
 
     public function login()
@@ -74,16 +74,16 @@ class AuthController extends BaseController
                 // Autenticar o usuário usando a classe Auth
                 // Após autenticar o usuário
                 Auth::login($userData);
-                
+
                 // Log para debug - verificar se a sessão foi criada corretamente
                 error_log("Sessão após login: " . json_encode($_SESSION));
                 error_log("Auth::check() após login: " . (Auth::check() ? "true" : "false"));
-                
+
                 // Redirecionar para o dashboard
-                header('Location: ' . base_url('dashboard'));
+                header('Location: ' . base_url('admin/dashboard'));
                 exit;
             }
-            
+
             // Log para debug
             error_log("Falha no login - Email: " . $email);
             if ($user) {
@@ -91,7 +91,7 @@ class AuthController extends BaseController
             } else {
                 error_log("Usuário não encontrado");
             }
-            
+
             // Credenciais inválidas
             echo $this->render('auth/login', [
                 'title' => 'Login',
@@ -101,7 +101,7 @@ class AuthController extends BaseController
         } catch (\Exception $e) {
             error_log("Erro durante o login: " . $e->getMessage());
             error_log("Stack trace: " . $e->getTraceAsString());
-            
+
             echo $this->render('auth/login', [
                 'title' => 'Login',
                 'error' => 'Ocorreu um erro durante o login. Por favor, tente novamente.',
@@ -152,7 +152,7 @@ class AuthController extends BaseController
         if ($password !== $passwordConfirmation) {
             $errors['password_confirmation'] = 'As senhas não conferem';
         }
-          
+
         // Se houver erros, exibir o formulário novamente
         if (!empty($errors)) {
             return $this->render('auth/register', [
@@ -175,10 +175,10 @@ class AuthController extends BaseController
         ];
 
         try {
-            
+
             $userId = $this->userModel->create($userData);
-             // Remova estas duas linhas:
-       
+            // Remova estas duas linhas:
+
             if ($userId) {
                 // Autenticar o usuário após o registro
                 $user = $this->userModel->findById($userId);
@@ -194,14 +194,14 @@ class AuthController extends BaseController
                     'use_sexo' => $user['use_sexo'] ?? null,
                     'type' => 'web'
                 ]);
-                
+
                 header('Location: ' . base_url('dashboard'));
                 exit;
             }
         } catch (\Exception $e) {
             error_log("Erro ao criar usuário: " . $e->getMessage());
             $errors['general'] = 'Erro ao criar usuário. Por favor, tente novamente.';
-            
+
             echo $this->render('auth/register', [
                 'title' => 'Cadastro',
                 'errors' => $errors,
@@ -325,7 +325,7 @@ class AuthController extends BaseController
     {
         // Usar o método Auth::logout() em vez de session_destroy() diretamente
         Auth::logout();
-        
+
         // Redirecionar para a página de login
         header('Location: ' . base_url('auth/login'));
         exit;
@@ -343,9 +343,9 @@ class AuthController extends BaseController
         // Verifica se o usuário já está autenticado
         if (Auth::check()) {
             // Redireciona para o dashboard se já estiver logado
-            return Response::redirectResponse('/dashboard');
+            return Response::redirectResponse('/admin/dashboard');
         }
-        
+
         // Se não estiver autenticado, exibe o formulário de login normalmente
         return $this->render('auth/login');
     }

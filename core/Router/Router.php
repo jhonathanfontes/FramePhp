@@ -3,18 +3,26 @@
 namespace Core\Router;
 
 use Core\Http\Request;
-use Core\Router\RouteDefinition;
+use Core\Http\Response;
+use Core\Middleware\Pipeline;
 
 class Router
 {
     private static $instance;
     private array $routes = [];
-    private array $middlewares = [];
-    private array $policies = [];
-    private string $prefix = '';
-    private string $currentName = '';
     private array $namedRoutes = [];
     private $fallback;
+    private string $prefix = '';
+    private array $groupMiddleware = [];
+    private array $middlewareAliases = [];
+
+    private function __construct()
+    {
+        $middlewarePath = BASE_PATH . '/config/middleware.php';
+        if (file_exists($middlewarePath)) {
+            $this->middlewareAliases = require $middlewarePath;
+        }
+    }
 
     public static function getInstance(): self
     {
@@ -24,182 +32,123 @@ class Router
         return self::$instance;
     }
 
-    public function middleware(array $middlewares): static
+    // Métodos para verbos HTTP
+    public function get(string $uri, $callback): RouteDefinition { return $this->addRoute('GET', $uri, $callback); }
+    public function post(string $uri, $callback): RouteDefinition { return $this->addRoute('POST', $uri, $callback); }
+    public function put(string $uri, $callback): RouteDefinition { return $this->addRoute('PUT', $uri, $callback); }
+    public function patch(string $uri, $callback): RouteDefinition { return $this->addRoute('PATCH', $uri, $callback); }
+    public function delete(string $uri, $callback): RouteDefinition { return $this->addRoute('DELETE', $uri, $callback); }
+
+    private function addRoute(string $method, string $uri, $callback): RouteDefinition
     {
-        $this->middlewares = $middlewares;
-        return $this;
+        $fullUri = rtrim($this->prefix . '/' . trim($uri, '/'), '/') ?: '/';
+        $routeDefinition = new RouteDefinition($method, $fullUri, $callback, $this->groupMiddleware);
+        $this->routes[] = $routeDefinition;
+        return $routeDefinition;
     }
 
-    public function policy(array $policies): static
+    public function group(array $options, callable $callback): void
     {
-        $this->policies = $policies;
-        return $this;
-    }
-
-    public function group(array $options = [], callable $callback): void
-    {
-        $originalMiddlewares = $this->middlewares;
         $originalPrefix = $this->prefix;
-        $originalPolicies = $this->policies;
+        $originalGroupMiddleware = $this->groupMiddleware;
 
-        if (isset($options['prefix'])) {
-            $this->prefix .= '/' . trim($options['prefix'], '/');
-        }
-
+        $this->prefix .= '/' . trim($options['prefix'] ?? '', '/');
         if (isset($options['middleware'])) {
-            $this->middlewares = array_merge($this->middlewares, (array) $options['middleware']);
-        }
-
-        if (isset($options['policy'])) {
-            $this->policies = array_merge($this->policies, (array) $options['policy']);
+            $this->groupMiddleware = array_merge($this->groupMiddleware, (array) $options['middleware']);
         }
 
         $callback($this);
 
-        $this->middlewares = $originalMiddlewares;
         $this->prefix = $originalPrefix;
-        $this->policies = $originalPolicies;
+        $this->groupMiddleware = $originalGroupMiddleware;
     }
 
-    public function get(string $uri, array|callable $callback): RouteDefinition
+    public function registerRouteName(string $name, RouteDefinition $route): void
     {
-        return new RouteDefinition($this, 'GET', $uri, $callback);
+        $this->namedRoutes[$name] = $route;
     }
 
-    public function post(string $uri, array|callable $callback): RouteDefinition
+    /**
+     * Gera uma URL completa para uma rota nomeada.
+     * Este é o método que estava faltando na versão original.
+     */
+    public function generateUrl(string $name, array $params = []): ?string
     {
-        return new RouteDefinition($this, 'POST', $uri, $callback);
-    }
-
-    public function name(string $name): static
-    {
-        $this->currentName = $name;
-        return $this;
-    }
-
-    public function addRoute(string $method, string $uri, array|callable $callback): static
-    {
-        $fullUri = rtrim($this->prefix . '/' . trim($uri, '/'), '/') ?: '/';
-
-        $route = [
-            'uri' => $fullUri,
-            'callback' => $callback,
-            'middlewares' => $this->middlewares,
-            'policies' => $this->policies,
-        ];
-
-        $this->routes[$method][] = $route;
-
-        if ($this->currentName) {
-            $this->namedRoutes[$this->currentName] = $fullUri;
-            $this->currentName = '';
+        if (!isset($this->namedRoutes[$name])) {
+            return null; // Rota nomeada não encontrada
         }
 
-        return $this;
+        /** @var RouteDefinition $route */
+        $route = $this->namedRoutes[$name];
+        $url = $route->getUri();
+
+        // Substitui os parâmetros na URL
+        foreach ($params as $key => $value) {
+            $url = preg_replace('/\{' . $key . '(\:[^\}]+)?\}/', (string) $value, $url);
+        }
+
+        // Retorna a URL completa usando a função helper base_url
+        return base_url($url);
+    }
+
+    private function resolveMiddleware(string $middleware): array
+    {
+        [$name, $params] = array_pad(explode(':', $middleware, 2), 2, null);
+        $className = $this->middlewareAliases[$name] ?? $name;
+        return [$className, $params ? explode(',', $params) : []];
     }
 
     public function dispatch(): void
     {
         $request = new Request();
-        $currentUri = rtrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/') ?: '/';
-        $method = $_SERVER['REQUEST_METHOD'];
+        $method = $request->input('_method', $request->getMethod());
+        $path = $request->getPath();
 
-        foreach ($this->routes[$method] ?? [] as $route) {
-            $pattern = preg_replace('#\{[\w]+\}#', '([\w-]+)', $route['uri']);
-            $pattern = "#^" . $pattern . "$#";
-
-            if (preg_match($pattern, $currentUri, $matches)) {
-                array_shift($matches);
-                $callback = $route['callback'];
-
-                // Executa Middlewares
-                foreach ($route['middlewares'] as $middleware) {
-                    if (class_exists($middleware)) {
-                        $instance = new $middleware();
-                        if (method_exists($instance, 'handle')) {
-                            $instance->handle($request, function($request) use ($callback) {
-                                if (is_array($callback)) {
-                                    $controller = new $callback[0]();
-                                    return $controller->{$callback[1]}($request);
-                                }
-                                return $callback($request);
-                            });
-                        }
-                    }
-                }
-
-                // Executa Policies
-                foreach ($route['policies'] as $policy) {
-                    if (class_exists($policy)) {
-                        $instance = new $policy();
-                        if (method_exists($instance, 'authorize')) {
-                            $instance->authorize();
-                        }
-                    }
-                }
-
-                if (is_array($callback)) {
-                    [$class, $method] = $callback;
-                    call_user_func_array([new $class, $method], $matches);
-                } else {
-                    call_user_func_array($callback, $matches);
-                }
+        foreach ($this->routes as $route) {
+            if ($route->matches($method, $path)) {
+                $this->processRoute($route, $request);
                 return;
             }
         }
 
-        // Fallback personalizado
+        http_response_code(404);
         if ($this->fallback) {
             call_user_func($this->fallback);
-            return;
+        } else {
+            echo "404 Not Found";
         }
-
-        http_response_code(404);
-        echo "404 - Página não encontrada";
     }
 
-    public function route(string $name): ?string
+    private function processRoute(RouteDefinition $route, Request $request): void
     {
-        return $this->namedRoutes[$name] ?? null;
+        $middlewares = array_map([$this, 'resolveMiddleware'], $route->getMiddlewares());
+        $pipeline = new Pipeline();
+
+        $response = $pipeline->send($request)
+            ->through($middlewares)
+            ->then(function ($request) use ($route) {
+                $params = $route->getParams();
+                $callback = $route->getCallback();
+
+                if (is_array($callback)) {
+                    [$controllerClass, $method] = $callback;
+                    $controller = new $controllerClass();
+                    $response = call_user_func_array([$controller, $method], $params);
+                } else {
+                    $response = call_user_func_array($callback, $params);
+                }
+
+                if (!$response instanceof Response) {
+                    return new Response((string) $response);
+                }
+                return $response;
+            });
+
+        $response->send();
     }
 
     public function setFallback(callable $callback): void
     {
         $this->fallback = $callback;
-    }
-
-    public function generateUrl(string $name, ?array $params = []): ?string
-    {
-
-        if (!isset($this->namedRoutes[$name])) {
-            return null;
-        }
-
-        $url = $this->namedRoutes[$name];
-
-        if (!empty($params)) {
-            foreach ($params as $key => $value) {
-                $placeholder = '{' . $key . '}';
-                if (str_contains($url, $placeholder)) {
-                    $url = str_replace($placeholder, $value, $url);
-                    unset($params[$key]);
-                }
-            }
-
-            if (!empty($params)) {
-                $url .= '?' . http_build_query($params);
-            }
-        }
-
-        return $url;
-    }
-    public function getFullUri(string $uri): string
-    {
-        return rtrim($this->prefix . '/' . trim($uri, '/'), '/') ?: '/';
-    }
-
-    public function registerRouteName(string $name, string $fullUri): void
-    {
-        $this->namedRoutes[$name] = $fullUri;
     }
 }
