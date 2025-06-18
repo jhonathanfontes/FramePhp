@@ -52,7 +52,7 @@ class Constants
         }
 
         if (!defined('BASE_VIEW')) {
-            define('BASE_VIEW', BASE_PATH . '/app/views');
+            define('BASE_VIEW', BASE_PATH . '/app/Views');
         }
     }
 }

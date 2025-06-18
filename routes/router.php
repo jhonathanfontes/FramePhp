@@ -47,7 +47,7 @@ $router->middleware([GuestMiddleware::class])
     ->group([], function ($router) {
 
         $router->group(['prefix' => 'auth'], function ($router) {
-            $router->get('/login', [AuthController::class, 'loginForm'])->name('login');
+            $router->get('/login', [AuthController::class, 'loginForm'])->name('AdminLogin');
             $router->post('/login', [AuthController::class, 'login']);
         });
 

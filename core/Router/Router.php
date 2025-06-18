@@ -117,7 +117,13 @@ class Router
                     if (class_exists($middleware)) {
                         $instance = new $middleware();
                         if (method_exists($instance, 'handle')) {
-                            $instance->handle($request);
+                            $instance->handle($request, function($request) use ($callback) {
+                                if (is_array($callback)) {
+                                    $controller = new $callback[0]();
+                                    return $controller->{$callback[1]}($request);
+                                }
+                                return $callback($request);
+                            });
                         }
                     }
                 }

@@ -10,6 +10,9 @@ require BASE_PATH . '/vendor/autoload.php';
 $dotenv = \Dotenv\Dotenv::createImmutable(BASE_PATH);
 $dotenv->load();
 
+// Inicializar apenas o necessário para migrações
+require_once BASE_PATH . '/core/Database/Database.php';
+
 // Carregar bootstrap
 require_once BASE_PATH . '/bootstrap/app.php';
 
@@ -40,4 +43,4 @@ foreach ($migrationFiles as $file) {
     }
 }
 
-echo "\nTodas as migrações foram executadas com sucesso!\n"; 
+echo "\nTodas as migrações foram executadas com sucesso!\n";
