@@ -33,7 +33,7 @@ class CadUsuarioModel extends Model
     public function findByEmail(string $email): ?array
     {
         try {
-            return $this->db->find($this->table, 'use_email = ?', [$email]);
+            return $this->db->find($this->table, '*', 'use_email = ?', [$email]);
         } catch (\Exception $e) {
             error_log("Erro ao buscar usuário por email: " . $e->getMessage());
             return null;
@@ -42,7 +42,7 @@ class CadUsuarioModel extends Model
 
     public function findById(int $id): ?array
     {
-        return $this->db->find($this->table, 'id_usuario = ?', [$id]);
+        return $this->db->find($this->table, '*', 'id_usuario = ?', [$id]);
     }
 
     public function create(array $data): int
@@ -82,7 +82,7 @@ class CadUsuarioModel extends Model
     public function findByUsername(string $username): ?array
     {
         try {
-            return $this->db->find($this->table, 'use_username = ?', [$username]);
+            return $this->db->find($this->table, '*', 'use_username = ?', [$username]);
         } catch (\Exception $e) {
             error_log("Erro ao buscar usuário por username: " . $e->getMessage());
             return null;
@@ -105,7 +105,7 @@ class CadUsuarioModel extends Model
 
     public function findPasswordReset(string $token): ?array
     {
-        return $this->db->find('password_resets', 'token = ?', [$token]);
+        return $this->db->find('password_resets', '*', 'token = ?', [$token]);
     }
 
     public function deletePasswordReset(string $email): int

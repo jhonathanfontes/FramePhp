@@ -2,6 +2,7 @@
 
 namespace App\Controllers\Admin;  
 
+use App\Models\User;
 use Core\Controller\BaseController;
 
 class AdminController extends BaseController
@@ -13,7 +14,12 @@ class AdminController extends BaseController
 
     public function users()
     {
-        return $this->render('admin/users/index');
+        $usuarios = new User();
+        $data = [
+            'usuarios' => $usuarios->findAll(),
+        ];
+
+         return $this->render('admin/users/index', $data);
     }
 
     public function settings()
