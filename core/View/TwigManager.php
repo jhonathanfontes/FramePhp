@@ -20,7 +20,7 @@ class TwigManager
         if (!is_dir($cacheDir)) {
             mkdir($cacheDir, 0777, true);
         }
-                     
+
         $loader = new FilesystemLoader(BASE_VIEW);
         $this->twig = new Environment($loader, [
             'cache' => $cacheDir,
@@ -40,11 +40,11 @@ class TwigManager
         $this->twig->addFunction(new TwigFunction('trans', 'trans'));
         $this->twig->addFunction(new TwigFunction('__', '__'));
         $this->twig->addFunction(new TwigFunction('get_locale', 'get_locale'));
-        
-        $this->twig->addFunction(new TwigFunction('csrf_token', function() {
+
+        $this->twig->addFunction(new TwigFunction('csrf_token', function () {
             return $_SESSION['csrf_token'] ?? '';
         }));
-        
+
         // Mantém as correções anteriores da UrlExtension e AuthExtension
         $router = Router::getInstance();
         $this->twig->addExtension(new UrlExtension($router));
@@ -62,52 +62,74 @@ class TwigManager
     public function render(string $template, array $data = []): string
     {
         try {
-            $viewsPath = BASE_VIEW . '/';
-            $templatePath = str_replace('/', DIRECTORY_SEPARATOR, $template);
-            
-            $pathParts = explode(DIRECTORY_SEPARATOR, $templatePath);
-            $templateName = end($pathParts);
-            
-            $htmlFile = $templatePath . '.html.twig';
-            $templateDir = $templatePath;
-            
-            if (is_dir($viewsPath . $templateDir)) {
-                if (file_exists($viewsPath . $templateDir . DIRECTORY_SEPARATOR . 'index.html.twig')) {
-                    $htmlFile = $templateDir . DIRECTORY_SEPARATOR . 'index.html.twig';
-                } elseif (file_exists($viewsPath . $templateDir . DIRECTORY_SEPARATOR . $templateName . '.html.twig')) {
-                    $htmlFile = $templateDir . DIRECTORY_SEPARATOR . $templateName . '.html.twig';
+            $viewsPath = BASE_VIEW . DIRECTORY_SEPARATOR;
+            // Garante que estamos usando os separadores de diretório corretos do sistema operacional.
+            $templatePath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $template);
+
+            // --- CORREÇÃO PRINCIPAL ---
+            // Pega o nome do diretório e o nome base do template de forma mais segura.
+            $templateDir = dirname($templatePath);
+            $templateBaseName = basename($templatePath);
+
+            // Define os possíveis nomes de arquivo a serem procurados.
+            // Ex: para 'pages/home', procura por 'pages/home.html.twig' e 'pages/home/index.html.twig'.
+            $possibleHtmlFiles = [
+                $templatePath . '.html.twig',
+                $templatePath . DIRECTORY_SEPARATOR . 'index.html.twig'
+            ];
+
+            $fileToRender = null;
+            foreach ($possibleHtmlFiles as $file) {
+                if (file_exists($viewsPath . $file)) {
+                    $fileToRender = $file;
+                    break;
                 }
-            }         
+            }
+
+            // Se nenhum arquivo de template for encontrado, lança uma exceção.
+            if ($fileToRender === null) {
+                throw new \Exception("Template \"{$template}\" não encontrado.");
+            }
+
+            // --- LÓGICA CORRIGIDA PARA CSS E JS ---
+            // Procura por um arquivo CSS com o mesmo nome ou um 'style.css' no mesmo diretório.
+            $possibleCssFiles = [
+                str_replace('.html.twig', '.css.twig', $fileToRender),
+                $templateDir . DIRECTORY_SEPARATOR . 'style.css.twig'
+            ];
 
             $cssFile = null;
-            if (file_exists($viewsPath . $templatePath . '.css.twig')) {
-                $cssFile = $templatePath . '.css.twig';
-            } elseif (is_dir($viewsPath . $templateDir)) {
-                if (file_exists($viewsPath . $templateDir . DIRECTORY_SEPARATOR . 'index.css.twig')) {
-                    $cssFile = $templateDir . DIRECTORY_SEPARATOR . 'index.css.twig';
-                } elseif (file_exists($viewsPath . $templateDir . DIRECTORY_SEPARATOR . $templateName . '.css.twig')) {
-                    $cssFile = $templateDir . DIRECTORY_SEPARATOR . $templateName . '.css.twig';
+            foreach ($possibleCssFiles as $file) {
+                if (file_exists($viewsPath . $file)) {
+                    $cssFile = $file;
+                    break;
                 }
             }
 
+            // Procura por um arquivo JS com o mesmo nome ou um 'script.js' no mesmo diretório.
+            $possibleJsFiles = [
+                str_replace('.html.twig', '.js.twig', $fileToRender),
+                $templateDir . DIRECTORY_SEPARATOR . 'script.js.twig'
+            ];
+
             $jsFile = null;
-            if (file_exists($viewsPath . $templatePath . '.js.twig')) {
-                $jsFile = $templatePath . '.js.twig';
-            } elseif (is_dir($viewsPath . $templateDir)) {
-                if (file_exists($viewsPath . $templateDir . DIRECTORY_SEPARATOR . 'index.js.twig')) {
-                    $jsFile = $templateDir . DIRECTORY_SEPARATOR . 'index.js.twig';
-                } elseif (file_exists($viewsPath . $templateDir . DIRECTORY_SEPARATOR . $templateName . '.js.twig')) {
-                    $jsFile = $templateDir . DIRECTORY_SEPARATOR . $templateName . '.js.twig';
+            foreach ($possibleJsFiles as $file) {
+                if (file_exists($viewsPath . $file)) {
+                    $jsFile = $file;
+                    break;
                 }
             }
-            
+
+            // Adiciona os caminhos encontrados (ou null) aos dados da view.
             $data['page_css'] = $cssFile;
             $data['page_js'] = $jsFile;
-            
-            $fileToRender = file_exists($viewsPath . $htmlFile) ? $htmlFile : $template . '.twig';
+
+            // Renderiza o template encontrado.
             return $this->twig->render($fileToRender, $data);
+
         } catch (\Exception $e) {
-              throw $e;
+            // Lança a exceção para que o ErrorHandler possa capturá-la.
+            throw $e;
         }
     }
 

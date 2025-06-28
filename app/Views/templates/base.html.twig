@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>
+			{% block title %}Minha Aplicação Twig
+			{% endblock %}
+		</title>
+		<link rel="stylesheet" href="/css/style.css"> {% block stylesheets %}{% endblock %}
+		</head>
+		<body>
+			<div id="wrapper">
+				{% block header %}
+					{% include 'includes/header.html.twig' %}
+				{% endblock %}
+
+				<main id="content"> {% block content %}{% endblock %}
+					</main>
+
+					{% block footer %}
+						{% include 'includes/footer.html.twig' %}
+					{% endblock %}
+				</div>
+
+				<script src="/js/main.js"></script>
+				{% block javascripts %}{% endblock %}
+			</body>
+		</html>

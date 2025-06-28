@@ -9,7 +9,7 @@ class CadUsuarioModel extends Model
 {
     protected $table = 'cad_usuario';
     protected $primaryKey = 'id_usuario';
-    
+
     protected $fillable = [
         'use_nome',
         'use_apelido',
@@ -45,15 +45,21 @@ class CadUsuarioModel extends Model
         return $this->db->find($this->table, 'id_usuario = ?', [$id]);
     }
 
+
+    public function findAllUsers(): array
+    {
+        return $this->db->findAll($this->table, 'deleted_at IS NULL', [], '*', 'use_nome ASC');
+    }
+
     public function create(array $data): int
     {
         if (isset($data['use_password'])) {
             $data['use_password'] = password_hash($data['use_password'], PASSWORD_DEFAULT);
         }
-        
+
         $data['created_at'] = date('Y-m-d H:i:s');
         $data['created_user_id'] = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
-          
+
         return $this->db->insert($this->table, $data);
     }
 
@@ -62,10 +68,10 @@ class CadUsuarioModel extends Model
         if (isset($data['use_password'])) {
             $data['use_password'] = password_hash($data['use_password'], PASSWORD_DEFAULT);
         }
-        
+
         $data['updated_at'] = date('Y-m-d H:i:s');
         $data['updated_user_id'] = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
-        
+
         return $this->db->update($this->table, $data, 'id_usuario = ?', [$id]);
     }
 
@@ -75,7 +81,7 @@ class CadUsuarioModel extends Model
             'deleted_at' => date('Y-m-d H:i:s'),
             'deleted_user_id' => isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null
         ];
-        
+
         return $this->db->update($this->table, $data, 'id_usuario = ?', [$id]);
     }
 
@@ -88,18 +94,18 @@ class CadUsuarioModel extends Model
             return null;
         }
     }
-    
+
     public function createPasswordReset(string $email, string $token): bool
     {
         // Primeiro, remove qualquer token existente para este e-mail
         $this->db->delete('password_resets', 'email = ?', [$email]);
-        
+
         // Insere o novo token
         $this->db->insert('password_resets', [
             'email' => $email,
             'token' => $token
         ]);
-        
+
         return true;
     }
 

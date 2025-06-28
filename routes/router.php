@@ -30,6 +30,10 @@ $router->group(['prefix' => 'auth', 'middleware' => ['guest', 'csrf']], function
     $router->post('/login', [AuthController::class, 'login']);
     $router->get('/register', [AuthController::class, 'registerForm'])->name('register');
     $router->post('/register', [AuthController::class, 'register']);
+    $router->get('/forgot-password', [AuthController::class, 'forgotPasswordForm'])->name('forgot-password');
+    $router->post('/forgot-password', [AuthController::class, 'forgotPassword']);
+    $router->get('/reset-password/{token}', [AuthController::class, 'resetPasswordForm'])->name('esqueci-senha');
+    $router->post('/reset-password', [AuthController::class, 'resetPassword']);
 });
 
 /*

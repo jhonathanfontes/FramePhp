@@ -1,0 +1,4 @@
+{% set button_class = button_class is defined ? button_class : 'btn-primary' %}
+<a href="{{ url }}" class="btn {{ button_class }}">
+	{{ text }}
+</a>

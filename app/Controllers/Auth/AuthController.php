@@ -25,7 +25,7 @@ class AuthController extends BaseController
 
     public function loginForm()
     {
-        return $this->render('auth/login');
+        return $this->render('pages/auth/login');
     }
 
     /**
@@ -40,7 +40,7 @@ class AuthController extends BaseController
         ]);
 
         if ($validator->fails()) {
-            return $this->render('auth/login', [
+            return $this->render('pages/auth/login', [
                 'errors' => $validator->getErrors(),
                 'old' => $data
             ]);
@@ -72,15 +72,67 @@ class AuthController extends BaseController
             return Response::redirectResponse(base_url('admin/dashboard'));
         }
 
-        return $this->render('auth/login', [
+        return $this->render('pages/auth/login', [
             'error' => 'Credenciais inválidas.',
             'old' => $data
         ]);
     }
 
+      public function forgotPasswordForm()
+    {
+        echo $this->render('pages/auth/forgot-password', [
+            'title' => 'Recuperar Senha'
+        ]);
+    }
+
+    public function forgotPassword()
+    {
+        $email = $_POST['email'] ?? '';
+
+        if (empty($email)) {
+            echo $this->render('pages/auth/forgot-password', [
+                'title' => 'Recuperar Senha',
+                'error' => 'O e-mail é obrigatório'
+            ]);
+            return;
+        }
+
+        // Verificar se o e-mail existe
+        $user = $this->userModel->findByEmail($email);
+        if (!$user) {
+            echo $this->render('pages/auth/forgot-password', [
+                'title' => 'Recuperar Senha',
+                'error' => 'Não encontramos um usuário com este e-mail'
+            ]);
+            return;
+        }
+
+        try {
+            // Gerar token de recuperação
+            $token = bin2hex(random_bytes(32));
+            $this->userModel->createPasswordReset($email, $token);
+
+            // Enviar e-mail de recuperação
+            // $emailService = new EmailService(TwigManager::getInstance());
+            // $emailService->sendPasswordResetEmail($email, $user['name'], $token);
+
+            echo $this->render('pages/auth/forgot-password', [
+                'title' => 'Recuperar Senha',
+                'success' => 'Enviamos um e-mail com instruções para recuperar sua senha.'
+            ]);
+        } catch (\Exception $e) {
+            error_log("Erro no processo de recuperação de senha: " . $e->getMessage());
+            echo $this->render('pages/auth/forgot-password', [
+                'title' => 'Recuperar Senha',
+                'error' => 'Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente.'
+            ]);
+        }
+    }
+
+
     public function registerForm()
     {
-        return $this->render('auth/register');
+        return $this->render('pages/auth/register');
     }
 
     /**
@@ -96,7 +148,7 @@ class AuthController extends BaseController
         ]);
 
         if ($validator->fails()) {
-            return $this->render('auth/register', [
+            return $this->render('pages/auth/register', [
                 'errors' => $validator->getErrors(),
                 'old' => $data
             ]);
@@ -133,6 +185,6 @@ class AuthController extends BaseController
     public function logout()
     {
         Session::destroy();
-        return Response::redirectResponse(base_url('auth/login'));
+        return Response::redirectResponse(base_url('pages/auth/login'));
     }
 }
