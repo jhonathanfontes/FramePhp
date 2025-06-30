@@ -54,5 +54,9 @@ class Constants
         if (!defined('BASE_VIEW')) {
             define('BASE_VIEW', BASE_PATH . '/app/Views');
         }
+
+         if (!defined('CURRENT_PATH')) {
+            define('CURRENT_PATH', parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
+        }
     }
 }

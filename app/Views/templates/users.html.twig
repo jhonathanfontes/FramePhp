@@ -1,0 +1,147 @@
+{% extends 'templates/base.html.twig' %}
+
+{% block title %}Usuários - Painel Administrativo{% endblock %}
+
+{% block content %}
+    <h1 class="title">Usuários</h1>
+    <p class="subtitle">Gerencie os usuários do seu sistema.</p>
+
+    <div class="field is-grouped is-grouped-right mb-4">
+        <p class="control">
+            <button id="btn-new-user" class="button is-primary">
+                <span class="icon is-small"><i class="fas fa-plus"></i></span>
+                <span>Novo Usuário</span>
+            </button>
+        </p>
+    </div>
+
+    <div class="box">
+        <h2 class="title is-5">Lista de Usuários</h2>
+        <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth responsive-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th>Tipo</th>
+                    <th>Status</th>
+                    <th class="has-text-centered">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if usuarios is not empty %}
+                    {% for user in usuarios %}
+                        <tr>
+                            <td data-label="ID">{{ user.id }}</td>
+                            <td data-label="Nome">{{ user.name }}</td>
+                            <td data-label="Email">{{ user.email }}</td>
+                            <td data-label="Tipo">
+                                <span class="tag {% if user.role == 'admin' %}is-danger{% elseif user.role == 'editor' %}is-warning{% else %}is-info{% endif %}">
+                                    {{ user.role | capitalize }} {# Usando o filtro role_label aqui #}
+                                </span>
+                            </td>
+                            <td data-label="Status">
+                                {% if user.status == 'active' %}
+                                    <span class="tag is-success">Ativo</span>
+                                {% else %}
+                                    <span class="tag is-light">Inativo</span>
+                                {% endif %}
+                            </td>
+                            <td data-label="Ações" class="has-text-centered">
+                                <div class="buttons is-centered">
+                                    <a href="/admin/users/{{ user.id }}/edit" class="button is-small is-info is-light" title="Editar">
+                                        <span class="icon is-small"><i class="fas fa-edit"></i></span>
+                                    </a>
+                                    <form action="/admin/users/{{ user.id }}/delete" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este usuário?');">
+                                        <input type="hidden" name="_method" value="DELETE">
+                                        <button type="submit" class="button is-small is-danger is-light" title="Excluir">
+                                            <span class="icon is-small"><i class="fas fa-trash-alt"></i></span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="has-text-centered">Nenhum usuário encontrado.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    {# INÍCIO DO CÓDIGO DO MODAL PARA NOVO USUÁRIO #}
+    <div id="new-user-modal" class="modal">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">Novo Usuário</p>
+                <button class="delete" aria-label="close"></button>
+            </header>
+            <section class="modal-card-body">
+                <form id="new-user-form" action="/admin/users" method="POST">
+                    <div class="field">
+                        <label class="label" for="user-name">Nome</label>
+                        <div class="control">
+                            <input class="input" type="text" id="user-name" name="name" placeholder="Nome completo" required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label" for="user-email">Email</label>
+                        <div class="control">
+                            <input class="input" type="email" id="user-email" name="email" placeholder="email@exemplo.com" required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label" for="user-password">Senha</label>
+                        <div class="control">
+                            <input class="input" type="password" id="user-password" name="password" placeholder="Mínimo 6 caracteres" required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label" for="user-role">Tipo de Usuário (Role)</label>
+                        <div class="control">
+                            <div class="select is-fullwidth">
+                                <select id="user-role" name="role" required>
+                                    <option value="">Selecione o Tipo</option>
+                                    <option value="viewer">Visualizador</option>
+                                    <option value="editor">Editor</option>
+                                    <option value="admin">Administrador</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Status</label>
+                        <div class="control">
+                            <label class="radio">
+                                <input type="radio" name="status" value="active" checked>
+                                Ativo
+                            </label>
+                            <label class="radio">
+                                <input type="radio" name="status" value="inactive">
+                                Inativo
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </section>
+            <footer class="modal-card-foot is-justify-content-flex-end">
+                <button class="button is-success" type="submit" form="new-user-form">Salvar Usuário</button>
+                <button class="button close-modal">Cancelar</button>
+            </footer>
+        </div>
+    </div>
+    {# FIM DO CÓDIGO DO MODAL #}
+{% endblock %}
+
+{# O bloco javascripts não é mais necessário aqui se a lógica do modal estiver em base.html.twig #}
+{# Mas é boa prática manter para scripts específicos desta página, se surgirem no futuro. #}
+{% block javascripts %}
+    {{ parent() }} {# Garante que os scripts do base.html.twig sejam incluídos #}
+{% endblock %}

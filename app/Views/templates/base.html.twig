@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Painel Administrativo{% endblock %}</title>
+    {# CDN do Bulma CSS (DEVE VIR PRIMEIRO) #}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
+    {# CDN do Font Awesome para os ícones #}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    {# Seus arquivos CSS personalizados (DEPOIS DOS CDNs, NESSA ORDEM) #}
+    <link rel="stylesheet" href="/css/style.css">      {# Estilos globais e de layout #}
+    <link rel="stylesheet" href="/css/sidebar.css">    {# Estilos da sidebar #}
+    <link rel="stylesheet" href="/css/table.css">      {# Estilos de tabela #} {# Certifique-se que este arquivo exista #}
+
+    {% block stylesheets %}{% endblock %} {# Para estilos específicos da página #}
+</head>
+<body>
+    <div class="wrapper">
+        {# Inclui a sidebar #}
+        {% include 'templates/components/sidebar.html.twig' %}
+
+        <div class="main-content">
+            {# Barra de navegação superior #}
+            <nav class="navbar is-light" role="navigation" aria-label="main navigation">
+                <div class="navbar-brand">
+                    {# Botão para recolher/expandir a sidebar (VISÍVEL APENAS EM DESKTOP) #}
+                    {# is-hidden-touch: classe do Bulma para esconder em mobile #}
+                    <a role="button" class="navbar-item is-hidden-touch" id="sidebar-toggle-button">
+                        <span class="icon">
+                            <i class="fas fa-bars"></i> {# Ícone de hambúrguer para o toggle #}
+                        </span>
+                    </a>
+                    <a class="navbar-item" href="{{url('admin.dashboard')}}">
+                        <h1 class="title is-4 mb-0">{{ app_name() | default('Admin App') }}</h1>
+                    </a>
+                    {# Burger menu para mobile (VISÍVEL APENAS EM MOBILE) #}
+                    {# ESTE BOTÃO VAI ABRIR O MENU LATERAL (SIDEBAR) EM MOBILE #}
+                    {# Removemos o data-target para o menu navbar, pois o JS customizado vai controlar a sidebar #}
+                    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+                        <span aria-hidden="true"></span>
+                        <span aria-hidden="true"></span>
+                        <span aria-hidden="true"></span>
+                    </a>
+                </div>
+                {# O menu superior do Bulma (Dashboard, Produtos, Pedidos, etc.) #}
+                {# Em desktop, ele estará visível. Em mobile, ele ficará escondido. #}
+                <div id="navbarBasicExample" class="navbar-menu"> {# Mantemos o ID para o JS do Bulma, se necessário, mas o principal é a classe #}
+                    <div class="navbar-start">
+                        {# Você pode adicionar os links do menu superior aqui se quiser que eles apareçam na navbar #}
+                        {# Pela imagem anterior, parecia que os links eram apenas da sidebar. #}
+                        {# Se quiser links na navbar superior também (além da sidebar), adicione-os aqui: #}
+                        {# <a href="/admin/dashboard" class="navbar-item">Dashboard</a> #}
+                        {# <a href="/admin/users" class="navbar-item">Usuários</a> #}
+                        {# ... #}
+                    </div>
+                    <div class="navbar-end">
+                        <div class="navbar-item has-dropdown is-hoverable">
+                            <a class="navbar-link">
+                               {{ session.user.name ?? 'Usuário' }}
+                            </a>
+                            <div class="navbar-dropdown">
+                                <a class="navbar-item">
+                                    Perfil
+                                </a>
+                                <hr class="navbar-divider">
+                                <a class="navbar-item" href="{{ url('logout') }}">
+                                    Sair
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            {# Seção principal de conteúdo #}
+            <section class="section">
+                <div class="container is-fluid">
+                    {% block content %}{# Conteúdo específico de cada página #}{% endblock %}
+                </div>
+            </section>
+        </div>
+    </div>
+
+    {# Bloco para scripts JavaScript #}
+    {% block javascripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebar = document.querySelector('.sidebar');
+            const mainContent = document.querySelector('.main-content');
+
+            // --- LÓGICA PARA O BURGER MENU (AGORA CONTROLA A SIDEBAR EM MOBILE) ---
+            const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+            if ($navbarBurgers.length > 0) {
+                $navbarBurgers.forEach(el => {
+                    el.addEventListener('click', () => {
+                        el.classList.toggle('is-active'); // Ativa/desativa o ícone do burger
+
+                        // Em mobile, este burger agora abre/fecha a sidebar
+                        if (window.innerWidth <= 768) { // Apenas em mobile
+                            sidebar.classList.toggle('is-active-mobile');
+                        }
+                        // Se você tiver um menu navbar que também recolhe, precisaria de lógica aqui
+                        // const targetNavbarMenu = document.getElementById('navbarBasicExample');
+                        // if (targetNavbarMenu) {
+                        //     targetNavbarMenu.classList.toggle('is-active');
+                        // }
+                    });
+                });
+            }
+
+            // --- LÓGICA PARA O TOGGLE COLLAPSED DA SIDEBAR (APENAS EM DESKTOP) ---
+            const sidebarToggleButton = document.getElementById('sidebar-toggle-button');
+            if (sidebarToggleButton) {
+                // Ao carregar a página, verifica o estado salvo no localStorage
+                const isSidebarCollapsed = localStorage.getItem('sidebarCollapsed');
+                if (isSidebarCollapsed === 'true') {
+                    sidebar.classList.add('is-collapsed');
+                    mainContent.classList.add('is-sidebar-collapsed');
+                }
+
+                // Adiciona o event listener para o clique no botão
+                sidebarToggleButton.addEventListener('click', () => {
+                    // APENAS EM DESKTOP (largura > 768px)
+                    if (window.innerWidth > 768) {
+                        sidebar.classList.toggle('is-collapsed');
+                        mainContent.classList.toggle('is-sidebar-collapsed');
+
+                        // Salva o estado atual no localStorage
+                        const isCurrentlyCollapsed = sidebar.classList.contains('is-collapsed');
+                        if (isCurrentlyCollapsed) {
+                            localStorage.setItem('sidebarCollapsed', 'true');
+                        } else {
+                            localStorage.removeItem('sidebarCollapsed');
+                        }
+                    }
+                });
+            }
+
+            // --- Lógica para o Dropdown "Usuário Logado" na Navbar (Bulma) ---
+            const dropdown = document.querySelector('.navbar-item.has-dropdown');
+            if (dropdown) {
+                dropdown.addEventListener('click', (event) => {
+                    event.stopPropagation(); // Impede que o clique se propague e feche o dropdown
+                    dropdown.classList.toggle('is-active');
+                });
+                // Fechar o dropdown ao clicar fora
+                document.addEventListener('click', (event) => {
+                    if (!dropdown.contains(event.target)) {
+                        dropdown.classList.remove('is-active');
+                    }
+                });
+            }
+
+            // --- LÓGICA DO MODAL (para Novo Usuário - se estiver em users.html.twig, pode ser movida) ---
+            // Mantida aqui para o exemplo, mas idealmente estaria em um arquivo JS separado ou específico da página.
+            const newUserModal = document.getElementById('new-user-modal');
+            const btnNewUser = document.getElementById('btn-new-user');
+            if (newUserModal && btnNewUser) {
+                const closeButtons = newUserModal.querySelectorAll('.delete, .modal-background, .close-modal');
+
+                btnNewUser.addEventListener('click', () => {
+                    newUserModal.classList.add('is-active');
+                });
+
+                closeButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        newUserModal.classList.remove('is-active');
+                        const newUserForm = document.getElementById('new-user-form');
+                        if (newUserForm) {
+                            newUserForm.reset();
+                        }
+                    });
+                });
+
+                const newUserForm = document.getElementById('new-user-form');
+                if (newUserForm) {
+                    newUserForm.addEventListener('submit', (event) => {
+                        event.preventDefault();
+                        const formData = new FormData(newUserForm);
+                        const userData = Object.fromEntries(formData.entries());
+                        console.log('Dados do novo usuário (simulado):', userData);
+                        newUserModal.classList.remove('is-active');
+                        newUserForm.reset();
+                        alert('Usuário adicionado (simulado)! Implemente a lógica de backend.');
+                    });
+                }
+            }
+        });
+    </script>
+    {% endblock %}
+</body>
+</html>

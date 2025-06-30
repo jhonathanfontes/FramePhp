@@ -37,7 +37,7 @@ class User
 
     public function findAll(): array
     {
-        return $this->db->findAll($this->table, 'id, name, email, created_at');
+        return $this->db->findAll($this->table, 'id, name, email, role, created_at');
     }
 
 

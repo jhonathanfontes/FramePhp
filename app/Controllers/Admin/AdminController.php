@@ -9,7 +9,7 @@ class AdminController extends BaseController
 {
     public function dashboard()
     {
-        return $this->render('admin/dashboard');
+        return $this->render('templates/dashboard');
     }
 
     public function users()
@@ -19,7 +19,7 @@ class AdminController extends BaseController
             'usuarios' => $usuarios->findAll(),
         ];
 
-         return $this->render('admin/users/index', $data);
+         return $this->render('templates/users', $data);
     }
 
     public function settings()

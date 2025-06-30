@@ -40,6 +40,8 @@ class TwigManager
         $this->twig->addFunction(new TwigFunction('trans', 'trans'));
         $this->twig->addFunction(new TwigFunction('__', '__'));
         $this->twig->addFunction(new TwigFunction('get_locale', 'get_locale'));
+        $this->twig->addFunction(new TwigFunction('current_path', 'get_current_path'));
+
         
         $this->twig->addFunction(new TwigFunction('csrf_token', function() {
             return $_SESSION['csrf_token'] ?? '';

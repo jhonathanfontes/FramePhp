@@ -1,0 +1,31 @@
+<aside class="sidebar">
+    <div class="sidebar-header has-text-centered">
+        <h4 class="title is-5 has-text-white sidebar-title"> {{ app_name() | default('Admin App') }}</h4>
+    </div>
+    <nav class="sidebar-menu">
+        <a href="{{ url('admin.dashboard') }}" class="menu-item {% if current_path == '/admin/dashboard' %}is-active{% endif %}">
+            <span class="icon is-small"><i class="fas fa-tachometer-alt"></i></span>
+            <span class="menu-item-text">Dashboard</span> {# Adicionado classe para o texto #}
+        </a>
+        <a href="{{ url('admin.users') }}" class="menu-item {% if current_path == '/admin/users' %}is-active{% endif %}">
+            <span class="icon is-small"><i class="fas fa-users"></i></span>
+            <span class="menu-item-text">Usuários</span> {# Adicionado classe para o texto #}
+        </a>
+        <a href="/admin/products" class="menu-item {% if current_path == '/admin/products' %}is-active{% endif %}">
+            <span class="icon is-small"><i class="fas fa-box"></i></span>
+            <span class="menu-item-text">Produtos</span> {# Adicionado classe para o texto #}
+        </a>
+        <a href="/admin/orders" class="menu-item {% if current_path == '/admin/orders' %}is-active{% endif %}">
+            <span class="icon is-small"><i class="fas fa-shopping-cart"></i></span>
+            <span class="menu-item-text">Pedidos</span> {# Adicionado classe para o texto #}
+        </a>
+        <a href="/admin/reports" class="menu-item {% if current_path == '/admin/reports' %}is-active{% endif %}">
+            <span class="icon is-small"><i class="fas fa-chart-bar"></i></span>
+            <span class="menu-item-text">Relatórios</span> {# Adicionado classe para o texto #}
+        </a>
+        <a href="/admin/settings" class="menu-item {% if current_path == '/admin/settings' %}is-active{% endif %}">
+            <span class="icon is-small"><i class="fas fa-cog"></i></span>
+            <span class="menu-item-text">Configurações</span> {# Adicionado classe para o texto #}
+        </a>
+    </nav>
+</aside>

@@ -1,0 +1,51 @@
+{% extends 'templates/base.html.twig' %}
+
+{% block title %}Dashboard - Painel Administrativo{% endblock %}
+
+{% block content %}
+    <h1 class="title">Dashboard</h1>
+    <p class="subtitle">Bem-vindo ao painel administrativo!</p>
+
+    <div class="columns is-multiline">
+        <div class="column is-one-third">
+            <div class="card">
+                <div class="card-content">
+                    <p class="title is-4">
+                        <i class="fas fa-users mr-2"></i>500
+                    </p>
+                    <p class="subtitle is-6">Total de Usuários</p>
+                </div>
+            </div>
+        </div>
+        <div class="column is-one-third">
+            <div class="card">
+                <div class="card-content">
+                    <p class="title is-4">
+                        <i class="fas fa-box mr-2"></i>1200
+                    </p>
+                    <p class="subtitle is-6">Total de Produtos</p>
+                </div>
+            </div>
+        </div>
+        <div class="column is-one-third">
+            <div class="card">
+                <div class="card-content">
+                    <p class="title is-4">
+                        <i class="fas fa-shopping-cart mr-2"></i>345
+                    </p>
+                    <p class="subtitle is-6">Novos Pedidos</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="box">
+        <h2 class="title is-5">Gráfico de Vendas (Exemplo)</h2>
+        <p>Aqui você pode integrar um gráfico de vendas ou outras métricas importantes.</p>
+        <div class="has-text-centered p-4">
+            <img src="https://via.placeholder.com/600x200?text=Gráfico+de+Exemplo" alt="Gráfico de Exemplo">
+        </div>
+    </div>
+{% endblock %}

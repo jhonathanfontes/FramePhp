@@ -1,0 +1,164 @@
+/*
+ * Arquivo: public/css/sidebar.css
+ * Descrição: Estilos para a Sidebar (Menu Lateral) e sua funcionalidade de colapso.
+ */
+
+/* --- 1. Estilos Base da Sidebar --- */
+.sidebar {
+    width: 250px; /* Largura padrão da sidebar em desktop */
+    background-color: #2b3e50;
+    color: white;
+    padding: 20px 0;
+    flex-shrink: 0; /* Impede que a sidebar encolha naturalmente em desktop */
+    transition: width 0.3s ease, transform 0.3s ease; /* Transições suaves para largura e movimento */
+    overflow-y: auto; /* Adiciona barra de rolagem se o conteúdo do menu for muito longo */
+    position: relative; /* Padrão, mas mudará em mobile */
+    z-index: 999; /* Garante que a sidebar fique acima de outros elementos */
+    /* Em desktop, a sidebar está no fluxo normal, não fixada */
+}
+
+.sidebar-header {
+    margin-bottom: 30px;
+    padding: 0 20px;
+    text-align: center;
+}
+
+.sidebar-header h4.sidebar-title {
+    color: white;
+    margin-bottom: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: opacity 0.3s ease; /* Transição para o texto do título */
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-menu .menu-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: #b0bec5;
+    text-decoration: none;
+    transition: background-color 0.2s, color 0.2s;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.sidebar-menu .menu-item:hover {
+    background-color: #3e5064;
+    color: white;
+}
+
+.sidebar-menu .menu-item.is-active {
+    background-color: #00d1b2;
+    color: white;
+    font-weight: bold;
+}
+
+.sidebar-menu .menu-item .icon {
+    margin-right: 10px;
+    color: inherit;
+    transition: margin-right 0.3s ease;
+}
+
+.sidebar-menu .menu-item .menu-item-text {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+
+/* --- 2. Sidebar Collapsed (Estado Recolhido - Desktop) --- */
+@media screen and (min-width: 769px) {
+    .sidebar.is-collapsed {
+        width: 80px; /* Largura menor quando recolhida */
+    }
+
+    .sidebar.is-collapsed .sidebar-header h4.sidebar-title {
+        opacity: 0;
+        width: 0;
+        padding: 0;
+        margin: 0;
+    }
+
+    .sidebar.is-collapsed .sidebar-menu .menu-item {
+        padding: 12px;
+        justify-content: center;
+    }
+
+    .sidebar.is-collapsed .sidebar-menu .menu-item .icon {
+        margin-right: 0;
+    }
+
+    .sidebar.is-collapsed .sidebar-menu .menu-item .menu-item-text {
+        opacity: 0;
+        width: 0;
+        overflow: hidden;
+    }
+
+    /* Ajuste do Main Content quando a Sidebar está recolhida */
+    .main-content {
+        margin-left: 0; /* Por padrão em desktop, sem margem inicial */
+        transition: margin-left 0.3s ease; /* Para transição suave ao expandir/recolher */
+    }
+
+    .main-content.is-sidebar-collapsed {
+        margin-left: 0px; /* Margem para abrir espaço para a sidebar recolhida */
+    }
+}
+
+
+/* --- 3. Sidebar Responsividade (Mobile) --- */
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed; /* Fixa a sidebar na tela em mobile */
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 250px; /* Largura total em mobile */
+        transform: translateX(-250px); /* Esconde por padrão em mobile */
+        transition: transform 0.3s ease-out; /* Transição de deslize */
+        box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+    }
+
+    /* Classe JS para mostrar a sidebar em mobile */
+    .sidebar.is-active-mobile {
+        transform: translateX(0); /* Mostra a sidebar */
+    }
+
+    /* Em mobile, a funcionalidade de 'collapsed' é desativada, ela sempre desliza por completo */
+    .sidebar.is-collapsed {
+        width: 250px; /* Reseta a largura para mobile */
+        transform: translateX(-250px); /* Garante que esteja escondida */
+    }
+    .sidebar.is-collapsed.is-active-mobile { /* Se estiver "colapsada", mas for ativada em mobile */
+         transform: translateX(0);
+    }
+
+    /* Garante que o texto apareça quando a sidebar está aberta em mobile (mesmo que estivesse "collapsed") */
+    .sidebar.is-collapsed .sidebar-header h4.sidebar-title,
+    .sidebar.is-collapsed .sidebar-menu .menu-item .menu-item-text {
+        opacity: 1;
+        width: auto;
+        overflow: visible;
+    }
+
+    .sidebar.is-collapsed .sidebar-menu .menu-item {
+        justify-content: flex-start; /* Alinha os itens normalmente em mobile */
+        padding: 12px 20px;
+    }
+
+    .sidebar.is-collapsed .sidebar-menu .menu-item .icon {
+        margin-right: 10px;
+    }
+
+    /* Remove a margem do main-content em mobile (não queremos que ele se mova) */
+    .main-content {
+        margin-left: 0;
+        transition: margin-left 0.3s ease; /* A transição é importante, mas o valor em si será 0 */
+    }
+}
