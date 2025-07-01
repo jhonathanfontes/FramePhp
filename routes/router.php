@@ -76,6 +76,10 @@ $router->group([
 ], function ($router) {
     $router->get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     $router->get('/users', [AdminController::class, 'users'])->name('admin.users');
+    $router->get('/settings', [AdminController::class, 'settings'])->name('admin.settings');
+    $router->get('/orders', [AdminController::class, 'orders'])->name('admin.orders');
+    $router->get('/reports', [AdminController::class, 'reports'])->name('admin.reports');
+    $router->get('/products', [AdminController::class, 'products'])->name('admin.products');
 });
 
 

@@ -1,0 +1,92 @@
+{# templates/orders.html.twig #}
+{% extends 'tamplates/base.html.twig' %}
+
+{% block title %}Pedidos - Painel Administrativo{% endblock %}
+
+{% block content %}
+    <h1 class="title">Pedidos</h1>
+    <p class="subtitle">Gerencie os pedidos realizados em seu sistema.</p>
+
+    <div class="field is-grouped is-grouped-right mb-4">
+        <p class="control">
+            <button class="button is-primary">
+                <span class="icon is-small"><i class="fas fa-plus"></i></span>
+                <span>Novo Pedido</span>
+            </button>
+        </p>
+    </div>
+
+    {# INCLUSÃO DO COMPONENTE DE TABELA DATATABLES PARA PEDIDOS #}
+    {% include 'templates/components/_data_table.html.twig' with {
+        id: 'ordersDataTable', {# ID único para esta tabela #}
+        headers: [
+            {data: 'id', title: 'ID do Pedido'},
+            {data: 'customer_name', title: 'Cliente'},
+            {data: 'total_amount', title: 'Total', className: 'has-text-right'},
+            {data: 'status', title: 'Status'},
+            {data: 'order_date', title: 'Data do Pedido'},
+            {data: 'actions', title: 'Ações'}
+        ],
+        rows: pedidos, {# Passa os dados dos pedidos #}
+        class: 'responsive-table',
+        data_table_options: {
+            pageLength: 10,
+            order: [[0, 'desc']], {# Ordena por ID do Pedido decrescente por padrão #}
+            searching: true,
+            ordering: true,
+            responsive: true,
+            columnDefs: [ {# Definições de coluna específicas para renderização #}
+                {
+                    targets: 2, // Coluna 'Total' (índice 2)
+                    render: function(data, type, row) {
+                        return 'R$ ' + parseFloat(data).toFixed(2).replace('.', ','); // Formata para moeda
+                    }
+                },
+                {
+                    targets: 3, // Coluna 'Status' (índice 3)
+                    render: function(data, type, row) {
+                        const statusClassMap = {
+                            'pending': 'is-warning',
+                            'processing': 'is-info',
+                            'completed': 'is-success',
+                            'cancelled': 'is-danger'
+                        };
+                        const statusLabelMap = {
+                            'pending': 'Pendente',
+                            'processing': 'Em Processamento',
+                            'completed': 'Concluído',
+                            'cancelled': 'Cancelado'
+                        };
+                        const tagClass = statusClassMap[data] || 'is-light';
+                        return `<span class="tag ${tagClass}">${statusLabelMap[data] || data}</span>`;
+                    }
+                },
+                {
+                    targets: 5, // Coluna 'Ações' (índice 5)
+                    orderable: false,
+                    searchable: false,
+                    className: 'has-text-centered',
+                    render: function(data, type, row) {
+                        const orderId = row.id || '';
+                        return `
+                            <div class="buttons is-centered is-small">
+                                <a href="/admin/orders/${orderId}/view" class="button is-small is-info is-light" title="Ver Detalhes">
+                                    <span class="icon is-small"><i class="fas fa-eye"></i></span>
+                                </a>
+                                <a href="/admin/orders/${orderId}/edit" class="button is-small is-primary is-light" title="Editar">
+                                    <span class="icon is-small"><i class="fas fa-edit"></i></span>
+                                </a>
+                                <form action="/admin/orders/${orderId}/delete" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este pedido?');">
+                                    <input type="hidden" name="_method" value="DELETE">
+                                    <button type="submit" class="button is-small is-danger is-light" title="Excluir">
+                                        <span class="icon is-small"><i class="fas fa-trash-alt"></i></span>
+                                    </button>
+                                </form>
+                            </div>
+                        `;
+                    }
+                }
+            ]
+        }
+    } %}
+{% endblock %}

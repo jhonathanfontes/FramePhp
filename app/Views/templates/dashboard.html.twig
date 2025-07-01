@@ -5,37 +5,38 @@
 {% block content %}
     <h1 class="title">Dashboard</h1>
     <p class="subtitle">Bem-vindo ao painel administrativo!</p>
-
     <div class="columns is-multiline">
-        <div class="column is-one-third">
-            <div class="card">
-                <div class="card-content">
-                    <p class="title is-4">
-                        <i class="fas fa-users mr-2"></i>500
-                    </p>
-                    <p class="subtitle is-6">Total de Usuários</p>
-                </div>
-            </div>
+        <div class="column is-one-quarter-desktop is-half-tablet is-full-mobile">
+            {% include 'templates/components/_card.html.twig' with {
+                title: 'Usuários', 
+                icon: 'fas fa-users',
+                value: '500',
+                subtitle: 'Total de Usuários'
+            } %}
         </div>
-        <div class="column is-one-third">
-            <div class="card">
-                <div class="card-content">
-                    <p class="title is-4">
-                        <i class="fas fa-box mr-2"></i>1200
-                    </p>
-                    <p class="subtitle is-6">Total de Produtos</p>
-                </div>
-            </div>
+        <div class="column is-one-quarter-desktop is-half-tablet is-full-mobile">
+            {% include 'templates/components/_card.html.twig' with {
+                title: 'Produtos', 
+                icon: 'fas fa-box',
+                value: '1200',
+                subtitle: 'Total de Produtos'
+            } %}
         </div>
-        <div class="column is-one-third">
-            <div class="card">
-                <div class="card-content">
-                    <p class="title is-4">
-                        <i class="fas fa-shopping-cart mr-2"></i>345
-                    </p>
-                    <p class="subtitle is-6">Novos Pedidos</p>
-                </div>
-            </div>
+       <div class="column is-one-quarter-desktop is-half-tablet is-full-mobile">
+            {% include 'templates/components/_card.html.twig' with {
+                title: 'Pedidos', 
+                icon: 'fas fa-shopping-cart',
+                value: '345',
+                subtitle: 'Novos Pedidos'
+            } %}
+        </div>
+         <div class="column is-one-quarter-desktop is-half-tablet is-full-mobile">
+            {% include 'templates/components/_card.html.twig' with {
+                title: 'Pedidos', 
+                icon: 'fas fa-shopping-cart',
+                value: '345',
+                subtitle: 'Novos Pedidos'
+            } %}
         </div>
     </div>
 

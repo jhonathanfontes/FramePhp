@@ -1,0 +1,83 @@
+{# templates/components/_table.html.twig #}
+{# Parâmetros:
+   - headers: Array de objetos/strings para os cabeçalhos da tabela. Ex: [{label: 'ID', class: 'has-text-centered'}, 'Nome']
+   - rows: Array de objetos/arrays para as linhas da tabela. Cada objeto deve ter as chaves correspondentes aos dados.
+   - responsive_labels: Array de strings correspondente aos 'data-label' na ordem das colunas.
+     Ex: ['ID', 'Nome Completo', 'Email do Usuário', 'Função', 'Situação', 'Ações']
+   - class: Classes adicionais para a tabela (e.g., is-striped, is-bordered, responsive-table)
+   - id_prefix: Prefixo para IDs gerados (opcional)
+#}
+{% set id_prefix = id_prefix | default('') %}
+<div class="table-container"> {# Mantido table-container para a rolagem padrão em desktop #}
+    <table class="table is-fullwidth {{ class | default('is-bordered is-striped is-narrow is-hoverable') }}">
+        <thead>
+            <tr>
+                {% for header in headers %}
+                    {% if header is iterable %}
+                        <th class="{{ header.class | default('') }}">{{ header.label }}</th>
+                    {% else %}
+                        <th>{{ header }}</th>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% if rows is not empty %}
+                {% for row_index, row in rows %}
+                    <tr>
+                        {% for col_index, header in headers %}
+                            {% set col_key = header is iterable ? header.key | default(loop.index0) : loop.index0 %} {# Tenta pegar a key, senão usa index #}
+                            {% set label = responsive_labels[col_index] | default('') %}
+
+                            <td data-label="{{ label }}">
+                                {% if row_index == loop.parent.loop.first and col_index == loop.parent.loop.first %} {# Primeiro TD de cada linha pode ter um ID #}
+                                    {% if row.id is defined %}{{ row.id }}{% endif %}
+                                {% else %}
+                                    {# Renderiza o conteúdo da célula. Você precisará de lógica aqui para cada tipo de coluna #}
+                                    {% if label == 'Tipo' %}
+                                        <span class="tag {% if row.role == 'admin' %}is-danger{% elseif row.role == 'editor' %}is-warning{% else %}is-info{% endif %}">
+                                            {{ row.role | role_label }}
+                                        </span>
+                                    {% elseif label == 'Status' %}
+                                        {% if row.status == 'active' %}
+                                            <span class="tag is-success">Ativo</span>
+                                        {% else %}
+                                            <span class="tag is-light">Inativo</span>
+                                        {% endif %}
+                                    {% elseif label == 'Ações' %}
+                                        {# Este é um caso especial, pois são botões de ação #}
+                                        <div class="buttons is-centered">
+                                            <a href="/admin/users/{{ row.id }}/edit" class="button is-small is-info is-light" title="Editar">
+                                                <span class="icon is-small"><i class="fas fa-edit"></i></span>
+                                            </a>
+                                            <form action="/admin/users/{{ row.id }}/delete" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este usuário?');">
+                                                <input type="hidden" name="_method" value="DELETE">
+                                                <button type="submit" class="button is-small is-danger is-light" title="Excluir">
+                                                    <span class="icon is-small"><i class="fas fa-trash-alt"></i></span>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    {% else %}
+                                        {# Conteúdo padrão da coluna, assume que a chave existe em 'row' #}
+                                        {% if col_key is iterable %}
+                                            {# Se a header.key for um array aninhado para acessar subpropriedades #}
+                                            {{ attribute(row, col_key) }}
+                                        {% elseif row[col_key] is defined %}
+                                            {{ row[col_key] }}
+                                        {% else %}
+                                            {# Fallback para quando a chave não é encontrada #}
+                                        {% endif %}
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="{{ headers | length }}" class="has-text-centered">Nenhum registro encontrado.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>

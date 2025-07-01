@@ -1,0 +1,23 @@
+{# templates/components/_card.html.twig #}
+{# Parâmetros:
+   - title: Título do card (opcional)
+   - icon: Ícone Font Awesome (opcional)
+   - value: Valor principal do card (opcional)
+   - subtitle: Subtítulo do card (opcional)
+   - class: Classes adicionais para o card (opcional)
+#}
+<div class="card {{ class | default('') }}">
+    <div class="card-content">
+        {% if title %}
+            <h4 class="title is-5">{{ title | default('') }}</h4>
+            <p class="title is-4">
+                {% if icon %}<span class="icon mr-2"><i class="{{ icon }}"></i></span>{% endif %}
+                {{ value | default('') }}
+            </p>
+            <p class="subtitle is-6">{{ subtitle | default('') }}</p>
+        {% else %}
+            {# Se não houver título, o conteúdo do bloco é o corpo do card #}
+            {{ content | raw }} {# Permite passar HTML como conteúdo #}
+        {% endif %}
+    </div>
+</div>
