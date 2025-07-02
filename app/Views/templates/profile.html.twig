@@ -1,0 +1,60 @@
+{# templates/profile.html.twig #}
+{% extends 'templates/base.html.twig' %}
+
+{% block title %}Meu Perfil - Painel Administrativo{% endblock %}
+
+{% block content %}
+    <h1 class="title">Meu Perfil</h1>
+    <p class="subtitle">Visualize e atualize suas informações de conta.</p>
+
+    <div class="columns is-centered"> {# Centraliza o conteúdo #}
+        <div class="column is-two-thirds-desktop is-full-tablet"> {# Ocupa 2/3 em desktop, full em tablet #}
+            <div class="box">
+                <h2 class="title is-5">Informações Pessoais</h2>
+                <form action="/admin/profile" method="POST">
+                    {# Campo Nome #}
+                    <div class="field">
+                        <label class="label" for="profile-name">Nome Completo</label>
+                        <div class="control">
+                            <input class="input" type="text" id="profile-name" name="name" placeholder="Seu nome completo" value="{{ user_profile.name | default('') }}" required>
+                        </div>
+                    </div>
+
+                    {# Campo Email #}
+                    <div class="field">
+                        <label class="label" for="profile-email">Email</label>
+                        <div class="control">
+                            <input class="input" type="email" id="profile-email" name="email" placeholder="seu@email.com" value="{{ user_profile.email | default('') }}" required>
+                        </div>
+                    </div>
+
+                    {# Campo Senha (opcional para alteração) #}
+                    <h3 class="title is-6 mt-5">Alterar Senha (Opcional)</h3>
+                    <p class="help mb-3">Preencha apenas se desejar alterar sua senha atual.</p>
+                    <div class="field">
+                        <label class="label" for="profile-password">Nova Senha</label>
+                        <div class="control">
+                            <input class="input" type="password" id="profile-password" name="password" placeholder="Mínimo 6 caracteres">
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label" for="profile-password-confirm">Confirmar Nova Senha</label>
+                        <div class="control">
+                            <input class="input" type="password" id="profile-password-confirm" name="password_confirm" placeholder="Confirme sua nova senha">
+                        </div>
+                    </div>
+
+                    <hr> {# Separador visual #}
+
+                    {# Botão de Submissão #}
+                    <div class="field is-grouped is-grouped-right">
+                        <div class="control">
+                            <button type="submit" class="button is-primary">Salvar Alterações</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

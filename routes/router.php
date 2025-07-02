@@ -80,6 +80,7 @@ $router->group([
     $router->get('/orders', [AdminController::class, 'orders'])->name('admin.orders');
     $router->get('/reports', [AdminController::class, 'reports'])->name('admin.reports');
     $router->get('/products', [AdminController::class, 'products'])->name('admin.products');
+    $router->get('/profile', [AdminController::class, 'profile'])->name('admin.profile');
 });
 
 

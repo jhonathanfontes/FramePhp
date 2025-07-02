@@ -1,0 +1,82 @@
+{# templates/emails/_base_email.html.twig #}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}Seu Aplicativo{% endblock %}</title>
+    <style type="text/css">
+        /* Estilos inline para compatibilidade com clientes de e-mail */
+        body { margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        table { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+        td, th { padding: 0; }
+        img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; }
+        p { display: block; margin: 13px 0; }
+        a { text-decoration: none; color: #007bff; } /* Cor para links */
+
+        /* Layout */
+        .wrapper-table { width: 100%; table-layout: fixed; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        .outer-table { width: 100%; max-width: 600px; margin: 0 auto; background-color: #ffffff; }
+        .full-width-table { width: 100%; }
+
+        /* Componentes */
+        .header { background-color: #2b3e50; padding: 20px; text-align: center; }
+        .header h1 { color: #ffffff; margin: 0; font-size: 28px; line-height: 1.2; }
+        .content-area { padding: 30px; background-color: #ffffff; }
+        .content-area p { font-size: 16px; line-height: 1.6; color: #333333; }
+        .button { display: inline-block; padding: 10px 20px; background-color: #00d1b2; color: #ffffff !important; text-decoration: none; border-radius: 5px; font-size: 16px; font-weight: bold; }
+        .footer { background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 13px; color: #777777; }
+        .footer p { margin: 0; }
+
+        /* Responsividade básica (alguns clientes ignoram) */
+        @media screen and (max-width: 600px) {
+            .outer-table { width: 100% !important; }
+            .content-area { padding: 20px !important; }
+            .header h1 { font-size: 24px !important; }
+        }
+    </style>
+</head>
+<body>
+    <center class="wrapper-table">
+        <table class="outer-table" width="100%">
+            <tr>
+                <td>
+                    <table class="full-width-table header">
+                        <tr>
+                            <td>
+                                <h1>{{ app_name | default('Seu Aplicativo') }}</h1>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="content-area">
+                    <table class="full-width-table">
+                        <tr>
+                            <td>
+                                {% block content %}{# Conteúdo específico do e-mail #}{% endblock %}
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <table class="full-width-table footer">
+                        <tr>
+                            <td>
+                                <p>&copy; {{ "now"|date("Y") }} {{ app_name | default('Seu Aplicativo') }}. Todos os direitos reservados.</p>
+                                <p>Este é um e-mail automático, por favor, não responda.</p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </center>
+</body>
+</html>

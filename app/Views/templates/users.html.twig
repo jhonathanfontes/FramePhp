@@ -15,61 +15,39 @@
         </p>
     </div>
 
-    <div class="box">
-        <h2 class="title is-5">Lista de Usuários</h2>
-        <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth responsive-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nome</th>
-                    <th>Email</th>
-                    <th>Tipo</th>
-                    <th>Status</th>
-                    <th class="has-text-centered">Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if usuarios is not empty %}
-                    {% for user in usuarios %}
-                        <tr>
-                            <td data-label="ID">{{ user.id }}</td>
-                            <td data-label="Nome">{{ user.name }}</td>
-                            <td data-label="Email">{{ user.email }}</td>
-                            <td data-label="Tipo">
-                                <span class="tag {% if user.role == 'admin' %}is-danger{% elseif user.role == 'editor' %}is-warning{% else %}is-info{% endif %}">
-                                    {{ user.role | capitalize }} {# Usando o filtro role_label aqui #}
-                                </span>
-                            </td>
-                            <td data-label="Status">
-                                {% if user.status == 'active' %}
-                                    <span class="tag is-success">Ativo</span>
-                                {% else %}
-                                    <span class="tag is-light">Inativo</span>
-                                {% endif %}
-                            </td>
-                            <td data-label="Ações" class="has-text-centered">
-                                <div class="buttons is-centered">
-                                    <a href="/admin/users/{{ user.id }}/edit" class="button is-small is-info is-light" title="Editar">
-                                        <span class="icon is-small"><i class="fas fa-edit"></i></span>
-                                    </a>
-                                    <form action="/admin/users/{{ user.id }}/delete" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este usuário?');">
-                                        <input type="hidden" name="_method" value="DELETE">
-                                        <button type="submit" class="button is-small is-danger is-light" title="Excluir">
-                                            <span class="icon is-small"><i class="fas fa-trash-alt"></i></span>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="6" class="has-text-centered">Nenhum usuário encontrado.</td>
-                    </tr>
-                {% endif %}
-            </tbody>
-        </table>
-    </div>
+    {# --- NOVO CAMPO DE BUSCA --- #}
+	<div
+		class="box p-5 mb-5">
+		{# Usando uma box Bulma para envolver o campo de busca #}
+		<form id="searchForm" action="/admin/products" method="GET">
+			<div class="field has-addons">
+				<div class="control has-icons-left is-expanded">
+					<input class="input" type="text" name="b" placeholder="Buscar produtos por nome ou categoria..." value="{{ busca_param | default('') }}">
+					<span class="icon is-left">
+						<i class="fas fa-search"></i>
+					</span>
+				</div>
+				<div class="control">
+					<button type="submit" class="button is-info">Buscar</button>
+				</div>
+				{% if busca_param is not empty %}
+					<div class="control">
+						<a href="/admin/products" class="button is-light">Limpar</a>
+					</div>
+				{% endif %}
+			</div>
+		</form>
+	</div>
+	{# --- FIM DO CAMPO DE BUSCA --- #}
+
+	{# INCLUI O HTML DA TABELA GERADO PELA CLASSE PHP #}
+	{% if usuariosTableHtml is defined %}
+		{{ usuariosTableHtml | raw }}
+	{% else %}
+		<div class="notification is-warning">
+			A tabela de produtos não foi gerada ou não há dados.
+		</div>
+	{% endif %}
 
     {# INÍCIO DO CÓDIGO DO MODAL PARA NOVO USUÁRIO #}
     <div id="new-user-modal" class="modal">

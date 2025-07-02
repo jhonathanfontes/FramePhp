@@ -1,0 +1,23 @@
+{# templates/emails/email_aviso_geral.html.twig #}
+{% extends 'templates/emails/_base_email.html.twig' %}
+
+{% block title %}{{ email_subject | default('Aviso Importante') }} - {{ app_name | default('Seu Aplicativo') }}{% endblock %}
+
+{% block content %}
+    <p>Olá, {{ user_name | default('Prezado(a) Cliente') }}!</p>
+    <p>
+        {% if message %}
+            {{ message | raw }} {# Permite que a mensagem seja HTML #}
+        {% else %}
+            Esta é uma notificação geral do seu aplicativo.
+        {% endif %}
+    </p>
+    
+    {% if action_url and action_label %}
+        <p style="text-align: center; margin: 20px 0;">
+            <a href="{{ action_url }}" class="button" target="_blank">{{ action_label }}</a>
+        </p>
+    {% endif %}
+
+    <p>Atenciosamente,<br>A equipe {{ app_name | default('Seu Aplicativo') }}</p>
+{% endblock %}
