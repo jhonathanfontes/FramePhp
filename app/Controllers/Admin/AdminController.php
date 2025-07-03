@@ -2,6 +2,7 @@
 
 namespace App\Controllers\Admin;  
 
+use App\Models\User;
 use Core\Controller\BaseController;
 use App\Models\CadUsuarioModel; // Certifique-se de que o modelo está importado corretamente
 
@@ -14,14 +15,12 @@ class AdminController extends BaseController
 
   public function users(): string
     {
-        // 1. Usa o model injetado para buscar todos os usuários.
-        $users = new CadUsuarioModel();
+        $usuarios = new User();
+        $data = [
+            'usuarios' => $usuarios->findAll(),
+        ];
 
-        // 2. Renderiza o template Twig, passando a lista de usuários para ele.
-        // O nome da variável no template será 'users'.
-        return $this->render('pages/admin/users/index', [
-            'users' => $users->findAllUsers()
-        ]);
+         return $this->render('admin/users/index', $data);
     }
 
     public function settings()

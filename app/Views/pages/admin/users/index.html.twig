@@ -1,4 +1,4 @@
-{% extends "layouts/admin.twig" %}
+{% extends "layouts/admin.html.twig" %}
 
 {% block title %}Usuários{% endblock %}
 
@@ -10,9 +10,6 @@
             <i class="fas fa-plus"></i> Novo Usuário
         </a>
     </div>
- <pre>
-        {{ dump( url('users') ) }}
-    </pre>
 
     <div class="card">
         <div class="card-body">
@@ -29,12 +26,14 @@
                         </tr>
                     </thead>
                     <tbody>
+                    {% for item in usuarios %}
+  
                         <tr>
-                            <td>1</td>
-                            <td>Administrador</td>
-                            <td>admin@exemplo.com</td>
+                            <td>{{ item.id }}</td>
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.email }}</td>
                             <td><span class="badge bg-success">Ativo</span></td>
-                            <td>01/01/2024</td>
+                            <td>{{ item.created_at|date('d/m/Y H:i:s') }}</td>
                             <td>
                                 <div class="btn-group">
                                     <a href="#" class="btn btn-sm btn-outline-primary">
@@ -47,6 +46,8 @@
                             </td>
                         </tr>
                     </tbody>
+                    
+{% endfor %}
                 </table>
             </div>
         </div>

@@ -7,10 +7,13 @@ use Core\Database\Database;
 class User
 {
     private $db;
+    private $table = 'users';
+    private $primaryKey = 'id';
 
     public function __construct()
     {
         $this->db = Database::getInstance();
+
     }
 
     public function findByEmail(string $email): ?array
@@ -18,12 +21,12 @@ class User
         try {
             // Log para debug
             error_log("Buscando usuário pelo email: " . $email);
-            
+
             $user = $this->db->find('users', 'email = ?', [$email]);
-            
+
             // Log para debug
             error_log("Resultado da busca: " . ($user ? "Usuário encontrado" : "Usuário não encontrado"));
-            
+
             return $user;
         } catch (\Exception $e) {
             // Log do erro
@@ -32,16 +35,22 @@ class User
         }
     }
 
+    public function findAll(): array
+    {
+        return $this->db->findAll($this->table, 'id, name, email, created_at');
+    }
+
+
     public function findById(int $id): ?array
     {
-        return $this->db->find('users', 'id = ?', [$id]);
+        return $this->db->find('users','*', 'id = ?', [$id]);
     }
 
     public function create(array $data): int
     {
         // Hash da senha
         $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
-        
+
         return $this->db->insert('users', $data);
     }
 
@@ -51,7 +60,7 @@ class User
         if (isset($data['password'])) {
             $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
         }
-        
+
         return $this->db->update('users', $data, 'id = ?', [$id]);
     }
 
@@ -64,13 +73,13 @@ class User
     {
         // Primeiro, remove qualquer token existente para este e-mail
         $this->db->delete('password_resets', 'email = ?', [$email]);
-        
+
         // Insere o novo token
         $this->db->insert('password_resets', [
             'email' => $email,
             'token' => $token
         ]);
-        
+
         return true;
     }
 

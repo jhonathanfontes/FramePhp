@@ -98,7 +98,7 @@ class Database
         return $stmt->rowCount();
     }
 
-    public function find(string $table, string $where, array $whereParams = [], string $columns = '*'): ?array
+    public function find(string $table, string $columns = '*', string $where, array $whereParams = []): ?array
     {
         try {
             // Log para debug
@@ -128,7 +128,7 @@ class Database
         }
     }
 
-    public function findAll(string $table, string $where = '1', array $whereParams = [], string $columns = '*', string $orderBy = null, int $limit = null, int $offset = null): array
+    public function findAll(string $table, string $columns = '*', string $where = '1', array $whereParams = [], string $orderBy = null, int $limit = null, int $offset = null): array
     {
         $sql = "SELECT {$columns} FROM {$table} WHERE {$where}";
         
