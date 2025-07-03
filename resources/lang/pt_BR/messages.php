@@ -29,6 +29,7 @@ return [
     'confirm_delete' => 'Tem certeza que deseja excluir este item?',
     
     // Autenticação
+    'title' => 'FramePhp',
     'login' => 'Entrar',
     'register' => 'Registrar',
     'logout' => 'Sair',

@@ -1,0 +1,91 @@
+{# templates/components/_data_table.html.twig #}
+{#
+   Parâmetros:
+   - headers: Array de objetos para os cabeçalhos da tabela. Ex: [{data: 'id', title: 'ID'}, {data: 'name', title: 'Nome'}]
+     'data' é o nome da propriedade no objeto 'row' para o DataTables buscar o valor.
+     'title' é o texto do cabeçalho.
+     Pode incluir outras propriedades DataTables como 'orderable', 'className', 'render'.
+   - rows: Array de objetos/arrays para as linhas da tabela (o dataset COMPLETO).
+   - id: ID único para a tabela (default: 'genericDataTable')
+   - class: Classes adicionais para a tabela (e.g., is-striped, is-bordered, responsive-table)
+   - data_table_options: Objeto com opções personalizadas para o DataTables, que será mesclado com as padrão.
+     Ex: { pageLength: 5, searching: false, order: [[1, 'asc']] }
+#}
+{% set table_id = id | default('genericDataTable') %}
+{% set data_table_options_json = data_table_options | default({}) | json_encode | raw %}
+
+<div class="box">
+    {# Nota: DataTables vai adicionar sua própria barra de busca e paginação #}
+    {# O .table-container do Bulma é útil para a tabela ser rolada horizontalmente se o DataTables não for responsivo #}
+    <div class="table-container">
+        <table id="{{ table_id }}" class="table is-fullwidth {{ class | default('is-striped is-hoverable') }}">
+            <thead>
+                <tr>
+                    {% for header in headers %}
+                        <th>{{ header.title | default(header.data | capitalize) }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {# O DataTables preencherá este corpo #}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{# Script para inicializar o DataTables para ESTA tabela específica #}
+{% block data_table_inline_script %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tableId = '{{ table_id }}';
+        const rawData = {{ rows | json_encode | raw }};
+        const columnsConfig = {{ headers | json_encode | raw }};
+        const customOptions = {{ data_table_options_json }};
+
+        // Adiciona as funções de renderização personalizadas
+        columnsConfig.forEach(column => {
+            if (column.data === 'role') {
+                column.render = function(data, type, row) {
+                    const roleLabelMap = { 'admin': 'Administrador', 'editor': 'Editor', 'viewer': 'Visualizador' };
+                    const tagClass = (data === 'admin' ? 'is-danger' : (data === 'editor' ? 'is-warning' : 'is-info'));
+                    return `<span class="tag ${tagClass}">${roleLabelMap[data] || (data.charAt(0).toUpperCase() + data.slice(1))}</span>`;
+                };
+            } else if (column.data === 'status') {
+                 column.render = function(data, type, row) {
+                    const tagClass = (data === 'active' ? 'is-success' : 'is-light');
+                    return `<span class="tag ${tagClass}">${data === 'active' ? 'Ativo' : 'Inativo'}</span>`;
+                };
+            } else if (column.data === 'actions') {
+                // Certifique-se de que 'actions' não é ordenável ou pesquisável
+                column.orderable = false;
+                column.searchable = false;
+                column.className = 'has-text-centered'; // Centraliza
+                column.render = function(data, type, row) {
+                    const recordId = row.id || '';
+                    return `
+                        <div class="buttons is-centered is-small">
+                            <a href="/admin/users/${recordId}/edit" class="button is-small is-info is-light" title="Editar">
+                                <span class="icon is-small"><i class="fas fa-edit"></i></span>
+                            </a>
+                            <form action="/admin/users/${recordId}/delete" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este usuário?');">
+                                <input type="hidden" name="_method" value="DELETE">
+                                <button type="submit" class="button is-small is-danger is-light" title="Excluir">
+                                    <span class="icon is-small"><i class="fas fa-trash-alt"></i></span>
+                                </button>
+                            </form>
+                        </div>
+                    `;
+                };
+            }
+        });
+
+        // Chama a função global para inicializar o DataTables
+        // Passa os dados e as configurações de coluna mescladas com as opções personalizadas
+        window.initDataTable(tableId, {
+            data: rawData,
+            columns: columnsConfig,
+            ...customOptions // Mescla as opções personalizadas passadas pelo Twig
+        });
+    });
+</script>
+{% endblock data_table_inline_script %}

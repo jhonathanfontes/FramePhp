@@ -1,0 +1,19 @@
+{# templates/emails/email_cadastro.html.twig #}
+{% extends 'templates/emails/_base_email.html.twig' %}
+
+{% block title %}Bem-vindo ao {{ app_name | default('Seu Aplicativo') }}!{% endblock %}
+
+{% block content %}
+    <p>Olá, {{ user_name }}!</p>
+    <p>Seja bem-vindo(a) ao {{ app_name | default('nosso aplicativo') }}!</p>
+    <p>Seu cadastro foi realizado com sucesso. Agora você pode acessar sua conta utilizando as seguintes informações:</p>
+    <p><strong>Email:</strong> {{ user_email }}</p>
+    <p>
+        Para começar, clique no botão abaixo para fazer login:
+    </p>
+    <p style="text-align: center; margin: 20px 0;">
+        <a href="{{ login_url }}" class="button" target="_blank">Acessar Minha Conta</a>
+    </p>
+    <p>Se você tiver alguma dúvida, não hesite em nos contatar.</p>
+    <p>Atenciosamente,<br>A equipe {{ app_name | default('Seu Aplicativo') }}</p>
+{% endblock %}

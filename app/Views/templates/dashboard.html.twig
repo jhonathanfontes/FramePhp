@@ -1,0 +1,52 @@
+{% extends 'templates/base.html.twig' %}
+
+{% block title %}Dashboard - Painel Administrativo{% endblock %}
+
+{% block content %}
+    <h1 class="title">Dashboard</h1>
+    <p class="subtitle">Bem-vindo ao painel administrativo!</p>
+    <div class="columns is-multiline">
+        <div class="column is-one-quarter-desktop is-half-tablet is-full-mobile">
+            {% include 'templates/components/_card.html.twig' with {
+                title: 'Usuários', 
+                icon: 'fas fa-users',
+                value: '500',
+                subtitle: 'Total de Usuários'
+            } %}
+        </div>
+        <div class="column is-one-quarter-desktop is-half-tablet is-full-mobile">
+            {% include 'templates/components/_card.html.twig' with {
+                title: 'Produtos', 
+                icon: 'fas fa-box',
+                value: '1200',
+                subtitle: 'Total de Produtos'
+            } %}
+        </div>
+       <div class="column is-one-quarter-desktop is-half-tablet is-full-mobile">
+            {% include 'templates/components/_card.html.twig' with {
+                title: 'Pedidos', 
+                icon: 'fas fa-shopping-cart',
+                value: '345',
+                subtitle: 'Novos Pedidos'
+            } %}
+        </div>
+         <div class="column is-one-quarter-desktop is-half-tablet is-full-mobile">
+            {% include 'templates/components/_card.html.twig' with {
+                title: 'Pedidos', 
+                icon: 'fas fa-shopping-cart',
+                value: '345',
+                subtitle: 'Novos Pedidos'
+            } %}
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="box">
+        <h2 class="title is-5">Gráfico de Vendas (Exemplo)</h2>
+        <p>Aqui você pode integrar um gráfico de vendas ou outras métricas importantes.</p>
+        <div class="has-text-centered p-4">
+            <img src="https://via.placeholder.com/600x200?text=Gráfico+de+Exemplo" alt="Gráfico de Exemplo">
+        </div>
+    </div>
+{% endblock %}

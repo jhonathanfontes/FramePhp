@@ -6,11 +6,11 @@ if (!function_exists('base_url')) {
     {
         // Usar a variável de ambiente APP_URL
         $base = env('APP_URL', 'http://localhost');
-        
+
         if ($path) {
             return $base . '/' . trim($path, '/');
         }
-        
+
         return $base;
     }
 }
@@ -33,5 +33,12 @@ if (!function_exists('app_debug')) {
     function app_debug(): bool
     {
         return env('APP_DEBUG', false);
+    }
+}
+
+if (!function_exists('get_current_path')) {
+    function get_current_path(): string
+    {
+        return CURRENT_PATH;
     }
 }

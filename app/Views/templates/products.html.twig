@@ -1,0 +1,177 @@
+{% extends 'templates/base.html.twig' %}
+
+{% block title %}Produtos - Painel Administrativo
+{% endblock %}
+
+{% block content %}
+	<h1 class="title">Produtos</h1>
+	<p class="subtitle">Gerencie os produtos disponíveis no seu sistema.</p>
+
+	<div class="field is-grouped is-grouped-right mb-4">
+		<p class="control">
+			<button id="btn-new-product" class="button is-primary">
+				<span class="icon is-small">
+					<i class="fas fa-plus"></i>
+				</span>
+				<span>Novo Produto</span>
+			</button>
+		</p>
+	</div>
+
+	{# --- NOVO CAMPO DE BUSCA --- #}
+	<div
+		class="box p-5 mb-5">
+		{# Usando uma box Bulma para envolver o campo de busca #}
+		<form id="searchForm" action="/admin/products" method="GET">
+			<div class="field has-addons">
+				<div class="control has-icons-left is-expanded">
+					<input class="input" type="text" name="b" placeholder="Buscar produtos por nome ou categoria..." value="{{ busca_param | default('') }}">
+					<span class="icon is-left">
+						<i class="fas fa-search"></i>
+					</span>
+				</div>
+				<div class="control">
+					<button type="submit" class="button is-info">Buscar</button>
+				</div>
+				{% if busca_param is not empty %}
+					<div class="control">
+						<a href="/admin/products" class="button is-light">Limpar</a>
+					</div>
+				{% endif %}
+			</div>
+		</form>
+	</div>
+	{# --- FIM DO CAMPO DE BUSCA --- #}
+
+	{# INCLUI O HTML DA TABELA GERADO PELA CLASSE PHP #}
+	{% if productTableHtml is defined %}
+		{{ productTableHtml | raw }}
+	{% else %}
+		<div class="notification is-warning">
+			A tabela de produtos não foi gerada ou não há dados.
+		</div>
+	{% endif %}
+
+	<div id="new-product-modal" class="modal">
+		<div class="modal-background"></div>
+		<div class="modal-card">
+			<header class="modal-card-head">
+				<p class="modal-card-title">Novo Produto</p>
+				<button class="delete" aria-label="close"></button>
+			</header>
+			<section class="modal-card-body">
+
+				<form id="new-product-form" action="/admin/products" method="POST">
+					<div class="field">
+						<label class="label" for="product-name">Nome do Produto</label>
+						<div class="control">
+							<input class="input" type="text" id="product-name" name="name" placeholder="Nome do produto" required>
+						</div>
+					</div>
+
+					<div class="field">
+						<label class="label" for="product-category">Categoria</label>
+						<div class="control">
+							<div class="select is-fullwidth">
+								<select id="product-category" name="category" required>
+									<option value="">Selecione a Categoria</option>
+									<option value="eletronicos">Eletrônicos</option>
+									<option value="roupas">Roupas</option>
+									<option value="alimentos">Alimentos</option>
+									<option value="livros">Livros</option>
+									<option value="outros">Outros</option>
+								</select>
+							</div>
+						</div>
+					</div>
+
+					<div class="field">
+						<label class="label" for="product-price">Preço</label>
+						<div class="control has-icons-left">
+							<input class="input" type="number" step="0.01" id="product-price" name="price" placeholder="Ex: 99.99" required>
+							<span class="icon is-left">
+								<i class="fas fa-dollar-sign"></i>
+							</span>
+						</div>
+					</div>
+
+					<div class="field">
+						<label class="label" for="product-stock">Estoque</label>
+						<div class="control">
+							<input class="input" type="number" id="product-stock" name="stock" placeholder="Quantidade em estoque" required>
+						</div>
+					</div>
+
+					<div class="field">
+						<label class="label">Status</label>
+						<div class="control">
+							<label class="radio">
+								<input type="radio" name="status" value="available" checked>
+								Disponível
+							</label>
+							<label class="radio">
+								<input type="radio" name="status" value="out_of_stock">
+								Esgotado
+							</label>
+							<label class="radio">
+								<input type="radio" name="status" value="discontinued">
+								Descontinuado
+							</label>
+						</div>
+					</div>
+				</form>
+			</section>
+			<footer class="modal-card-foot is-justify-content-flex-end">
+				<button class="button is-success" type="submit" form="new-product-form">Salvar Produto</button>
+				<button class="button close-modal">Cancelar</button>
+			</footer>
+		</div>
+	</div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+	 <script>
+	       document.addEventListener('DOMContentLoaded', () => {
+	            // --- Lógica do Modal de Novo Produto (específica desta página) ---
+	            const newProductModal = document.getElementById('new-product-modal');
+	            const btnNewProduct = document.getElementById('btn-new-product');
+	            if (newProductModal && btnNewProduct) {
+	                const closeButtons = newProductModal.querySelectorAll('.delete, .close-modal');
+	
+	                btnNewProduct.addEventListener('click', () => {
+	                    newProductModal.classList.add('is-active');
+	                });
+	
+	                closeButtons.forEach(button => {
+	                    button.addEventListener('click', () => {
+	                        newProductModal.classList.remove('is-active');
+	                        const newProductForm = document.getElementById('new-product-form');
+	                        if (newProductForm) {
+	                            newProductForm.reset();
+	                        }
+	                    });
+	                });
+	
+	                const newProductForm = document.getElementById('new-product-form');
+	                if (newProductForm) {
+	                    newProductForm.addEventListener('submit', (event) => {
+	                        event.preventDefault();
+	                        const formData = new FormData(newProductForm);
+	                        const productData = Object.fromEntries(formData.entries());
+	                        console.log('Dados do novo produto (simulado):', productData);
+	                        newProductModal.classList.remove('is-active');
+	                        newProductForm.reset();
+	                        alert('Produto adicionado (simulado)! Implemente a lógica de backend.');
+	                        // Em uma aplicação real, você faria uma requisição AJAX aqui
+	                    });
+	                }
+	            }
+	        });
+	
+	     function addlinha(params) {
+			console.log(params);
+		 }
+	    </script>
+{% endblock %}

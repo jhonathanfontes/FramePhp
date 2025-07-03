@@ -1,0 +1,81 @@
+{# templates/reports.html.twig #}
+{% extends 'templates/base.html.twig' %}
+
+{% block title %}Relatórios - Painel Administrativo{% endblock %}
+
+{% block content %}
+    <h1 class="title">Relatórios</h1>
+    <p class="subtitle">Acesse e gere relatórios importantes do seu sistema.</p>
+
+    <div class="columns is-multiline">
+        <div class="column is-one-third-desktop is-half-tablet is-full-mobile">
+            {% include 'templates/components/_card.html.twig' with {
+                title: 'Relatório de Vendas',
+                icon: 'fas fa-chart-line',
+                value: 'Ver Detalhes',
+                subtitle: 'Vendas totais por período'
+            } %}
+        </div>
+        <div class="column is-one-third-desktop is-half-tablet is-full-mobile">
+            {% include 'templates/components/_card.html.twig' with {
+                title: 'Relatório de Usuários',
+                icon: 'fas fa-users',
+                value: 'Ver Detalhes',
+                subtitle: 'Estatísticas de cadastro de usuários'
+            } %}
+        </div>
+        <div class="column is-one-third-desktop is-half-tablet is-full-mobile">
+            {% include 'templates/components/_card.html.twig' with {
+                title: 'Relatório de Estoque',
+                icon: 'fas fa-warehouse',
+                value: 'Ver Detalhes',
+                subtitle: 'Itens em baixo estoque'
+            } %}
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="box">
+        <h2 class="title is-5">Gerador de Relatórios Personalizados</h2>
+        <p>Use os filtros abaixo para gerar relatórios específicos.</p>
+        <form>
+            <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                    <label class="label">Tipo</label>
+                </div>
+                <div class="field-body">
+                    <div class="field">
+                        <div class="control">
+                            <div class="select is-fullwidth">
+                                <select>
+                                    <option>Vendas</option>
+                                    <option>Usuários</option>
+                                    <option>Produtos</option>
+                                    <option>Pedidos</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="control has-icons-left">
+                            <input class="input" type="date">
+                            <span class="icon is-left"><i class="fas fa-calendar-alt"></i></span>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="control has-icons-left">
+                            <input class="input" type="date">
+                            <span class="icon is-left"><i class="fas fa-calendar-alt"></i></span>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="control">
+                            <button class="button is-info">Gerar Relatório</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}

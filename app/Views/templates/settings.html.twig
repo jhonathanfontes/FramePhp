@@ -1,0 +1,58 @@
+{# templates/settings.html.twig #}
+{% extends 'templates/base.html.twig' %}
+
+{% block title %}Configurações - Painel Administrativo{% endblock %}
+
+{% block content %}
+    <h1 class="title">Configurações</h1>
+    <p class="subtitle">Ajuste as configurações gerais do seu aplicativo.</p>
+
+    <div class="columns">
+        <div class="column is-half"> {# Para o formulário ocupar metade da largura em desktop #}
+            <div class="box">
+                <h2 class="title is-5">Configurações Gerais do Aplicativo</h2>
+                <form action="/admin/settings" method="POST">
+                    <div class="field">
+                        <label class="label" for="app-name">Nome do Aplicativo</label>
+                        <div class="control">
+                            <input class="input" type="text" id="app-name" name="app_name" placeholder="Nome do seu painel" value="{{ current_app_name | default('Admin App') }}" required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label" for="app-theme">Tema do Aplicativo</label>
+                        <div class="control">
+                            <div class="select is-fullwidth">
+                                <select id="app-theme" name="app_theme">
+                                    <option value="default" {% if current_app_theme == 'default' %}selected{% endif %}>Padrão (Escuro)</option>
+                                    <option value="light" {% if current_app_theme == 'light' %}selected{% endif %}>Claro</option>
+                                    <option value="dark" {% if current_app_theme == 'dark' %}selected{% endif %}>Escuro</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field is-grouped is-grouped-right">
+                        <div class="control">
+                            <button type="submit" class="button is-primary">Salvar Configurações</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="column is-half">
+            <div class="box">
+                <h2 class="title is-5">Outras Configurações</h2>
+                <p>Aqui você pode adicionar outras seções de configuração, como:</p>
+                <ul>
+                    <li>- Configurações de notificação</li>
+                    <li>- Integrações (APIs, serviços externos)</li>
+                    <li>- Segurança e Logs</li>
+                    <li>- Gerenciamento de Permissões (se não for uma página separada)</li>
+                </ul>
+                <p class="mt-4">Estruture as configurações em seções lógicas para facilitar a navegação do usuário.</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

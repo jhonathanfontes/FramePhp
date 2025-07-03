@@ -5,7 +5,8 @@ namespace Core\Database;
 abstract class Model
 {
     protected $table;
-
+    protected $primaryKey = 'id';
+ 
     public function query(): QueryBuilder
     {
         return new QueryBuilder($this->table);
@@ -18,6 +19,6 @@ abstract class Model
 
     public function find($id)
     {
-        return $this->query()->where('id', '=', $id)->first();
+        return $this->query()->where($this->primaryKey, '=', $id)->first();
     }
 }

@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}404 - Página Não Encontrada{% endblock %}
+
+{% block content %}
+<div class="has-text-centered p-6">
+    <h1 class="title is-1 has-text-danger">404</h1>
+    <p class="subtitle is-3">Ops! Parece que a página que você procura não existe.</p>
+    <p class="block">{{ message | default('Por favor, verifique o URL e tente novamente.') }}</p>
+    <a href="{{url(admin.dashdoard)}}" class="button is-link is-large">Voltar para o Dashboard</a>
+</div>
+{% endblock %}

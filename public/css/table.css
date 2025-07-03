@@ -1,0 +1,114 @@
+/*
+ * Arquivo: public/css/table.css
+ * Descrição: Estilos para tornar as tabelas responsivas em telas pequenas,
+ * transformando-as em um formato de "cartão" por linha.
+ */
+
+/* Estilos aplicados APENAS em telas pequenas (até 768px) */
+@media screen and (max-width: 768px) {
+    .responsive-table {
+        border: 0;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .responsive-table thead {
+        border: none;
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+    }
+
+    .responsive-table tr {
+        border-bottom: 3px solid #ddd;
+        display: block;
+        margin-bottom: 1.5em;
+        background-color: #fff;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .responsive-table td {
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: flex-start;
+        align-items: flex-start;
+        font-size: .9em;
+        padding: 12px 15px;
+        position: relative;
+        min-height: auto;
+    }
+
+    .responsive-table tr td:last-of-type {
+        border-bottom: none;
+    }
+
+    .responsive-table td::before {
+        content: attr(data-label);
+        flex-basis: 35%;
+        flex-shrink: 0;
+        text-align: left;
+        font-weight: bold;
+        color: #363636;
+        padding-right: 15px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        align-self: flex-start;
+        line-height: 1.5;
+    }
+
+    .responsive-table td > *:not(span.tag):not(div.buttons) {
+        flex-grow: 1;
+        text-align: right;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        min-width: 0;
+    }
+
+    .responsive-table td:has(span.tag) {
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .responsive-table td span.tag {
+        flex-shrink: 0;
+        margin-left: 10px;
+    }
+
+    .responsive-table td:last-child {
+        display: block;
+        text-align: center;
+        padding: 15px 0;
+        border-bottom: none;
+    }
+
+    .responsive-table td:last-child::before {
+        content: "Ações";
+        position: static;
+        display: block;
+        width: 100%;
+        text-align: center;
+        font-size: 1em;
+        font-weight: bold;
+        color: #363636;
+        margin-bottom: 10px;
+        padding: 0;
+    }
+
+    .responsive-table .buttons {
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-left: auto;
+        margin-right: auto;
+        max-width: fit-content;
+    }
+    .responsive-table .buttons .button {
+        margin: 5px;
+    }
+}

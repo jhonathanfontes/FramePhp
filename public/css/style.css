@@ -1,0 +1,130 @@
+/*
+ * Arquivo: public/css/style.css
+ * Descrição: Estilos globais e para o layout principal do Painel Administrativo.
+ * Define a estrutura base flexível da página.
+ */
+
+/* --- 1. Reset Básico & Estilos Globais --- */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    background-color: #f5f5f5; /* Cor de fundo geral suave */
+}
+
+/* Garante que o body ocupe a altura total da viewport e permite rolagem se o conteúdo exceder */
+body {
+    display: flex;
+    flex-direction: column; /* Para que o main-content e outras seções possam empilhar */
+    min-height: 100vh; /* Garante que o body tenha pelo menos 100% da altura da viewport */
+    overflow-x: hidden; /* Previne rolagem horizontal indesejada no body */
+}
+
+
+/* O wrapper principal para o layout flex: sidebar ao lado do conteúdo principal */
+.wrapper {
+    display: flex;
+    flex: 1; /* Permite que o wrapper cresça para preencher o espaço restante verticalmente */
+    width: 100%; /* Garante que o wrapper ocupe a largura total disponível */
+    overflow: hidden; /* Importante para conter o scroll horizontal em desktop se a sidebar recolher */
+}
+
+/* --- 2. Layout Principal (Main Content & Navbar) --- */
+
+.main-content {
+    flex-grow: 1; /* Ocupa todo o espaço restante horizontalmente */
+    display: flex;
+    flex-direction: column; /* Organiza navbar e seção de conteúdo verticalmente */
+    overflow-y: auto; /* Permite rolagem apenas no conteúdo principal */
+    background-color: #f5f5f5; /* Cor de fundo para o conteúdo */
+    /* Remove a transição de margin-left daqui, ela será definida no sidebar.css */
+}
+
+.navbar {
+    border-bottom: 1px solid #eee;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05); /* Sombra suave para a navbar */
+    padding: 10px 20px; /* Padding para o navbar */
+}
+
+.section {
+    flex-grow: 1; /* Garante que a seção de conteúdo ocupe o espaço restante verticalmente */
+    padding: 30px; /* Espaçamento interno da seção de conteúdo */
+}
+
+/* --- 3. Utilitários (Bulma) --- */
+/* Estes são utilitários comuns, mantidos aqui por conveniência */
+.mr-2 {
+    margin-right: 0.5rem !important;
+}
+.mb-4 {
+    margin-bottom: 1.5rem !important;
+}
+.p-4 {
+    padding: 1.5rem !important;
+}
+.is-justify-content-flex-end {
+    justify-content: flex-end;
+}
+
+/* --- 4. Responsividade Geral (Navbar Burger & Navbar Menu) --- */
+/* Estas regras controlam a visibilidade do hambúrguer do Bulma e do menu superior */
+@media screen and (max-width: 768px) {
+    .navbar-burger {
+        display: block; /* Força o burger menu a aparecer em mobile */
+    }
+
+    .navbar-brand {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* Oculta o menu superior (navbar-menu) por padrão em mobile */
+    .navbar-menu {
+        display: none !important; /* Esconde o menu superior em mobile */
+        position: absolute; /* Para não ocupar espaço quando escondido */
+        top: 100%; /* Abaixo da navbar */
+        left: 0;
+        width: 100%;
+        background-color: white;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        z-index: 99;
+        flex-direction: column;
+    }
+    /* Classe adicionada pelo JS do Bulma para mostrar o menu superior */
+    .navbar-menu.is-active {
+        display: flex !important;
+    }
+
+    /* Oculta o botão de toggle da sidebar em mobile */
+    #sidebar-toggle-button {
+        display: none;
+    }
+}
+
+@media screen and (min-width: 769px) {
+    .navbar-burger {
+        display: none; /* Oculta o burger menu em telas maiores que 768px */
+    }
+    /* Garante que o botão de toggle da sidebar seja visível em desktop */
+    #sidebar-toggle-button {
+        display: block;
+    }
+    /* Em desktop, o menu superior sempre visível e alinhado */
+    .navbar-menu {
+        display: flex !important; /* Força visibilidade em desktop */
+        position: static; /* Remove posicionamento absoluto */
+        box-shadow: none; /* Remove sombra */
+        flex-direction: row; /* Volta a ser uma linha */
+        justify-content: space-between; /* Alinhamento */
+        width: auto; /* Largura automática */
+    }
+    .navbar-menu .navbar-start {
+        display: flex; /* Garante que os links de navegação fiquem em linha */
+    }
+    .navbar-menu .navbar-end {
+        display: flex; /* Garante que os itens do lado direito fiquem em linha */
+    }
+}
