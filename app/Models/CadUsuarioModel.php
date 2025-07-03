@@ -48,7 +48,7 @@ class CadUsuarioModel extends Model
 
     public function findAllUsers(): array
     {
-        return $this->db->findAll($this->table, 'deleted_at IS NULL', [], '*', 'use_nome ASC');
+        return $this->db->findAll($this->table,'*', 'deleted_at IS NULL', [],  'use_nome ASC');
     }
 
     public function create(array $data): int
