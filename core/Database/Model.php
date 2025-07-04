@@ -2,10 +2,12 @@
 
 namespace Core\Database;
 
+use PDOException; // Importa PDOException para uso no logError se necessário
+
 abstract class Model
 {
-    protected $table;
-    protected $primaryKey = 'id';
+    protected string $table;
+    protected string $primaryKey = 'id';
     protected array $fillable = [];
     protected array $guarded = []; // Colunas que não podem ser preenchidas em massa
     protected array $attributes = [];
@@ -43,10 +45,10 @@ abstract class Model
         return null;
     }
 
-     /**
+    /**
      * Encontra um modelo incluindo os soft-deletados.
      * @param mixed $id
-     * @return self|null
+     * @return object|self|null
      */
     public function findWithTrashed($id): ?self
     {

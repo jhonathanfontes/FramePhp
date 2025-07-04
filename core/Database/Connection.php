@@ -4,7 +4,6 @@ namespace Core\Database;
 
 use PDO;
 use PDOException;
-// use Core\Config\Environment; // Assumindo que a função env() é global ou carregada
 
 class Connection
 {
@@ -20,7 +19,6 @@ class Connection
 
     private function loadConfig(): void
     {
-        // Certifique-se de que a função env() está disponível globalmente ou via um autoloader
         $this->config = [
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', '3306'),
@@ -49,7 +47,6 @@ class Connection
                 $this->config['options']
             );
         } catch (PDOException $e) {
-            // Em vez de uma exceção genérica, pode-se criar uma exceção personalizada aqui
             throw new \RuntimeException("Erro de conexão com o banco de dados: " . $e->getMessage(), (int)$e->getCode(), $e);
         }
     }
@@ -75,7 +72,6 @@ class Connection
     public function isConnected(): bool
     {
         try {
-            // Executa uma consulta leve para verificar a conexão
             return $this->pdo->query('SELECT 1')->fetchColumn() === '1';
         } catch (PDOException $e) {
             return false;
@@ -87,7 +83,7 @@ class Connection
     {
     }
 
-    // Previne a desserialização da instância Singleton
+    // Previne a serialização da instância Singleton
     public function __wakeup()
     {
     }

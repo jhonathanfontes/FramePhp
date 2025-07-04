@@ -1,10 +1,9 @@
 <?php
-
 namespace Core\Database;
 
 use PDO;
 use PDOException;
-use Core\Error\ErrorHandler;
+use Core\Error\ErrorHandler; 
 
 class Database
 {
@@ -13,12 +12,12 @@ class Database
 
     private function __construct()
     {
-         try {
+        try {
             $this->connection = Connection::getInstance();
         } catch (\Exception $e) {
             // Garante que a aplicação pare se a conexão com o BD falhar no construtor
             ErrorHandler::handleException($e);
-            exit(1);
+            exit(1); // Usar exit(1) para indicar erro
         }
     }
 
@@ -28,9 +27,9 @@ class Database
             try {
                 self::$instance = new self();
             } catch (\Exception $e) {
-                // Usar o ErrorHandler para exibir o erro
+                // Em caso de falha na criação da instância, loga e encerra
                 ErrorHandler::handleException($e);
-                exit;
+                exit(1);
             }
         }
         return self::$instance;
@@ -59,32 +58,42 @@ class Database
 
     public function insert(string $table, array $data): int
     {
-        $columns = implode(', ', array_keys($data));
+        $this->validateTableName($table);
+        $this->validateData($data);
+
+        $columns = '`' . implode('`, `', array_keys($data)) . '`';
         $placeholders = implode(', ', array_fill(0, count($data), '?'));
-        
-        $sql = "INSERT INTO {$table} ({$columns}) VALUES ({$placeholders})";
-        
+
+        $sql = "INSERT INTO `{$table}` ({$columns}) VALUES ({$placeholders})";
+
         $this->query($sql, array_values($data));
-        return (int) $this->getConnection()->getlastInsertId();
+        return (int) $this->getConnection()->lastInsertId();
     }
 
     public function update(string $table, array $data, string $where, array $whereParams = []): int
     {
+        $this->validateTableName($table);
+        $this->validateData($data);
+        $this->validateWhereClause($where);
+
         $set = [];
         foreach (array_keys($data) as $column) {
-            $set[] = "{$column} = ?";
+            $set[] = "`{$column}` = ?";
         }
-        
-        $sql = "UPDATE {$table} SET " . implode(', ', $set) . " WHERE {$where}";
-        
+
+        $sql = "UPDATE `{$table}` SET " . implode(', ', $set) . " WHERE {$where}";
+
         $stmt = $this->query($sql, array_merge(array_values($data), $whereParams));
         return $stmt->rowCount();
     }
 
     public function delete(string $table, string $where, array $whereParams = []): int
     {
-        $sql = "DELETE FROM {$table} WHERE {$where}";
-        
+        $this->validateTableName($table);
+        $this->validateWhereClause($where);
+
+        $sql = "DELETE FROM `{$table}` WHERE {$where}";
+
         $stmt = $this->query($sql, $whereParams);
         return $stmt->rowCount();
     }
@@ -92,54 +101,95 @@ class Database
     public function find(string $table, string $columns = '*', string $where, array $whereParams = []): ?array
     {
         try {
-            // Log para debug
-            error_log("Executando query FIND - Tabela: {$table}, Where: {$where}");
-            
-            $sql = "SELECT {$columns} FROM {$table} WHERE {$where} LIMIT 1";
-            
-            // Log da query
-            error_log("SQL: " . $sql);
-            error_log("Parâmetros: " . json_encode($whereParams));
-            
+            $this->validateTableName($table);
+            $this->validateWhereClause($where);
+
+            $sql = "SELECT {$columns} FROM `{$table}` WHERE {$where} LIMIT 1";
+
             $stmt = $this->query($sql, $whereParams);
-            $result = $stmt->fetch();
-            
-            // Log do resultado
-            error_log("Resultado: " . ($result ? "Registro encontrado" : "Nenhum registro encontrado"));
-            
+            $result = $stmt->fetch(PDO::FETCH_ASSOC); // Fetch como array associativo por padrão
+
             return $result !== false ? $result : null;
         } catch (PDOException $e) {
-            // Log do erro
-            error_log("Erro na query FIND: " . $e->getMessage());
-            error_log("SQL: " . $sql);
-            error_log("Parâmetros: " . json_encode($whereParams));
-            
-            // Lançar exceção para ser tratada pelo ErrorHandler
+            // Usar o operador null coalescing para $sql caso não esteja definido
+            $this->logError($sql ?? '', $whereParams, $e);
             throw $e;
         }
     }
 
     public function findAll(string $table, string $columns = '*', string $where = '1', array $whereParams = [], string $orderBy = null, int $limit = null, int $offset = null): array
     {
-        $sql = "SELECT {$columns} FROM {$table} WHERE {$where}";
-        
+        $this->validateTableName($table);
+
+        $sql = "SELECT {$columns} FROM `{$table}` WHERE {$where}";
+
         if ($orderBy !== null) {
             $sql .= " ORDER BY {$orderBy}";
         }
-        
+
         if ($limit !== null) {
+            if ($limit <= 0) {
+                throw new \InvalidArgumentException("Limit deve ser maior que zero.");
+            }
             $sql .= " LIMIT {$limit}";
-            
+
             if ($offset !== null) {
+                if ($offset < 0) {
+                    throw new \InvalidArgumentException("Offset não pode ser negativo.");
+                }
                 $sql .= " OFFSET {$offset}";
             }
         }
-        
+
         $stmt = $this->query($sql, $whereParams);
-        return $stmt->fetchAll();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC); // Fetch como array associativo por padrão
     }
 
-        // Método de log melhorado
+    // Métodos de transação
+    public function beginTransaction(): void
+    {
+        $this->getConnection()->beginTransaction();
+    }
+
+    public function commit(): void
+    {
+        $this->getConnection()->commit();
+    }
+
+    public function rollback(): void
+    {
+        $this->getConnection()->rollback();
+    }
+
+    public function inTransaction(): bool
+    {
+        return $this->getConnection()->inTransaction();
+    }
+
+    // Métodos de validação
+    private function validateTableName(string $table): void
+    {
+        // Garante que o nome da tabela contenha apenas caracteres válidos (a-z, A-Z, 0-9, _)
+        if (empty($table) || !preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $table)) {
+            throw new \InvalidArgumentException("Nome de tabela inválido: '{$table}'");
+        }
+    }
+
+    private function validateData(array $data): void
+    {
+        if (empty($data)) {
+            throw new \InvalidArgumentException("Dados não podem estar vazios.");
+        }
+    }
+
+    private function validateWhereClause(string $where): void
+    {
+        if (empty(trim($where))) {
+            throw new \InvalidArgumentException("Cláusula WHERE não pode estar vazia.");
+        }
+    }
+
+    // Método de log melhorado
     private function logError(string $sql, array $params, PDOException $e): void
     {
         error_log("=== ERRO DE BANCO DE DADOS ===");
@@ -151,14 +201,4 @@ class Database
         error_log("===============================");
     }
 
-    private function logDebug(string $message): void
-    {
-        // Verifica se as variáveis de ambiente estão definidas antes de usar
-        $appDebug = $_ENV['APP_DEBUG'] ?? false;
-        $dbDebug = $_ENV['DB_DEBUG'] ?? false;
-
-        if ($appDebug || $dbDebug) {
-            error_log("[DB DEBUG] " . $message);
-        }
-    }
 }

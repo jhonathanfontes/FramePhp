@@ -59,7 +59,7 @@ class CadPessoaModel extends Model
      */
     public function findById(int $id): ?array
     {
-        return $this->find('id_pessoa = ?', [$id]);
+        return $this->find($id);
     }
 
     /**
