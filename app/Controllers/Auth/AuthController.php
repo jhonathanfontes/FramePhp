@@ -48,22 +48,24 @@ class AuthController extends BaseController
 
         $user = $this->userModel->findByEmail($data['email']);
 
-        if ($user && password_verify($data['password'], $user['use_password'])) {
+      
+
+        if ($user && password_verify($data['password'], $user->use_password)) {
             // ... (código para popular $userData) ...
             $userData = [
-                'id' => $user['id_usuario'], 
-                'name' => $user['use_nome'],
-                'role' => $user['permissao_id'] == 1 ? 'admin' : 'user',
+                'id' => $user->id_usuario,
+                'name' => $user->use_nome,
+                'role' => $user->permissao_id == 1 ? 'admin' : 'user',
             ];
 
             $userData = [
-                'id' => $user['id_usuario'],
-                'name' => $user['use_nome'],
-                'username' => $user['use_username'],
-                'email' => $user['use_email'],
-                'role' => $user['permissao_id'] == 1 ? 'admin' : 'user',
-                'avatar' => $user['use_avatar'],
-                'status' => $user['status'],
+                'id' => $user->id_usuario,
+                'name' => $user->use_nome,
+                'username' => $user->use_username,
+                'email' => $user->use_email,
+                'role' => $user->permissao_id == 1 ? 'admin' : 'user',
+                'avatar' => $user->use_avatar,
+                'status' => $user->status,
                 'type' => 'admin',
             ];
 
@@ -155,26 +157,26 @@ class AuthController extends BaseController
         }
         
         $userId = $this->userModel->create([
-            'use_nome' => $data['name'],
-            'use_email' => $data['email'],
-            'use_password' => $data['password'],
-            'use_username' => $data['email'], 
-            'status' => 1,
-            'permissao_id' => 2 // Padrão para novo usuário
+            'use_nome'      => $data['name'],
+            'use_email'     => $data['email'],
+            'use_password'  => $data['password'],
+            'use_username'  => $data['email'],
+            'status'        => 1,
+            'permissao_id'  => 2
         ]);
         
         $user = $this->userModel->findById($userId);
         // ... (código para popular $userData e fazer login) ...
        
         $userData = [
-            'id' => $user['id_usuario'],
-            'name' => $user['use_nome'],
-            'username' => $user['use_username'],
-            'email' => $user['use_email'],
-            'role' => $user['permissao_id'] == 1 ? 'admin' : 'user',
-            'avatar' => $user['use_avatar'],
-            'status' => $user['status'],
-            'type' => 'admin',
+            'id'        => $user->id_usuario,
+            'name'      => $user->use_nome,
+            'username'  => $user->use_username,
+            'email'     => $user->use_email,
+            'role'      => $user->permissao_id == 1 ? 'admin' : 'user',
+            'avatar'    => $user->use_avatar,
+            'status'    => $user->status,
+            'type'      => 'admin',
         ];
 
         Auth::login($userData);

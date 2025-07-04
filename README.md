@@ -1,6 +1,7 @@
-# FramePhp
+# FramePhp 
 
-Um framework PHP moderno, leve e fácil de usar para desenvolvimento web.
+Framework PHP simples, inspirado em boas práticas modernas.  
+Inclui suporte a Twig, arquitetura modular, testes automatizados e internacionalização.
 
 ## Características
 
@@ -24,7 +25,39 @@ Um framework PHP moderno, leve e fácil de usar para desenvolvimento web.
 
 ## Instalação
 
-1. Clone o repositório:
+```bash
+composer install
+```
+
+## Primeiros Passos
+
+1. Clone este repositório.
+2. Copie `.env.example` para `.env` e ajuste as configurações.
+3. Execute o servidor embutido:
    ```bash
-   git clone https://github.com/jhonathanfontes/framephp.git
+   php -S localhost:8080 -t public
    ```
+
+## Testes
+
+```bash
+vendor/bin/phpunit
+```
+
+## Estrutura de Pastas
+
+- `app/` - Código principal da aplicação
+- `public/` - Ponto de entrada (index.php)
+- `tests/` - Testes automatizados
+- `config/` - Configurações
+- `resources/lang/` - Arquivos de tradução
+
+## Contribuição
+
+1. Crie um fork
+2. Crie um branch: `git checkout -b minha-melhoria`
+3. Faça commit das suas mudanças: `git commit -am 'feat: Minha melhoria'`
+4. Faça push para o branch: `git push origin minha-melhoria`
+5. Abra um Pull Request
+
+---

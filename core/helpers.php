@@ -33,4 +33,16 @@ if (!function_exists('env')) {
 
         return $padrao;
     }
+
+    function dd($params, $exit = true)
+    {
+        echo '<pre>';
+        var_dump($params);
+        echo '</pre>';
+
+        if ($exit) {
+            exit;
+        }
+    }
+
 }
