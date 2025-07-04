@@ -8,35 +8,17 @@ use Core\Error\ErrorHandler;
 
 class Database
 {
-    private static $instance = null;
-    private $connection;
+    private static ?self $instance = null;
+    private Connection $connection;
 
     private function __construct()
     {
-        $host = $_ENV['DB_HOST'] ?? 'localhost';
-        $port = $_ENV['DB_PORT'] ?? '3306';
-        $database = $_ENV['DB_DATABASE'] ?? 'framephp';
-        $username = $_ENV['DB_USERNAME'] ?? 'root';
-        $password = $_ENV['DB_PASSWORD'] ?? '';
-
-        try {
-            $this->connection = new PDO(
-                "mysql:host={$host};port={$port};dbname={$database}",
-                $username,
-                $password,
-                [
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                    PDO::ATTR_EMULATE_PREPARES => false,
-                    PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci"
-                ]
-            );
-        } catch (PDOException $e) {
-            // Em vez de encerrar a execução, lançamos uma exceção personalizada
-           // throw new \Exception("Erro de conexão com o banco de dados: " . $e->getMessage());
-            // Usar o ErrorHandler para exibir o erro
+         try {
+            $this->connection = Connection::getInstance();
+        } catch (\Exception $e) {
+            // Garante que a aplicação pare se a conexão com o BD falhar no construtor
             ErrorHandler::handleException($e);
-            exit;
+            exit(1);
         }
     }
 
@@ -54,16 +36,25 @@ class Database
         return self::$instance;
     }
 
-    public function getConnection(): PDO
+   public function getConnection(): PDO
     {
-        return $this->connection;
+        return $this->connection->getPdo();
     }
 
-    public function query(string $sql, array $params = []): \PDOStatement
+       public function query(string $sql, array $params = []): \PDOStatement
     {
-        $stmt = $this->connection->prepare($sql);
-        $stmt->execute($params);
-        return $stmt;
+        try {
+            if (empty(trim($sql))) {
+                throw new \InvalidArgumentException("SQL não pode estar vazio.");
+            }
+
+            $stmt = $this->getConnection()->prepare($sql);
+            $stmt->execute($params);
+            return $stmt;
+        } catch (PDOException $e) {
+            $this->logError($sql, $params, $e);
+            throw $e; // Re-lança a exceção para ser tratada em um nível superior
+        }
     }
 
     public function insert(string $table, array $data): int
@@ -74,7 +65,7 @@ class Database
         $sql = "INSERT INTO {$table} ({$columns}) VALUES ({$placeholders})";
         
         $this->query($sql, array_values($data));
-        return (int) $this->connection->lastInsertId();
+        return (int) $this->getConnection()->getlastInsertId();
     }
 
     public function update(string $table, array $data, string $where, array $whereParams = []): int
@@ -146,5 +137,28 @@ class Database
         
         $stmt = $this->query($sql, $whereParams);
         return $stmt->fetchAll();
+    }
+
+        // Método de log melhorado
+    private function logError(string $sql, array $params, PDOException $e): void
+    {
+        error_log("=== ERRO DE BANCO DE DADOS ===");
+        error_log("Erro: " . $e->getMessage());
+        error_log("Código: " . $e->getCode());
+        error_log("SQL: " . $sql);
+        error_log("Parâmetros: " . json_encode($params));
+        error_log("Stack trace: " . $e->getTraceAsString());
+        error_log("===============================");
+    }
+
+    private function logDebug(string $message): void
+    {
+        // Verifica se as variáveis de ambiente estão definidas antes de usar
+        $appDebug = $_ENV['APP_DEBUG'] ?? false;
+        $dbDebug = $_ENV['DB_DEBUG'] ?? false;
+
+        if ($appDebug || $dbDebug) {
+            error_log("[DB DEBUG] " . $message);
+        }
     }
 }

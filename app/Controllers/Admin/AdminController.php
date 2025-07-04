@@ -35,7 +35,7 @@ class AdminController extends BaseController
 
                 $roleLabel = ''; // Lógica de formatação de status
                 $roleClass = '';
-                switch ($item['role']) {
+                switch ($item->role) {
                     case 'admin':
                         $roleLabel = 'Administrador';
                         $roleClass = 'is-success';
@@ -49,7 +49,7 @@ class AdminController extends BaseController
 
                 $statusLabel = ''; // Lógica de formatação de status
                 $statusClass = '';
-                switch ($item['role']) {
+                switch ($item->role) {
                     case 'admin':
                         $statusLabel = 'Ativo';
                         $statusClass = 'is-success';
@@ -61,23 +61,23 @@ class AdminController extends BaseController
                 }
                 $formattedStatus = "<span class='tag {$statusClass}'>{$statusLabel}</span>";
 
-                $table->addCol($item['id']) // Valor para o checkbox
-                    ->addCol($item['name'])
-                    ->addCol($item['email'])
+                $table->addCol($item->id) // Valor para o checkbox
+                    ->addCol($item->name)
+                    ->addCol($item->email)
                     ->addCol($formattedRoles) // Status formatado
                     ->addCol($formattedStatus) // Status formatado
                     ->addCol("  <div class='buttons has-addons is-small'>
-                        <a href='/admin/users/" . $item['id'] . "/edit' class='button is-info is-light'>
+                        <a href='/admin/users/" . $item->id . "/edit' class='button is-info is-light'>
                             <span class='icon is-small'><i class='fas fa-edit'></i></span> <span>Editar</span>
                         </a> 
-                        <form action='/admin/users/" . $item['id'] . "/delete' method='POST' onsubmit=\"return confirm('Tem certeza que deseja excluir este usuário?');\">
+                        <form action='/admin/users/" . $item->id . "/delete' method='POST' onsubmit=\"return confirm('Tem certeza que deseja excluir este usuário?');\">
                             <input type='hidden' name='_method' value='DELETE'>
                             <button type='submit' class='button is-danger is-light' title='Excluir'>
                                 <span class='icon is-small'><i class='fas fa-trash-alt'></i></span> <span>Excluir</span> 
                             </button>
                         </form>
                     </div>")
-                    ->addRow('', 'addlinha(' . $item['id'] . ')'); // Adiciona a linha
+                    ->addRow('', 'addlinha(' . $item->id . ')'); // Adiciona a linha
             }
         }
 

@@ -48,27 +48,27 @@ class AuthController extends BaseController
 
         $user = $this->userModel->findByEmail($data['email']);
 
-        if ($user && password_verify($data['password'], $user['use_password'])) {
+            if ($user && password_verify($data['password'], $user->use_password)) {
             // ... (código para popular $userData) ...
             $userData = [
-                'id' => $user['id_usuario'], 
-                'name' => $user['use_nome'],
-                'role' => $user['permissao_id'] == 1 ? 'admin' : 'user',
+                'id' => $user->id_usuario,
+                'name' => $user->use_nome,
+                'role' => $user->permissao_id == 1 ? 'admin' : 'user',
             ];
 
             $userData = [
-                'id' => $user['id_usuario'],
-                'name' => $user['use_nome'],
-                'username' => $user['use_username'],
-                'email' => $user['use_email'],
-                'role' => $user['permissao_id'] == 1 ? 'admin' : 'user',
-                'avatar' => $user['use_avatar'],
-                'status' => $user['status'],
+                'id' => $user->id_usuario,
+                'name' => $user->use_nome,
+                'username' => $user->use_username,
+                'email' => $user->use_email,
+                'role' => $user->permissao_id == 1 ? 'admin' : 'user',
+                'avatar' => $user->use_avatar,
+                'status' => $user->status,
                 'type' => 'admin',
             ];
 
             Auth::login($userData);
-            
+
             return Response::redirectResponse(base_url('admin/dashboard'));
         }
 
@@ -78,7 +78,7 @@ class AuthController extends BaseController
         ]);
     }
 
-      public function forgotPasswordForm()
+    public function forgotPasswordForm()
     {
         echo $this->render('pages/auth/forgot-password', [
             'title' => 'Recuperar Senha'
@@ -149,23 +149,32 @@ class AuthController extends BaseController
 
         if ($validator->fails()) {
             return $this->render('pages/auth/register', [
-                'errors' => $validator->getErrors(),
+                'error_message' => $validator->getErrors(),
                 'old' => $data
             ]);
         }
-        
+
+        $user = $this->userModel->findByEmail($data['email']);
+
+            if ($user) {
+            return $this->render('pages/auth/register', [
+                'error' => 'E-mail já cadastrado.',
+                'old' => $data
+            ]);
+        }
+
         $userId = $this->userModel->create([
             'use_nome' => $data['name'],
             'use_email' => $data['email'],
             'use_password' => $data['password'],
-            'use_username' => $data['email'], 
+            'use_username' => $data['email'],
             'status' => 1,
             'permissao_id' => 2 // Padrão para novo usuário
         ]);
-        
+
         $user = $this->userModel->findById($userId);
         // ... (código para popular $userData e fazer login) ...
-       
+
         $userData = [
             'id' => $user['id_usuario'],
             'name' => $user['use_nome'],
@@ -185,6 +194,6 @@ class AuthController extends BaseController
     public function logout()
     {
         Session::destroy();
-        return Response::redirectResponse(base_url('pages/auth/login'));
+        return Response::redirectResponse(base_url('auth/login'));
     }
 }
