@@ -48,14 +48,8 @@ class AuthController extends BaseController
 
         $user = $this->userModel->findByEmail($data['email']);
 
-        if ($user && password_verify($data['password'], $user['use_password'])) {
-            // ... (código para popular $userData) ...
-            $userData = [
-                'id' => $user->id_usuario,
-                'name' => $user->use_nome,
-                'role' => $user->permissao_id == 1 ? 'admin' : 'user',
-            ];
-
+        if ($user && password_verify($data['password'], $user->use_password)) {
+        
             $userData = [
                 'id' => $user->id_usuario,
                 'name' => $user->use_nome,

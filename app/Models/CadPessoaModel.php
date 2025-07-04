@@ -121,7 +121,7 @@ class CadPessoaModel extends Model
     public function findByEmail(string $email): ?array
     {
         try {
-            return $this->find('pes_email = ?', [$email]);
+            return $this->query()->where('pes_email', $email)->get();
         } catch (\Exception $e) {
             error_log("Erro ao buscar pessoa por email: " . $e->getMessage());
             return null;

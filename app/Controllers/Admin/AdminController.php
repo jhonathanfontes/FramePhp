@@ -49,7 +49,7 @@ class AdminController extends BaseController
 
                 $statusLabel = ''; // Lógica de formatação de status
                 $statusClass = '';
-                switch ($item->permissao_id) {
+                switch ($item->status) {
                     case 1:
                         $statusLabel = 'Ativo';
                         $statusClass = 'is-success';
