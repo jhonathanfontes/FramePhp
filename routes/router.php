@@ -78,6 +78,7 @@ $router->group([
     'prefix' => 'admin',
     'middleware' => ['auth', 'permission:admin'] // Usa o alias 'permission' com o parâmetro 'admin'
 ], function ($router) {
+   // $router->get('/', $router->redirect('dashboard'));
     $router->get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     $router->get('/users', [AdminController::class, 'users'])->name('admin.users');
     $router->get('/settings', [AdminController::class, 'settings'])->name('admin.settings');
@@ -87,6 +88,20 @@ $router->group([
     $router->get('/profile', [AdminController::class, 'profile'])->name('admin.profile');
 });
 
+
+$router->group([
+    'prefix' => 'user',
+    'middleware' => ['auth', 'permission:admin,user'] // Usa o alias 'permission' com o parâmetro 'admin'
+], function ($router) {
+  //  $router->get('/', $router->redirect('dashboard'));
+    $router->get('/dashboard', [AdminController::class, 'dashboard'])->name('user.dashboard');
+    $router->get('/users', [AdminController::class, 'users'])->name('user.users');
+    $router->get('/settings', [AdminController::class, 'settings'])->name('user.settings');
+    $router->get('/orders', [AdminController::class, 'orders'])->name('user.orders');
+    $router->get('/reports', [AdminController::class, 'reports'])->name('user.reports');
+    $router->get('/products', [AdminController::class, 'products'])->name('user.products');
+    $router->get('/profile', [AdminController::class, 'profile'])->name('user.profile');
+});
 
 /*
 |--------------------------------------------------------------------------

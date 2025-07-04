@@ -49,7 +49,7 @@ class AuthController extends BaseController
         $user = $this->userModel->findByEmail($data['email']);
 
         if ($user && password_verify($data['password'], $user->use_password)) {
-        
+
             $userData = [
                 'id' => $user->id_usuario,
                 'name' => $user->use_nome,
@@ -143,16 +143,16 @@ class AuthController extends BaseController
 
         if ($validator->fails()) {
             return $this->render('pages/auth/register', [
-                'error_message' => $validator->getErrors(),
+                'errors' => $validator->getErrors(),
                 'old' => $data
             ]);
         }
 
         $user = $this->userModel->findByEmail($data['email']);
 
-            if ($user) {
+        if ($user) {
             return $this->render('pages/auth/register', [
-                'error' => 'E-mail já cadastrado.',
+                'error_message' => 'E-mail já cadastrado.',
                 'old' => $data
             ]);
         }
@@ -161,27 +161,29 @@ class AuthController extends BaseController
             'use_nome' => $data['name'],
             'use_email' => $data['email'],
             'use_password' => $data['password'],
-            'use_username' => $data['email'], 
+            'use_username' => $data['email'],
             'status' => 1,
             'permissao_id' => 2 // Padrão para novo usuário
         ]);
 
-        $user = $this->userModel->findById($userId);
-        // ... (código para popular $userData e fazer login) ...
+        if ($userId) {
+            $atributosArray = $userId->toArray();
 
-        $userData = [
-            'id'        => $user->id_usuario,
-            'name'      => $user->use_nome,
-            'username'  => $user->use_username,
-            'email'     => $user->use_email,
-            'role'      => $user->permissao_id == 1 ? 'admin' : 'user',
-            'avatar'    => $user->use_avatar,
-            'status'    => $user->status,
-            'type'      => 'admin',
-        ];
+            $user = $this->userModel->find($atributosArray['id_usuario']);
+    
+            $userData = [
+                'id' => $user->id_usuario,
+                'name' => $user->use_nome,
+                'username' => $user->use_username,
+                'email' => $user->use_email,
+                'role' => $user->permissao_id == 1 ? 'admin' : 'user',
+                'avatar' => $user->use_avatar,
+                'status' => $user->status,
+                'type' => 'admin',
+            ];
 
-        Auth::login($userData);
-
+            Auth::login($userData);
+        }
         return Response::redirectResponse(base_url('admin/dashboard'));
     }
 

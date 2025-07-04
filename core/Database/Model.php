@@ -34,9 +34,9 @@ abstract class Model
     {
         return $this->query()->get();
     }
-    public function find($id): ?self
+    public function find($id): ?object
     {
-        $result = $this->query()->where($this->primaryKey, '=', $id)->first();
+        $result = $this->query()->where($this->primaryKey, $id)->first();
 
         if ($result) {
             return $this->newFromBuilder($result);
@@ -56,7 +56,7 @@ abstract class Model
         if ($this->softDelete) {
             $query->withTrashed(); // Garante que a consulta inclua os deletados
         }
-        $result = $query->where($this->primaryKey, '=', $id)->first();
+        $result = $query->where($this->primaryKey, $id)->first();
 
         if ($result) {
             return $this->newFromBuilder($result);

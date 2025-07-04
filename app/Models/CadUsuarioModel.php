@@ -23,12 +23,12 @@ class CadUsuarioModel extends Model
         'permissao_id'
     ];
 
-    public function findByEmail(string $email): ?object 
+    public function findByEmail(string $email): ?object
     {
         try {
             return $this->query()
                 ->where('use_email', $email)
-                ->first();            
+                ->first();
         } catch (\Exception $e) {
             // Erros são tratados pelo ErrorHandler global, mas logs específicos ainda podem ser úteis.
             error_log("Erro ao buscar usuário por email: " . $e->getMessage());
@@ -36,29 +36,25 @@ class CadUsuarioModel extends Model
         }
     }
 
-    public function findById(int $id): ?object // Retorna ?object para consistência
-    {
-        try {
-            // O método find da classe pai Model já faz isso.
-            // Para ter os atributos como objeto, o método find do Model já retorna ?self (que é um objeto).
-            return $this->find($id);
-        } catch (\Exception $e) {
-            error_log("Erro ao buscar usuário por ID: " . $e->getMessage());
-            return null;
-        }
-    }
-
-       public function findByUsername(string $username): ?object // Retorna ?object
+    public function findByUsername(string $username): ?object // Retorna ?object
     {
         try {
             // Usa o QueryBuilder da classe pai (Model)
             return $this->query()
-                ->where('use_username', '=', $username)
+                ->where('use_username', $username)
                 ->first();
         } catch (\Exception $e) {
             error_log("Erro ao buscar usuário por username: " . $e->getMessage());
             return null;
         }
+    }
+
+    public function create(array $data): self
+    {
+        // Hash da senha
+        $data['use_password'] = password_hash($data['use_password'], PASSWORD_DEFAULT);
+
+       return parent::create($data);
     }
 
     public function createPasswordReset(string $email, string $token): bool

@@ -33,7 +33,7 @@ class PermissionMiddleware implements MiddlewareInterface
             
             // Para requisições web, redireciona para uma página de dashboard
             // com uma mensagem de erro, impedindo o acesso indevido.
-            return Response::redirectResponse(base_url('admin/dashboard'))->with('error', 'Você não tem permissão para acessar esta área.');
+            return Response::redirectResponse(base_url('/'))->with('error', 'Você não tem permissão para acessar esta área.');
         }
 
         // Permissão concedida, a requisição continua para o controlador.
