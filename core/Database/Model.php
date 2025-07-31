@@ -26,12 +26,29 @@ abstract class Model
     }
 
     // Query methods
+    public function query(): QueryBuilder
+    {
+        $queryBuilder = new QueryBuilder($this->table);
+        
+        // Se o modelo suporta soft delete, habilitar automaticamente
+        if (property_exists($this, 'softDelete') && $this->softDelete) {
+            $queryBuilder->enableSoftDelete();
+            
+            // Se tem coluna personalizada de soft delete
+            if (property_exists($this, 'deletedAtColumn')) {
+                $queryBuilder->setDeletedAtColumn($this->deletedAtColumn);
+            }
+        }
+        
+        return $queryBuilder;
+    }
+
     public function find(int $id): ?array
     {
         $cacheKey = $this->table . '_' . $id;
 
         return $this->cache->remember($cacheKey, function() use ($id) {
-            return $this->db->find($this->table, '*', $this->primaryKey . ' = ?', [$id]);
+            return $this->db->find($this->table, $this->primaryKey . ' = ?', [$id]);
         }, 300);
     }
 

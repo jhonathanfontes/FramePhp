@@ -36,7 +36,7 @@ class CadUsuarioModel extends Model
         }
     }
 
-    public function findByUsername(string $username): ?object // Retorna ?object
+    public function findByUsername(string $username): ?object
     {
         try {
             // Usa o QueryBuilder da classe pai (Model)
