@@ -1,0 +1,146 @@
+
+{% extends "layouts/store.html.twig" %}
+
+{% block title %}{{ title ?? 'Carrinho de Compras' }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="breadcrumb">
+        <a href="{{ route('client.home') }}">Início</a> > Carrinho de Compras
+    </div>
+
+    <h1>Carrinho de Compras</h1>
+
+    {% if itens_carrinho %}
+    <div class="cart-content">
+        <div class="cart-items">
+            {% for item in itens_carrinho %}
+            <div class="cart-item" data-produto-id="{{ item.produto.id_produto }}">
+                <div class="item-image">
+                    <img src="{{ item.produto.pro_imagem ?? '/assets/images/no-image.jpg' }}" alt="{{ item.produto.pro_nome }}">
+                </div>
+                
+                <div class="item-info">
+                    <h3>{{ item.produto.pro_nome }}</h3>
+                    <div class="item-code">Cód: {{ item.produto.pro_sku }}</div>
+                    <div class="item-price">R$ {{ item.produto.pro_preco|number_format(2, ',', '.') }}</div>
+                </div>
+                
+                <div class="item-quantity">
+                    <label>Quantidade:</label>
+                    <div class="quantity-controls">
+                        <button class="qty-btn" data-action="decrease">-</button>
+                        <input type="number" class="quantity-input" value="{{ item.quantidade }}" min="1" max="{{ item.produto.pro_estoque }}">
+                        <button class="qty-btn" data-action="increase">+</button>
+                    </div>
+                </div>
+                
+                <div class="item-subtotal">
+                    <strong>R$ {{ item.subtotal|number_format(2, ',', '.') }}</strong>
+                </div>
+                
+                <div class="item-actions">
+                    <button class="btn btn-danger btn-small remove-item">Remover</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="cart-summary">
+            <h3>Resumo do Pedido</h3>
+            <div class="summary-line">
+                <span>Subtotal:</span>
+                <span id="cart-subtotal">R$ {{ total|number_format(2, ',', '.') }}</span>
+            </div>
+            <div class="summary-line total">
+                <span>Total:</span>
+                <span id="cart-total">R$ {{ total|number_format(2, ',', '.') }}</span>
+            </div>
+            
+            <div class="cart-actions">
+                <a href="{{ route('client.catalogo') }}" class="btn btn-outline">Continuar Comprando</a>
+                <a href="{{ route('client.checkout') }}" class="btn btn-primary btn-large">Finalizar Compra</a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-cart">
+        <h2>Seu carrinho está vazio</h2>
+        <p>Adicione alguns produtos ao seu carrinho para continuar</p>
+        <a href="{{ route('client.catalogo') }}" class="btn btn-primary">Ver Produtos</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Controles de quantidade
+    document.querySelectorAll('.qty-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const action = this.dataset.action;
+            const input = this.parentElement.querySelector('.quantity-input');
+            const currentValue = parseInt(input.value);
+            const max = parseInt(input.max);
+            
+            if (action === 'increase' && currentValue < max) {
+                input.value = currentValue + 1;
+            } else if (action === 'decrease' && currentValue > 1) {
+                input.value = currentValue - 1;
+            }
+            
+            updateCartItem(input);
+        });
+    });
+
+    // Atualização direta no input
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('change', function() {
+            updateCartItem(this);
+        });
+    });
+
+    // Remover item
+    document.querySelectorAll('.remove-item').forEach(button => {
+        button.addEventListener('click', function() {
+            const cartItem = this.closest('.cart-item');
+            const produtoId = cartItem.dataset.produtoId;
+            
+            if (confirm('Deseja remover este item do carrinho?')) {
+                window.location.href = `{{ route('client.carrinho.remover', {id: ''}) }}${produtoId}`;
+            }
+        });
+    });
+
+    function updateCartItem(input) {
+        const cartItem = input.closest('.cart-item');
+        const produtoId = cartItem.dataset.produtoId;
+        const quantidade = input.value;
+        
+        fetch('{{ route("client.carrinho.atualizar") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: `produto_id=${produtoId}&quantidade=${quantidade}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Recarregar a página para atualizar os totais
+                location.reload();
+            } else {
+                alert('Erro ao atualizar carrinho: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao atualizar carrinho');
+        });
+    }
+});
+</script>
+{% endblock %}
+</script>

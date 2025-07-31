@@ -86,4 +86,12 @@ class CadProdutoModel extends Model
         
         return $this->findAll($sql, [], '*', 'created_at DESC LIMIT ' . $limit);
     }
+
+    /**
+     * Busca produto por ID
+     */
+    public function findById($id): ?array
+    {
+        return $this->find($id);
+    }
 }
