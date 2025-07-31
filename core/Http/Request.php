@@ -158,14 +158,6 @@ class Request
     }
 
     /**
-     * Obtém um attribute específico
-     */
-    public function getAttribute(string $key, $default = null)
-    {
-        return $this->attributes[$key] ?? $default;
-    }
-
-    /**
      * Obtém todos os attributes
      */
     public function getAttributes(): array

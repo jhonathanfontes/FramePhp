@@ -1,178 +1,164 @@
+
 <?php
 
 return [
     // General
-    'welcome' => 'Welcome to FramePhp',
+    'welcome' => 'Welcome',
     'home' => 'Home',
-    'about' => 'About',
-    'contact' => 'Contact',
     'dashboard' => 'Dashboard',
-    'profile' => 'Profile',
-    'settings' => 'Settings',
-    'save' => 'Save',
-    'cancel' => 'Cancel',
-    'delete' => 'Delete',
-    'edit' => 'Edit',
-    'create' => 'Create',
-    'actions' => 'Actions',
-    'submit' => 'Submit',
-    'search' => 'Search',
-    'no_results' => 'No results found',
-    
-    // Messages
-    'success' => 'Success',
-    'error' => 'Error',
-    'warning' => 'Warning',
-    'info' => 'Information',
-    'operation_success' => 'Operation completed successfully!',
-    'operation_error' => 'An error occurred while performing the operation.',
-    'confirm_delete' => 'Are you sure you want to delete this item?',
-    
-    // Authentication
     'login' => 'Login',
-    'register' => 'Register',
     'logout' => 'Logout',
-    'email' => 'Email',
-    'password' => 'Password',
-    'remember_me' => 'Remember Me',
-    'forgot_password' => 'Forgot Your Password?',
-    'reset_password' => 'Reset Password',
-    'name' => 'Name',
-    'confirm_password' => 'Confirm Password',
-    'dont_have_account' => 'Don\'t have an account?',
-    'login_success' => 'Login successful!',
-    'login_error' => 'Incorrect email or password.',
-    'register_success' => 'Registration successful!',
-    'logout_success' => 'Logout successful!',
-    'unauthorized' => 'Unauthorized',
-    'access_denied' => 'Access denied',
+    'register' => 'Register',
+    'save' => 'Save',
+    'edit' => 'Edit',
+    'delete' => 'Delete',
+    'cancel' => 'Cancel',
+    'back' => 'Back',
+    'next' => 'Next',
+    'previous' => 'Previous',
+    'search' => 'Search',
+    'filter' => 'Filter',
+    'export' => 'Export',
+    'import' => 'Import',
+    'print' => 'Print',
+    'download' => 'Download',
+    'upload' => 'Upload',
+    'view' => 'View',
+    'details' => 'Details',
+    'actions' => 'Actions',
+    'status' => 'Status',
+    'active' => 'Active',
+    'inactive' => 'Inactive',
+    'yes' => 'Yes',
+    'no' => 'No',
+    'total' => 'Total',
     
-    // Validation
-    'required' => 'The :field field is required.',
-    'email_invalid' => 'The :field field must be a valid email.',
-    'min_length' => 'The :field field must be at least :min characters.',
-    'max_length' => 'The :field field must be at most :max characters.',
-    'password_confirmation' => 'The password confirmation does not match.',
-    'unique' => 'The :field is already in use.',
-    
-    // Errors
-    'page_not_found' => 'Page not found',
-    'server_error' => 'Internal server error',
-    'back_to_home' => 'Back to home page',
-    'csrf_token_invalid' => 'Invalid CSRF token. Please try again.',
-
-    // Reports
-    'reports' => [
-        'title' => 'Reports',
-        'sales_report' => 'Sales Report',
-        'products_report' => 'Products Report',
-        'financial_report' => 'Financial Report',
-        'companies_report' => 'Companies Report',
-        'export_pdf' => 'Export PDF',
-        'export_excel' => 'Export Excel',
-        'view_report' => 'View Report',
-        'generate_report' => 'Generate Report',
-        'updated_at' => 'Updated at',
-        'period' => 'Period',
-        'company' => 'Company',
-        'all_companies' => 'All Companies',
-        
-        // Sales fields
-        'sales_summary' => 'Sales Summary',
-        'sales_details' => 'Sales Details',
-        'total_orders' => 'Total Orders',
-        'total_amount' => 'Total Amount',
-        'order_id' => 'Order',
-        'date' => 'Date',
-        'customer' => 'Customer',
-        'status' => 'Status',
-        'amount' => 'Amount',
-        
-        // Products fields
-        'products_summary' => 'Products Summary',
-        'products_details' => 'Products Details',
-        'total_products' => 'Total Products',
-        'active_products' => 'Active Products',
-        'code' => 'Code',
-        'name' => 'Name',
-        'category' => 'Category',
-        'brand' => 'Brand',
-        'stock' => 'Stock',
-        'price' => 'Price',
-        
-        // Filters
-        'filters' => 'Filters',
-        'start_date' => 'Start Date',
-        'end_date' => 'End Date',
-        'select_company' => 'Select Company',
-        'select_category' => 'Select Category',
-        'apply_filters' => 'Apply Filters',
-        'clear_filters' => 'Clear Filters',
+    // Navigation
+    'menu' => [
+        'dashboard' => 'Dashboard',
+        'empresas' => 'Companies',
+        'lojas' => 'Stores',
+        'produtos' => 'Products',
+        'pedidos' => 'Orders',
+        'usuarios' => 'Users',
+        'relatorios' => 'Reports',
+        'configuracoes' => 'Settings',
+        'ajuda' => 'Help'
     ],
-
-    // Companies
-    'companies' => [
-        'title' => 'Companies',
-        'create' => 'Create Company',
-        'edit' => 'Edit Company',
-        'list' => 'Companies List',
-        'company_name' => 'Company Name',
-        'fantasy_name' => 'Fantasy Name',
-        'cnpj' => 'CNPJ',
+    
+    // Forms
+    'form' => [
+        'required' => 'Required field',
         'email' => 'Email',
+        'password' => 'Password',
+        'confirm_password' => 'Confirm password',
+        'name' => 'Name',
+        'description' => 'Description',
         'phone' => 'Phone',
         'address' => 'Address',
         'city' => 'City',
         'state' => 'State',
-        'zipcode' => 'Zipcode',
-        'status' => 'Status',
-        'active' => 'Active',
-        'inactive' => 'Inactive',
-    ],
-
-    // Store
-    'store' => [
-        'title' => 'Store',
-        'products' => 'Products',
-        'categories' => 'Categories',
-        'cart' => 'Cart',
-        'checkout' => 'Checkout',
-        'add_to_cart' => 'Add to Cart',
-        'view_details' => 'View Details',
+        'zip_code' => 'ZIP Code',
+        'country' => 'Country',
+        'date' => 'Date',
+        'time' => 'Time',
         'price' => 'Price',
-        'description' => 'Description',
-        'specifications' => 'Specifications',
-        'availability' => 'Availability',
-        'in_stock' => 'In Stock',
-        'out_of_stock' => 'Out of Stock',
-        'featured_products' => 'Featured Products',
-        'new_products' => 'New Products',
-        'best_sellers' => 'Best Sellers',
+        'quantity' => 'Quantity',
+        'category' => 'Category'
     ],
-
-    // System
-    'system' => [
-        'loading' => 'Loading...',
-        'saving' => 'Saving...',
-        'processing' => 'Processing...',
-        'completed' => 'Completed',
-        'failed' => 'Failed',
-        'retry' => 'Retry',
-        'close' => 'Close',
-        'confirm' => 'Confirm',
-        'yes' => 'Yes',
-        'no' => 'No',
-        'ok' => 'OK',
-        'back' => 'Back',
-        'next' => 'Next',
-        'previous' => 'Previous',
-        'first' => 'First',
-        'last' => 'Last',
-        'page' => 'Page',
-        'of' => 'of',
-        'showing' => 'Showing',
-        'entries' => 'entries',
-        'no_data' => 'No data found',
-        'select_option' => 'Select an option',
+    
+    // Companies
+    'empresas' => [
+        'title' => 'Companies',
+        'create' => 'New Company',
+        'edit' => 'Edit Company',
+        'razao_social' => 'Company Name',
+        'nome_fantasia' => 'Trade Name',
+        'cnpj' => 'Tax ID',
+        'inscricao_estadual' => 'State Registration',
+        'telefone' => 'Phone',
+        'email' => 'Email',
+        'endereco' => 'Address',
+        'cidade' => 'City',
+        'estado' => 'State',
+        'cep' => 'ZIP Code',
+        'created_success' => 'Company created successfully!',
+        'updated_success' => 'Company updated successfully!',
+        'deleted_success' => 'Company deleted successfully!'
     ],
+    
+    // Stores
+    'lojas' => [
+        'title' => 'Stores',
+        'create' => 'New Store',
+        'edit' => 'Edit Store',
+        'nome' => 'Name',
+        'endereco' => 'Address',
+        'telefone' => 'Phone',
+        'empresa' => 'Company',
+        'gerente' => 'Manager'
+    ],
+    
+    // Products
+    'produtos' => [
+        'title' => 'Products',
+        'create' => 'New Product',
+        'edit' => 'Edit Product',
+        'nome' => 'Name',
+        'codigo' => 'Code',
+        'preco' => 'Price',
+        'estoque' => 'Stock',
+        'categoria' => 'Category',
+        'descricao' => 'Description',
+        'imagem' => 'Image'
+    ],
+    
+    // Reports
+    'reports' => [
+        'title' => 'Reports',
+        'vendas' => 'Sales',
+        'produtos' => 'Products',
+        'clientes' => 'Customers',
+        'financeiro' => 'Financial',
+        'vendas_title' => 'Sales Report',
+        'produtos_title' => 'Products Report',
+        'export_pdf' => 'Export PDF',
+        'export_excel' => 'Export Excel',
+        'periodo' => 'Period',
+        'de' => 'From',
+        'ate' => 'To',
+        'gerar' => 'Generate Report',
+        'pedido_id' => 'Order ID',
+        'data' => 'Date',
+        'valor' => 'Value',
+        'loja' => 'Store',
+        'empresa' => 'Company',
+        'codigo' => 'Code',
+        'nome' => 'Name',
+        'categoria' => 'Category',
+        'preco' => 'Price',
+        'estoque' => 'Stock'
+    ],
+    
+    // Error messages
+    'error' => [
+        '404' => 'Page not found',
+        '500' => 'Internal server error',
+        'unauthorized' => 'Unauthorized access',
+        'forbidden' => 'Access denied',
+        'validation_failed' => 'Data validation failed',
+        'database_error' => 'Database error',
+        'file_not_found' => 'File not found',
+        'upload_failed' => 'File upload failed'
+    ],
+    
+    // Success messages
+    'success' => [
+        'created' => 'Created successfully!',
+        'updated' => 'Updated successfully!',
+        'deleted' => 'Deleted successfully!',
+        'saved' => 'Saved successfully!',
+        'sent' => 'Sent successfully!',
+        'uploaded' => 'File uploaded successfully!'
+    ]
 ];

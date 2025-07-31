@@ -1,4 +1,7 @@
+The code adds PDF export functionality to the ReportController, including vendas and produtos reports, using the PdfService and TCPDF library, and improves translations.
+```
 
+```php
 <?php
 
 namespace App\Controllers\Admin;
@@ -69,7 +72,7 @@ class ReportController extends BaseController
     private function exportVendasPdf($data)
     {
         $html = $this->renderPdfContent('pages/admin/reports/vendas_pdf', $data);
-        
+
         $pdf = $this->pdfService->createPortraitReport(
             $data['title'],
             $data['period'],
@@ -115,7 +118,7 @@ class ReportController extends BaseController
     private function exportProdutosPdf($data)
     {
         $html = $this->renderPdfContent('pages/admin/reports/produtos_pdf', $data);
-        
+
         $pdf = $this->pdfService->createLandscapeReport(
             $data['title'],
             $data['period'],

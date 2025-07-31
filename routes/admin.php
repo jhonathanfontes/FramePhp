@@ -49,7 +49,7 @@ use App\Middleware\AuthenticationMiddleware;
 // Aplicar middleware de autenticação para todas as rotas admin
 $router->middleware([AuthenticationMiddleware::class])
     ->group(['prefix' => 'admin'], function ($router) {
-        
+
         // Dashboard administrativo
         $router->get('/', [AdminController::class, 'dashboard'])->name('admin.dashboard');
         $router->get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard.alt');
@@ -70,5 +70,7 @@ $router->middleware([AuthenticationMiddleware::class])
             $router->get('/produtos', [ReportController::class, 'produtos'])->name('admin.reports.produtos');
             $router->get('/financeiro', [ReportController::class, 'financeiro'])->name('admin.reports.financeiro');
             $router->get('/empresas', [ReportController::class, 'empresas'])->name('admin.reports.empresas');
+            $router->get('/vendas/pdf', [ReportController::class, 'exportVendasPdf'])->name('admin.reports.vendas.pdf');
+            $router->get('/produtos/pdf', [ReportController::class, 'exportProdutosPdf'])->name('admin.reports.produtos.pdf');
         });
     });
