@@ -1,0 +1,144 @@
+
+{% extends "layouts/store.html.twig" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header da página -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="display-4 mb-3">Contato</h1>
+            <p class="lead text-muted">Entre em contato conosco</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Formulário de contato -->
+        <div class="col-lg-8 mb-5">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Envie sua mensagem</h4>
+                </div>
+                <div class="card-body">
+                    <form id="contatoForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="nome" class="form-label">Nome completo *</label>
+                                <input type="text" class="form-control" id="nome" name="nome" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">E-mail *</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="assunto" class="form-label">Assunto *</label>
+                            <input type="text" class="form-control" id="assunto" name="assunto" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="mensagem" class="form-label">Mensagem *</label>
+                            <textarea class="form-control" id="mensagem" name="mensagem" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-paper-plane me-2"></i>Enviar Mensagem
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Informações de contato -->
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">Informações de Contato</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h6><i class="fas fa-map-marker-alt text-primary me-2"></i>Endereço</h6>
+                        <p class="text-muted mb-0">
+                            Rua das Flores, 123<br>
+                            Centro - São Paulo/SP<br>
+                            CEP: 01234-567
+                        </p>
+                    </div>
+                    <div class="mb-4">
+                        <h6><i class="fas fa-phone text-primary me-2"></i>Telefone</h6>
+                        <p class="text-muted mb-0">(11) 9999-9999</p>
+                    </div>
+                    <div class="mb-4">
+                        <h6><i class="fas fa-envelope text-primary me-2"></i>E-mail</h6>
+                        <p class="text-muted mb-0">contato@nossaloja.com.br</p>
+                    </div>
+                    <div class="mb-0">
+                        <h6><i class="fas fa-clock text-primary me-2"></i>Horário de Atendimento</h6>
+                        <p class="text-muted mb-0">
+                            Segunda à Sexta: 8h às 18h<br>
+                            Sábado: 8h às 14h<br>
+                            Domingo: Fechado
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Redes sociais -->
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Redes Sociais</h5>
+                </div>
+                <div class="card-body text-center">
+                    <a href="#" class="btn btn-outline-primary btn-social me-2">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="#" class="btn btn-outline-info btn-social me-2">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="#" class="btn btn-outline-danger btn-social me-2">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="#" class="btn btn-outline-success btn-social">
+                        <i class="fab fa-whatsapp"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.btn-social {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+</style>
+
+<script>
+document.getElementById('contatoForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    fetch('/client/contato/enviar', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            this.reset();
+        } else {
+            alert('Erro: ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('Erro ao enviar mensagem. Tente novamente.');
+    });
+});
+</script>
+{% endblock %}

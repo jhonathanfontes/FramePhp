@@ -40,6 +40,12 @@ $router->middleware([LocaleMiddleware::class, CsrfMiddleware::class])
         // Página inicial da loja
         $router->get('/', [ClientController::class, 'index'])->name('client.home');
         
+        // Páginas institucionais
+        $router->get('/sobre', [ClientController::class, 'sobre'])->name('client.sobre');
+        $router->get('/contato', [ClientController::class, 'contato'])->name('client.contato');
+        $router->post('/contato/enviar', [ClientController::class, 'enviarContato'])->name('client.contato.enviar');
+        $router->get('/loja', [ClientController::class, 'loja'])->name('client.loja');
+        
         // Catálogo de produtos
         $router->get('/catalogo', [ClientController::class, 'catalogo'])->name('client.catalogo');
         $router->get('/produto/{id}', [ClientController::class, 'produto'])->name('client.produto');

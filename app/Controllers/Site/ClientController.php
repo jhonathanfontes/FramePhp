@@ -249,6 +249,92 @@ class ClientController extends Controller
     }
 
     /**
+     * Página Sobre
+     */
+    public function sobre()
+    {
+        return $this->view('pages/client/sobre/index', [
+            'title' => 'Sobre Nós'
+        ]);
+    }
+
+    /**
+     * Página Contato
+     */
+    public function contato()
+    {
+        return $this->view('pages/client/contato/index', [
+            'title' => 'Contato'
+        ]);
+    }
+
+    /**
+     * Processar formulário de contato
+     */
+    public function enviarContato()
+    {
+        $nome = $_POST['nome'] ?? '';
+        $email = $_POST['email'] ?? '';
+        $assunto = $_POST['assunto'] ?? '';
+        $mensagem = $_POST['mensagem'] ?? '';
+
+        // Validação básica
+        if (empty($nome) || empty($email) || empty($assunto) || empty($mensagem)) {
+            return $this->json(['success' => false, 'message' => 'Todos os campos são obrigatórios']);
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return $this->json(['success' => false, 'message' => 'Email inválido']);
+        }
+
+        // Aqui você pode implementar o envio do email
+        // Por enquanto, vamos apenas simular o sucesso
+        
+        return $this->json(['success' => true, 'message' => 'Mensagem enviada com sucesso! Entraremos em contato em breve.']);
+    }
+
+    /**
+     * Página da Loja (listagem de produtos)
+     */
+    public function loja()
+    {
+        $categoriaId = $_GET['categoria'] ?? null;
+        $busca = $_GET['busca'] ?? '';
+        $ordenacao = $_GET['ordenacao'] ?? 'nome';
+        $pagina = (int)($_GET['pagina'] ?? 1);
+        $porPagina = 16;
+
+        if (!empty($busca)) {
+            $produtos = $this->produtoModel->buscarProdutos($busca);
+        } elseif ($categoriaId) {
+            $produtos = $this->produtoModel->findByCategoria($categoriaId);
+        } else {
+            $produtos = $this->produtoModel->findAllProdutos();
+        }
+
+        // Ordenação
+        $produtos = $this->ordenarProdutos($produtos, $ordenacao);
+
+        // Paginação
+        $totalProdutos = count($produtos);
+        $produtos = array_slice($produtos, ($pagina - 1) * $porPagina, $porPagina);
+
+        $categorias = $this->categoriaModel->findAllCategorias();
+
+        return $this->view('pages/client/loja/index', [
+            'produtos' => $produtos,
+            'categorias' => $categorias,
+            'categoria_atual' => $categoriaId,
+            'busca_atual' => $busca,
+            'ordenacao_atual' => $ordenacao,
+            'pagina_atual' => $pagina,
+            'total_produtos' => $totalProdutos,
+            'total_paginas' => ceil($totalProdutos / $porPagina),
+            'title' => 'Nossa Loja'
+        ]);
+    }
+
+    /**
      * Minha conta
      */
     public function conta()
