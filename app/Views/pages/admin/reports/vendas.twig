@@ -1,82 +1,24 @@
+{% extends "layouts/reports.html.twig" %}
 
-{% extends 'layouts/reports.html.twig' %}
+{% block title %}{{ title }}{% endblock %}
 
 {% block content %}
-<!-- Estatísticas gerais -->
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-value">{{ totais.quantidade_pedidos | default(0) }}</div>
-        <div class="stat-label">Total de Pedidos</div>
+<div class="report-header d-flex justify-content-between align-items-center">
+    <div>
+        <h2>{{ title }}</h2>
+        <p class="report-period">{{ period }}</p>
+        {% if company %}
+            <p class="report-company">{{ company.nome_fantasia }}</p>
+        {% endif %}
     </div>
-    <div class="stat-card">
-        <div class="stat-value">R$ {{ totais.valor_total | default(0) | number_format(2, ',', '.') }}</div>
-        <div class="stat-label">Valor Total</div>
+    <div class="report-actions">
+        <a href="?format=pdf&data_inicio={{ data_inicio }}&data_fim={{ data_fim }}{% if company %}&empresa_id={{ company.id }}{% endif %}" 
+           class="btn btn-danger" target="_blank">
+            <i class="fas fa-file-pdf"></i> {{ __('reports.export_pdf') }}
+        </a>
+        <a href="/admin/reports" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> {{ __('system.back') }}
+        </a>
     </div>
-    <div class="stat-card">
-        <div class="stat-value">R$ {{ totais.ticket_medio | default(0) | number_format(2, ',', '.') }}</div>
-        <div class="stat-label">Ticket Médio</div>
-    </div>
-</div>
-
-<!-- Tabela de vendas -->
-<table class="report-table">
-    <thead>
-        <tr>
-            <th>Data</th>
-            <th>Pedido</th>
-            <th>Cliente</th>
-            <th>Status</th>
-            <th class="text-right">Valor</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for venda in vendas %}
-        <tr>
-            <td class="text-date">{{ venda.data_pedido | date('d/m/Y') }}</td>
-            <td class="text-center">#{{ venda.id }}</td>
-            <td>{{ venda.cliente_nome | default('Cliente não informado') }}</td>
-            <td class="text-center">
-                <span class="status-{{ venda.status | lower }}">
-                    {{ venda.status | upper }}
-                </span>
-            </td>
-            <td class="text-currency">R$ {{ venda.valor_total | number_format(2, ',', '.') }}</td>
-        </tr>
-        {% else %}
-        <tr>
-            <td colspan="5" class="text-center">Nenhuma venda encontrada no período</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-<!-- Totalizadores -->
-<div class="report-totals">
-    <div class="total-row">
-        <span>Subtotal:</span>
-        <span>R$ {{ totais.subtotal | default(0) | number_format(2, ',', '.') }}</span>
-    </div>
-    <div class="total-row">
-        <span>Descontos:</span>
-        <span>R$ {{ totais.descontos | default(0) | number_format(2, ',', '.') }}</span>
-    </div>
-    <div class="total-row">
-        <span>Impostos:</span>
-        <span>R$ {{ totais.impostos | default(0) | number_format(2, ',', '.') }}</span>
-    </div>
-    <div class="total-row" style="border-top: 1px solid #333; padding-top: 10px;">
-        <span>TOTAL GERAL:</span>
-        <span>R$ {{ totais.valor_total | default(0) | number_format(2, ',', '.') }}</span>
-    </div>
-</div>
-
-<!-- Observações -->
-<div style="margin-top: 30px; padding: 15px; background: #f8f9fa; border-left: 4px solid #007bff;">
-    <h4>Observações:</h4>
-    <ul>
-        <li>Relatório gerado considerando apenas pedidos com status válido</li>
-        <li>Valores apresentados em Real (R$)</li>
-        <li>Dados atualizados até {{ "now" | date('d/m/Y H:i:s') }}</li>
-    </ul>
 </div>
 {% endblock %}
