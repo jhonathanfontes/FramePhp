@@ -98,7 +98,7 @@ class Database
         return $stmt->rowCount();
     }
 
-    public function find(string $table, string $columns = '*', string $where, array $whereParams = []): ?array
+    public function find(string $table, string $where, array $whereParams = [], string $columns = '*'): ?array
     {
         try {
             $this->validateTableName($table);
