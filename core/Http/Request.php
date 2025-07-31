@@ -9,6 +9,8 @@ class Request
     private array $server;
     private array $files;
     private array $headers;
+    private array $cookies;
+    private ?string $content;
     private array $attributes = [];
 
     public function __construct()
