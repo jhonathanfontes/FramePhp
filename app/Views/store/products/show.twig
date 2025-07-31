@@ -1,0 +1,127 @@
+
+{% extends 'layouts/store.html.twig' %}
+
+{% block title %}{{ produto.pro_descricao }} - {{ loja.nome_loja }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav class="breadcrumb">
+        <a href="/">Início</a> >
+        <span>{{ produto.pro_descricao }}</span>
+    </nav>
+
+    <div class="product-detail">
+        <div class="product-images">
+            <div class="main-image">
+                <img src="/assets/img/products/default.jpg" alt="{{ produto.pro_descricao }}" id="mainImage">
+            </div>
+        </div>
+
+        <div class="product-info">
+            <h1>{{ produto.pro_descricao }}</h1>
+            
+            {% if produto.pro_descricao_pvd %}
+            <p class="product-description">{{ produto.pro_descricao_pvd }}</p>
+            {% endif %}
+            
+            <div class="product-details">
+                <p><strong>Código:</strong> {{ produto.pro_cod_fabricante }}</p>
+                {% if produto.pro_codigobarras %}
+                <p><strong>Código de Barras:</strong> {{ produto.pro_codigobarras }}</p>
+                {% endif %}
+            </div>
+
+            <div class="product-actions">
+                <div class="quantity-selector">
+                    <label for="quantity">Quantidade:</label>
+                    <input type="number" id="quantity" name="quantity" value="1" min="1">
+                </div>
+                
+                <button class="btn btn-primary btn-large add-to-cart" data-product-id="{{ produto.id_produto }}">
+                    Adicionar ao Carrinho
+                </button>
+                
+                <button class="btn btn-success btn-large buy-now" data-product-id="{{ produto.id_produto }}">
+                    Comprar Agora
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="product-tabs">
+        <div class="tab-buttons">
+            <button class="tab-button active" data-tab="description">Descrição</button>
+            <button class="tab-button" data-tab="specifications">Especificações</button>
+        </div>
+        
+        <div class="tab-content">
+            <div class="tab-pane active" id="description">
+                <p>{{ produto.pro_descricao_pvd|default('Descrição detalhada do produto em breve.') }}</p>
+            </div>
+            
+            <div class="tab-pane" id="specifications">
+                <table class="specifications-table">
+                    <tr>
+                        <td>Código do Fabricante</td>
+                        <td>{{ produto.pro_cod_fabricante }}</td>
+                    </tr>
+                    {% if produto.pro_codigobarras %}
+                    <tr>
+                        <td>Código de Barras</td>
+                        <td>{{ produto.pro_codigobarras }}</td>
+                    </tr>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Tab functionality
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+    
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const tabId = this.getAttribute('data-tab');
+            
+            // Remove active class from all buttons and panes
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabPanes.forEach(pane => pane.classList.remove('active'));
+            
+            // Add active class to clicked button and corresponding pane
+            this.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        });
+    });
+    
+    // Add to cart functionality
+    document.querySelector('.add-to-cart').addEventListener('click', function() {
+        const productId = this.getAttribute('data-product-id');
+        const quantity = document.getElementById('quantity').value;
+        addToCart(productId, quantity);
+    });
+    
+    // Buy now functionality
+    document.querySelector('.buy-now').addEventListener('click', function() {
+        const productId = this.getAttribute('data-product-id');
+        const quantity = document.getElementById('quantity').value;
+        buyNow(productId, quantity);
+    });
+    
+    function addToCart(productId, quantity) {
+        // Implementar lógica de adicionar ao carrinho
+        alert(`Produto ${productId} adicionado ao carrinho! Quantidade: ${quantity}`);
+    }
+    
+    function buyNow(productId, quantity) {
+        // Implementar lógica de compra direta
+        window.location.href = '/checkout?product=' + productId + '&quantity=' + quantity;
+    }
+});
+</script>
+{% endblock %}

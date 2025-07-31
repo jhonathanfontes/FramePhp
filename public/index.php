@@ -18,13 +18,23 @@ try {
             throw new Exception("Arquivo .env.example não encontrado. Por favor, crie o arquivo .env manualmente.");
         }
     }
-    
+
     $dotenv = \Dotenv\Dotenv::createImmutable(BASE_PATH);
     $dotenv->load();
 
 } catch (Exception $e) {
-    header('Content-Type: text/html; charset=utf-8');
-    die("Erro ao carregar variáveis de ambiente: " . $e->getMessage());
+    // Log do erro
+    error_log('Erro na aplicação: ' . $e->getMessage());
+
+    // Renderizar página de erro
+    http_response_code(500);
+    echo '<h1>Erro interno do servidor</h1>';
+    echo '<p>Ocorreu um erro inesperado. Tente novamente mais tarde.</p>';
+
+    // Em desenvolvimento, mostrar detalhes do erro
+    if (isset($_ENV['APP_DEBUG']) && $_ENV['APP_DEBUG'] === 'true') {
+        echo '<pre>' . $e->getTraceAsString() . '</pre>';
+    }
 }
 
 use Core\Config\Constants;
@@ -41,4 +51,3 @@ $container = \Core\Container\Container::getInstance();
 
 // Load bootstrap
 require_once BASE_PATH . '/bootstrap/app.php';p';
-
