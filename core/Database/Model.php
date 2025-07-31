@@ -54,18 +54,59 @@ abstract class Model
 
     public function findBy(string $column, $value): ?array
     {
-        return $this->db->find($this->table, '*', $column . ' = ?', [$value]);
+        return $this->query()
+            ->where($column, $value)
+            ->first();
     }
 
     public function all(): array
     {
-        return $this->db->select($this->table);
+        return $this->query()->get();
     }
 
-    public function where(string $column, string $operator, $value): self
+    public function where(string $column, $value, string $operator = '='): QueryBuilder
     {
-        // Implementar query builder fluente
-        return $this;
+        return $this->query()->where($column, $value, $operator);
+    }
+
+    public function select(string $columns = '*'): QueryBuilder
+    {
+        return $this->query()->select($columns);
+    }
+
+    public function orderBy(string $column, string $direction = 'ASC'): QueryBuilder
+    {
+        return $this->query()->orderBy($column, $direction);
+    }
+
+    public function limit(int $limit): QueryBuilder
+    {
+        return $this->query()->limit($limit);
+    }
+
+    public function whereIn(string $column, array $values): QueryBuilder
+    {
+        return $this->query()->whereIn($column, $values);
+    }
+
+    public function whereNull(string $column): QueryBuilder
+    {
+        return $this->query()->whereNull($column);
+    }
+
+    public function whereNotNull(string $column): QueryBuilder
+    {
+        return $this->query()->whereNotNull($column);
+    }
+
+    public function join(string $table, string $first, string $second, string $operator = '='): QueryBuilder
+    {
+        return $this->query()->join($table, $first, $second, $operator);
+    }
+
+    public function leftJoin(string $table, string $first, string $second, string $operator = '='): QueryBuilder
+    {
+        return $this->query()->leftJoin($table, $first, $second, $operator);
     }
 
     public function create(array $data): int
