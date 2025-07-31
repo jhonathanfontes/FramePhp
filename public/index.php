@@ -50,4 +50,4 @@ ini_set('error_log', BASE_PATH . '/storage/logs/php_errors.log');
 $container = \Core\Container\Container::getInstance();
 
 // Load bootstrap
-require_once BASE_PATH . '/bootstrap/app.php';p';
+require_once BASE_PATH . '/bootstrap/app.php';

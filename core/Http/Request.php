@@ -8,9 +8,7 @@ class Request
     private array $post;
     private array $server;
     private array $files;
-    private array $cookies;
     private array $headers;
-    private ?string $content;
     private array $attributes = [];
 
     public function __construct()
@@ -38,11 +36,11 @@ class Request
     {
         $uri = $this->getUri();
         $position = strpos($uri, '?');
-        
+
         if ($position === false) {
             return $uri;
         }
-        
+
         return substr($uri, 0, $position);
     }
 
@@ -135,24 +133,6 @@ class Request
         return $this->server['HTTP_REFERER'] ?? null;
     }
 
-    public function getClientIp(): string
-    {
-        if (!empty($this->server['HTTP_CLIENT_IP'])) {
-            return $this->server['HTTP_CLIENT_IP'];
-        }
-        
-        if (!empty($this->server['HTTP_X_FORWARDED_FOR'])) {
-            return $this->server['HTTP_X_FORWARDED_FOR'];
-        }
-        
-        return $this->server['REMOTE_ADDR'] ?? '0.0.0.0';
-    }
-
-    public function getUserAgent(): string
-    {
-        return $this->server['HTTP_USER_AGENT'] ?? '';
-    }
-
     public function setAttribute(string $key, $value): self
     {
         $this->attributes[$key] = $value;
@@ -167,5 +147,59 @@ class Request
     public function hasAttribute(string $key): bool
     {
         return isset($this->attributes[$key]);
+    }
+
+    /**
+     * Define attributes no request
+     */
+    public function setAttributes(array $attributes): void
+    {
+        $this->attributes = array_merge($this->attributes, $attributes);
+    }
+
+    /**
+     * Obtém um attribute específico
+     */
+    public function getAttribute(string $key, $default = null)
+    {
+        return $this->attributes[$key] ?? $default;
+    }
+
+    /**
+     * Obtém todos os attributes
+     */
+    public function getAttributes(): array
+    {
+        return $this->attributes;
+    }
+
+    /**
+     * Obtém o IP do cliente
+     */
+    public function getClientIp(): string
+    {
+        $headers = [
+            'HTTP_CF_CONNECTING_IP',     // Cloudflare
+            'HTTP_CLIENT_IP',            // Proxy
+            'HTTP_X_FORWARDED_FOR',      // Load balancer/proxy
+            'HTTP_X_FORWARDED',          // Proxy
+            'HTTP_X_CLUSTER_CLIENT_IP',  // Cluster
+            'HTTP_FORWARDED_FOR',        // Proxy
+            'HTTP_FORWARDED',            // Proxy
+            'REMOTE_ADDR'                // Standard
+        ];
+
+        foreach ($headers as $header) {
+            if (!empty($this->server[$header])) {
+                $ips = explode(',', $this->server[$header]);
+                return trim($ips[0]);
+            }
+        }
+
+        return $this->server['REMOTE_ADDR'] ?? '0.0.0.0';
+    }
+    public function getUserAgent(): string
+    {
+        return $this->server['HTTP_USER_AGENT'] ?? '';
     }
 }

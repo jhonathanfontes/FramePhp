@@ -17,6 +17,9 @@ use App\Middleware\GuestMiddleware;
 use App\Middleware\JWTAuthMiddleware;
 use App\Middleware\LocaleMiddleware;
 use App\Middleware\PermissionMiddleware;
+use App\Middleware\EmpresaMiddleware;
+use App\Middleware\ApiRateLimitMiddleware;
+use App\Middleware\CorsMiddleware;
 
 return [
     'auth'       => AuthenticationMiddleware::class,
@@ -25,4 +28,7 @@ return [
     'locale'     => LocaleMiddleware::class,
     'jwt'        => JWTAuthMiddleware::class,
     'permission' => PermissionMiddleware::class,
+    'empresa'    => EmpresaMiddleware::class,
+    'api.rate'   => ApiRateLimitMiddleware::class,
+    'cors'       => CorsMiddleware::class,
 ];

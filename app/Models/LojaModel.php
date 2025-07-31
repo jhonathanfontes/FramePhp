@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Models;
@@ -58,5 +57,36 @@ class LojaModel extends Model
     {
         $data['updated_at'] = date('Y-m-d H:i:s');
         return $this->db->update($this->table, $data, 'id_loja = ?', [$id]);
+    }
+
+    public function createLoja($data)
+    {
+        return $this->create($data);
+    }
+
+    /**
+     * Busca uma loja pelo slug
+     */
+    public function findBySlug($slug)
+    {
+        try {
+            return $this->find('slug = ?', [$slug]);
+        } catch (\Exception $e) {
+            error_log("Erro ao buscar loja por slug: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Busca lojas ativas de uma empresa
+     */
+    public function findActiveByEmpresa($empresaId)
+    {
+        try {
+            return $this->findAll('empresa_id = ? AND status = ?', [$empresaId, 'ativo']);
+        } catch (\Exception $e) {
+            error_log("Erro ao buscar lojas ativas: " . $e->getMessage());
+            return [];
+        }
     }
 }
