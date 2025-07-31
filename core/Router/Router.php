@@ -97,10 +97,9 @@ class Router
     private function processRoute(RouteDefinition $route, Request $request): void
     {
         $middlewares = array_map([$this, 'resolveMiddleware'], $route->getMiddlewares());
-        $pipeline = new Pipeline();
+        $pipeline = new Pipeline($request);
 
-        $response = $pipeline->send($request)
-            ->through($middlewares)
+        $response = $pipeline->through($middlewares)
             ->then(function ($request) use ($route) {
                 $params = $route->getParams();
                 $callback = $route->getCallback();
