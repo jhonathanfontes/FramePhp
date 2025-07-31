@@ -1,0 +1,155 @@
+
+{% extends "layouts/app.html.twig" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/shop">Loja</a></li>
+            <li class="breadcrumb-item active">{{ produto.pro_nome }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Imagem do Produto -->
+        <div class="col-md-6">
+            {% if produto.pro_imagem %}
+            <img src="{{ produto.pro_imagem }}" class="img-fluid rounded shadow" alt="{{ produto.pro_nome }}">
+            {% else %}
+            <div class="bg-light rounded shadow d-flex align-items-center justify-content-center" style="height: 400px;">
+                <i class="fas fa-image fa-3x text-muted"></i>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Detalhes do Produto -->
+        <div class="col-md-6">
+            <h1 class="mb-3">{{ produto.pro_nome }}</h1>
+            
+            {% if produto.pro_sku %}
+            <p class="text-muted mb-2">SKU: {{ produto.pro_sku }}</p>
+            {% endif %}
+
+            <div class="mb-3">
+                {% if produto.pro_preco_promocional and produto.pro_preco_promocional > 0 %}
+                <h3 class="text-success mb-1">R$ {{ produto.pro_preco_promocional|number_format(2, ',', '.') }}</h3>
+                <p class="text-muted text-decoration-line-through">De: R$ {{ produto.pro_preco|number_format(2, ',', '.') }}</p>
+                {% else %}
+                <h3 class="text-primary">R$ {{ produto.pro_preco|number_format(2, ',', '.') }}</h3>
+                {% endif %}
+            </div>
+
+            {% if produto.pro_descricao %}
+            <div class="mb-4">
+                <h5>Descrição</h5>
+                <p>{{ produto.pro_descricao }}</p>
+            </div>
+            {% endif %}
+
+            {% if produto.pro_estoque > 0 %}
+            <div class="mb-3">
+                <span class="badge bg-success">{{ produto.pro_estoque }} em estoque</span>
+            </div>
+
+            <!-- Formulário de Compra -->
+            <form id="formCarrinho" class="mb-4">
+                <div class="row align-items-end">
+                    <div class="col-md-4">
+                        <label for="quantidade" class="form-label">Quantidade</label>
+                        <input type="number" id="quantidade" name="quantidade" class="form-control" value="1" min="1" max="{{ produto.pro_estoque }}">
+                    </div>
+                    <div class="col-md-8">
+                        <button type="button" class="btn btn-primary btn-lg w-100" onclick="adicionarAoCarrinho()">
+                            <i class="fas fa-shopping-cart me-2"></i>Adicionar ao Carrinho
+                        </button>
+                    </div>
+                </div>
+            </form>
+            {% else %}
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>Produto indisponível no momento
+            </div>
+            {% endif %}
+
+            <!-- Informações Adicionais -->
+            {% if produto.pro_peso or produto.pro_dimensoes %}
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Informações Técnicas</h6>
+                    {% if produto.pro_peso %}
+                    <p class="mb-1"><strong>Peso:</strong> {{ produto.pro_peso }}</p>
+                    {% endif %}
+                    {% if produto.pro_dimensoes %}
+                    <p class="mb-1"><strong>Dimensões:</strong> {{ produto.pro_dimensoes }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Produtos Relacionados -->
+    {% if produtos_relacionados|length > 0 %}
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3 class="mb-4">Produtos Relacionados</h3>
+            <div class="row">
+                {% for relacionado in produtos_relacionados %}
+                {% if relacionado.id_produto != produto.id_produto %}
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        {% if relacionado.pro_imagem %}
+                        <img src="{{ relacionado.pro_imagem }}" class="card-img-top" alt="{{ relacionado.pro_nome }}" style="height: 200px; object-fit: cover;">
+                        {% endif %}
+                        <div class="card-body d-flex flex-column">
+                            <h6 class="card-title">{{ relacionado.pro_nome }}</h6>
+                            <div class="mt-auto">
+                                <p class="text-primary fw-bold mb-2">R$ {{ relacionado.pro_preco|number_format(2, ',', '.') }}</p>
+                                <a href="/shop/produto/{{ relacionado.id_produto }}" class="btn btn-outline-primary btn-sm w-100">Ver Produto</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script>
+function adicionarAoCarrinho() {
+    const quantidade = document.getElementById('quantidade').value;
+    
+    fetch('/carrinho/adicionar', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'produto_id={{ produto.id_produto }}&quantidade=' + quantidade
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Produto adicionado ao carrinho!');
+            // Redirecionar para o carrinho ou continuar comprando
+            if (confirm('Produto adicionado! Deseja ir para o carrinho?')) {
+                window.location.href = '/carrinho';
+            }
+        } else {
+            alert('Erro ao adicionar produto: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        alert('Erro ao adicionar produto ao carrinho');
+    });
+}
+</script>
+{% endblock %}

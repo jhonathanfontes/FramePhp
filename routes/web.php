@@ -2,6 +2,8 @@
 
 use App\Controllers\Site\HomeController;
 use App\Controllers\Site\MailController;
+use App\Controllers\Site\ShopController;
+use App\Controllers\Site\CartController;
 use App\Controllers\Auth\AuthController;
 use App\Controllers\Admin\AdminController;
 use App\Controllers\Api\ApiController;
@@ -36,6 +38,19 @@ $router->middleware([LocaleMiddleware::class, CsrfMiddleware::class])
         $router->get('/home', [HomeController::class, 'index']);
         $router->get('/about', [HomeController::class, 'about'])->name('about');
         $router->get('/contact', [HomeController::class, 'contact'])->name('contact');
+        
+        // Rotas da Loja
+        $router->get('/shop', [ShopController::class, 'index'])->name('shop');
+        $router->get('/shop/categoria/{id}', [ShopController::class, 'categoria'])->name('shop.categoria');
+        $router->get('/shop/produto/{id}', [ShopController::class, 'produto'])->name('shop.produto');
+        $router->get('/shop/buscar', [ShopController::class, 'buscar'])->name('shop.buscar');
+        
+        // Rotas do Carrinho
+        $router->get('/carrinho', [CartController::class, 'index'])->name('carrinho');
+        $router->post('/carrinho/adicionar', [CartController::class, 'adicionar'])->name('carrinho.adicionar');
+        $router->post('/carrinho/atualizar', [CartController::class, 'atualizar'])->name('carrinho.atualizar');
+        $router->get('/carrinho/remover/{id}', [CartController::class, 'remover'])->name('carrinho.remover');
+        $router->get('/carrinho/limpar', [CartController::class, 'limpar'])->name('carrinho.limpar');
     });
 
 // Rotas de autenticação (apenas para visitantes)

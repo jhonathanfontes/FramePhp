@@ -1,0 +1,129 @@
+
+{% extends "layouts/app.html.twig" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">Carrinho de Compras</h1>
+            
+            {% if itens|length > 0 %}
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Produto</th>
+                                            <th>Preço</th>
+                                            <th>Quantidade</th>
+                                            <th>Subtotal</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in itens %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    {% if item.produto.pro_imagem %}
+                                                    <img src="{{ item.produto.pro_imagem }}" alt="{{ item.produto.pro_nome }}" class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                                                    {% endif %}
+                                                    <div>
+                                                        <h6 class="mb-0">{{ item.produto.pro_nome }}</h6>
+                                                        {% if item.produto.pro_sku %}
+                                                        <small class="text-muted">SKU: {{ item.produto.pro_sku }}</small>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>R$ {{ item.produto.pro_preco|number_format(2, ',', '.') }}</td>
+                                            <td>
+                                                <form method="POST" action="/carrinho/atualizar" class="d-flex align-items-center">
+                                                    <input type="hidden" name="produto_id" value="{{ item.produto.id_produto }}">
+                                                    <input type="number" name="quantidade" value="{{ item.quantidade }}" min="1" max="{{ item.produto.pro_estoque }}" class="form-control me-2" style="width: 80px;" onchange="this.form.submit()">
+                                                </form>
+                                            </td>
+                                            <td class="fw-bold">R$ {{ item.subtotal|number_format(2, ',', '.') }}</td>
+                                            <td>
+                                                <a href="/carrinho/remover/{{ item.produto.id_produto }}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Remover este item do carrinho?')">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Resumo do Pedido</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Subtotal:</span>
+                                <span>R$ {{ total|number_format(2, ',', '.') }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Frete:</span>
+                                <span class="text-muted">A calcular</span>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between mb-3">
+                                <strong>Total:</strong>
+                                <strong class="text-primary">R$ {{ total|number_format(2, ',', '.') }}</strong>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <a href="/checkout" class="btn btn-primary btn-lg">Finalizar Compra</a>
+                                <a href="/shop" class="btn btn-outline-secondary">Continuar Comprando</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cupom de Desconto -->
+                    <div class="card mt-3">
+                        <div class="card-body">
+                            <h6 class="card-title">Cupom de Desconto</h6>
+                            <form>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="Digite seu cupom">
+                                    <button type="submit" class="btn btn-outline-primary">Aplicar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="text-center">
+                        <a href="/carrinho/limpar" class="btn btn-outline-danger" onclick="return confirm('Tem certeza que deseja limpar o carrinho?')">
+                            <i class="fas fa-trash me-2"></i>Limpar Carrinho
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                <h3>Seu carrinho está vazio</h3>
+                <p class="text-muted mb-4">Adicione alguns produtos para começar suas compras</p>
+                <a href="/shop" class="btn btn-primary btn-lg">Continuar Comprando</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
