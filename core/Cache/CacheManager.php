@@ -4,124 +4,91 @@ namespace Core\Cache;
 
 class CacheManager
 {
-    private static $instance = null;
-    private $driver = 'file'; // Padrão: arquivo
-    private $redis = null;
-    
+    private static ?self $instance = null;
+    private string $cacheDir;
+    private int $defaultTtl = 3600; // 1 hora
+
     private function __construct()
     {
-        // Verificar se Redis está disponível
-        if (extension_loaded('redis')) {
-            try {
-                $this->redis = new \Redis();
-                $host = getenv('REDIS_HOST') ?: '127.0.0.1';
-                $port = getenv('REDIS_PORT') ?: 6379;
-                if ($this->redis->connect($host, $port)) {
-                    $this->driver = 'redis';
-                }
-            } catch (\Exception $e) {
-                error_log('Redis não disponível: ' . $e->getMessage());
-            }
-        }
-        // Verificar se APCu está disponível como fallback
-        elseif (extension_loaded('apcu') && apcu_enabled()) {
-            $this->driver = 'apcu';
+        $this->cacheDir = BASE_PATH . '/storage/cache';
+        if (!is_dir($this->cacheDir)) {
+            mkdir($this->cacheDir, 0755, true);
         }
     }
-    
-    public static function getInstance()
+
+    public static function getInstance(): self
     {
         if (self::$instance === null) {
             self::$instance = new self();
         }
         return self::$instance;
     }
-    
+
     public function get(string $key, $default = null)
     {
-        switch ($this->driver) {
-            case 'redis':
-                $value = $this->redis->get($key);
-                return $value !== false ? json_decode($value, true) : $default;
-            case 'apcu':
-                $success = false;
-                $value = apcu_fetch($key, $success);
-                return $success ? $value : $default;
-            default:
-                // Implementação baseada em arquivo
-                $cacheFile = $this->getCacheFilePath($key);
-                if (file_exists($cacheFile) && is_readable($cacheFile)) {
-                    $content = file_get_contents($cacheFile);
-                    $data = json_decode($content, true);
-                    if ($data && isset($data['expiry']) && $data['expiry'] > time()) {
-                        return $data['value'];
-                    }
-                }
-                return $default;
+        $file = $this->getCacheFile($key);
+
+        if (!file_exists($file)) {
+            return $default;
         }
+
+        $data = unserialize(file_get_contents($file));
+
+        if ($data['expires'] < time()) {
+            unlink($file);
+            return $default;
+        }
+
+        return $data['value'];
     }
-    
-    public function set(string $key, $value, int $ttl = 3600): bool
+
+    public function set(string $key, $value, ?int $ttl = null): bool
     {
-        switch ($this->driver) {
-            case 'redis':
-                return $this->redis->setex($key, $ttl, json_encode($value));
-            case 'apcu':
-                return apcu_store($key, $value, $ttl);
-            default:
-                // Implementação baseada em arquivo
-                $cacheFile = $this->getCacheFilePath($key);
-                $cacheDir = dirname($cacheFile);
-                if (!is_dir($cacheDir)) {
-                    mkdir($cacheDir, 0777, true);
-                }
-                $data = [
-                    'value' => $value,
-                    'expiry' => time() + $ttl
-                ];
-                return file_put_contents($cacheFile, json_encode($data)) !== false;
-        }
+        $ttl = $ttl ?? $this->defaultTtl;
+        $file = $this->getCacheFile($key);
+
+        $data = [
+            'value' => $value,
+            'expires' => time() + $ttl
+        ];
+
+        return file_put_contents($file, serialize($data)) !== false;
     }
-    
+
     public function delete(string $key): bool
     {
-        switch ($this->driver) {
-            case 'redis':
-                return $this->redis->del($key) > 0;
-            case 'apcu':
-                return apcu_delete($key);
-            default:
-                $cacheFile = $this->getCacheFilePath($key);
-                if (file_exists($cacheFile)) {
-                    return unlink($cacheFile);
-                }
-                return false;
+        $file = $this->getCacheFile($key);
+
+        if (file_exists($file)) {
+            return unlink($file);
         }
+
+        return true;
     }
-    
-    public function increment(string $key, int $step = 1): int
+
+    public function clear(): bool
     {
-        switch ($this->driver) {
-            case 'redis':
-                return $this->redis->incrBy($key, $step);
-            case 'apcu':
-                return apcu_inc($key, $step) ?: $step;
-            default:
-                $value = (int) $this->get($key, 0);
-                $newValue = $value + $step;
-                $this->set($key, $newValue);
-                return $newValue;
+        $files = glob($this->cacheDir . '/*.cache');
+        foreach ($files as $file) {
+            unlink($file);
         }
+        return true;
     }
-    
-    private function getCacheFilePath(string $key): string
+
+    public function remember(string $key, callable $callback, ?int $ttl = null)
     {
-        $safeKey = preg_replace('/[^a-zA-Z0-9_-]/', '_', $key);
-        return BASE_PATH . '/storage/cache/' . $safeKey . '.cache';
+        $value = $this->get($key);
+
+        if ($value === null) {
+            $value = $callback();
+            $this->set($key, $value, $ttl);
+        }
+
+        return $value;
     }
-    
-    public function getDriver(): string
+
+    private function getCacheFile(string $key): string
     {
-        return $this->driver;
+        return $this->cacheDir . '/' . md5($key) . '.cache';
     }
 }

@@ -1,105 +1,132 @@
+
 <?php
 
 namespace Core\Validation;
 
-use Core\Database\Database;
-
 class Validator
 {
-    protected array $data;
-    protected array $rules;
-    protected array $errors = [];
-    protected Database $db;
+    private array $data = [];
+    private array $rules = [];
+    private array $errors = [];
+    private array $customMessages = [];
 
-    public function __construct(array $data, array $rules)
+    public function __construct(array $data = [])
     {
         $this->data = $data;
+    }
+
+    public function validate(array $rules, array $messages = []): bool
+    {
         $this->rules = $rules;
-        $this->db = Database::getInstance();
-        $this->validate();
+        $this->customMessages = $messages;
+        $this->errors = [];
+
+        foreach ($rules as $field => $fieldRules) {
+            $this->validateField($field, $fieldRules);
+        }
+
+        return empty($this->errors);
     }
 
-    /**
-     * Método de fábrica estático para criar uma instância.
-     */
-    public static function make(array $data, array $rules): self
-    {
-        return new self($data, $rules);
-    }
-
-    /**
-     * Retorna true se a validação falhou.
-     */
-    public function fails(): bool
-    {
-        return !empty($this->errors);
-    }
-
-    /**
-     * Retorna o array de erros.
-     */
     public function getErrors(): array
     {
         return $this->errors;
     }
 
-    /**
-     * Itera sobre as regras e executa a validação.
-     */
-    protected function validate(): void
+    public function getFirstError(): ?string
     {
-        foreach ($this->rules as $field => $fieldRules) {
-            $rules = explode('|', $fieldRules);
-            $value = $this->data[$field] ?? null;
+        return !empty($this->errors) ? reset($this->errors)[0] : null;
+    }
 
-            foreach ($rules as $rule) {
-                [$ruleName, $params] = array_pad(explode(':', $rule, 2), 2, '');
-                $method = 'validate' . ucfirst($ruleName);
-                
-                if (method_exists($this, $method)) {
-                    $this->$method($field, $value, explode(',', $params));
+    private function validateField(string $field, string $rules): void
+    {
+        $rulesArray = explode('|', $rules);
+        $value = $this->data[$field] ?? null;
+
+        foreach ($rulesArray as $rule) {
+            $this->applyRule($field, $value, $rule);
+        }
+    }
+
+    private function applyRule(string $field, $value, string $rule): void
+    {
+        $parameters = [];
+        
+        if (strpos($rule, ':') !== false) {
+            [$rule, $paramString] = explode(':', $rule, 2);
+            $parameters = explode(',', $paramString);
+        }
+
+        switch ($rule) {
+            case 'required':
+                if (empty($value) && $value !== '0') {
+                    $this->addError($field, "O campo {$field} é obrigatório.");
                 }
-            }
+                break;
+
+            case 'email':
+                if (!empty($value) && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                    $this->addError($field, "O campo {$field} deve ser um email válido.");
+                }
+                break;
+
+            case 'min':
+                $min = (int)$parameters[0];
+                if (!empty($value) && strlen($value) < $min) {
+                    $this->addError($field, "O campo {$field} deve ter pelo menos {$min} caracteres.");
+                }
+                break;
+
+            case 'max':
+                $max = (int)$parameters[0];
+                if (!empty($value) && strlen($value) > $max) {
+                    $this->addError($field, "O campo {$field} deve ter no máximo {$max} caracteres.");
+                }
+                break;
+
+            case 'numeric':
+                if (!empty($value) && !is_numeric($value)) {
+                    $this->addError($field, "O campo {$field} deve ser numérico.");
+                }
+                break;
+
+            case 'alpha':
+                if (!empty($value) && !ctype_alpha($value)) {
+                    $this->addError($field, "O campo {$field} deve conter apenas letras.");
+                }
+                break;
+
+            case 'alphanumeric':
+                if (!empty($value) && !ctype_alnum($value)) {
+                    $this->addError($field, "O campo {$field} deve conter apenas letras e números.");
+                }
+                break;
+
+            case 'confirmed':
+                $confirmField = $field . '_confirmation';
+                if ($value !== ($this->data[$confirmField] ?? null)) {
+                    $this->addError($field, "A confirmação do campo {$field} não confere.");
+                }
+                break;
+
+            case 'unique':
+                // Implementar validação de unicidade no banco
+                break;
         }
     }
 
-    protected function addError(string $field, string $message): void
+    private function addError(string $field, string $message): void
     {
-        // Adiciona erro apenas para o primeiro erro encontrado no campo
         if (!isset($this->errors[$field])) {
-            $this->errors[$field] = $message;
+            $this->errors[$field] = [];
         }
+        
+        $customMessage = $this->customMessages["{$field}.{$this->getCurrentRule()}"] ?? $message;
+        $this->errors[$field][] = $customMessage;
     }
 
-    // --- MÉTODOS DE VALIDAÇÃO ---
-
-    protected function validateRequired(string $field, $value): void
+    private function getCurrentRule(): string
     {
-        if (is_null($value) || (is_string($value) && trim($value) === '')) {
-            $this->addError($field, "Este campo é obrigatório.");
-        }
-    }
-
-    protected function validateEmail(string $field, $value): void
-    {
-        if ($value && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
-            $this->addError($field, "Por favor, insira um e-mail válido.");
-        }
-    }
-
-    protected function validateMin(string $field, $value, array $params): void
-    {
-        $min = $params[0] ?? 0;
-        if (strlen($value) < $min) {
-            $this->addError($field, "Este campo deve ter no mínimo {$min} caracteres.");
-        }
-    }
-
-    protected function validateConfirmed(string $field, $value): void
-    {
-        $confirmationField = $field . '_confirmation';
-        if ($value !== ($this->data[$confirmationField] ?? null)) {
-            $this->addError($field, 'A confirmação de senha não confere.');
-        }
+        return 'default';
     }
 }
