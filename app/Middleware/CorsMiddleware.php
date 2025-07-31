@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Middleware;
@@ -6,39 +5,6 @@ namespace App\Middleware;
 use Core\Http\Request;
 use Core\Http\Response;
 use Core\Interface\MiddlewareInterface;
-
-class CorsMiddleware implements MiddlewareInterface
-{
-    public function handle(Request $request, \Closure $next): Response
-    {
-        // Se for uma requisição OPTIONS (preflight), responder diretamente
-        if ($request->getMethod() === 'OPTIONS') {
-            return new Response('', 200, [
-                'Access-Control-Allow-Origin' => '*',
-                'Access-Control-Allow-Methods' => 'GET, POST, PUT, DELETE, OPTIONS',
-                'Access-Control-Allow-Headers' => 'Content-Type, Authorization, X-Requested-With',
-                'Access-Control-Max-Age' => '86400'
-            ]);
-        }
-
-        // Continuar com a requisição
-        $response = $next($request);
-        
-        // Garantir que temos um objeto Response
-        if (!$response instanceof Response) {
-            $response = new Response((string) $response);
-        }
-
-        // Adicionar headers CORS à resposta
-        $response->addHeaders([
-            'Access-Control-Allow-Origin' => '*',
-            'Access-Control-Allow-Methods' => 'GET, POST, PUT, DELETE, OPTIONS',
-            'Access-Control-Allow-Headers' => 'Content-Type, Authorization, X-Requested-With'
-        ]);
-
-        return $response;
-    }
-}
 
 class CorsMiddleware implements MiddlewareInterface
 {

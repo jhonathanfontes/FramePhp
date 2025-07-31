@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Middleware;
@@ -9,45 +8,6 @@ use Core\Interface\MiddlewareInterface;
 use Core\Auth\Auth;
 use App\Models\EmpresaModel;
 use App\Models\LojaModel;
-
-class EmpresaMiddleware implements MiddlewareInterface
-{
-    public function handle(Request $request, \Closure $next): Response
-    {
-        $user = Auth::user();
-        
-        if (!$user) {
-            return Response::redirectResponse(base_url('auth/login'));
-        }
-
-        // Verificar se o usuário tem empresa associada
-        if (empty($user['empresa_id'])) {
-            return new Response('Usuário não possui empresa associada', 403);
-        }
-
-        try {
-            $empresaModel = new EmpresaModel();
-            $empresa = $empresaModel->find($user['empresa_id']);
-            
-            if (!$empresa) {
-                return new Response('Empresa não encontrada', 404);
-            }
-
-            // Adicionar empresa ao request para uso posterior
-            $request->setAttribute('empresa', $empresa);
-            
-            // Buscar lojas da empresa
-            $lojaModel = new LojaModel();
-            $lojas = $lojaModel->getByEmpresa($user['empresa_id']);
-            $request->setAttribute('lojas', $lojas);
-
-            return $next($request);
-            
-        } catch (\Exception $e) {
-            return new Response('Erro ao verificar empresa: ' . $e->getMessage(), 500);
-        }
-    }
-}
 
 class EmpresaMiddleware implements MiddlewareInterface
 {
