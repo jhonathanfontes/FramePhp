@@ -37,12 +37,16 @@ class Pipeline
     {
         return function ($stack, $pipe) {
             return function ($passable) use ($stack, $pipe) {
-                if (is_string($pipe)) {
+                // Se for um array [classe, parâmetros], extrair a classe e parâmetros
+                if (is_array($pipe)) {
+                    [$className, $params] = $pipe;
+                    $pipe = new $className(...($params ?? []));
+                } elseif (is_string($pipe)) {
                     $pipe = new $pipe();
                 }
 
                 if (!$pipe instanceof MiddlewareInterface) {
-                    throw new \InvalidArgumentException('Middleware deve implementar MiddlewareInterface');
+                    throw new \InvalidArgumentException("Middleware deve implementar MiddlewareInterface: " . get_class($pipe));
                 }
 
                 return $pipe->handle($passable, $stack);
