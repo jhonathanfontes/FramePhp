@@ -1,0 +1,128 @@
+
+<?php
+
+namespace App\Controllers\Admin;
+
+use Core\Controller\BaseController;
+use App\Models\EmpresaModel;
+use App\Models\LojaModel;
+use App\Models\PedidoModel;
+use App\Models\CadProdutoModel;
+
+class ReportController extends BaseController
+{
+    private $empresaModel;
+    private $lojaModel;
+    private $pedidoModel;
+    private $produtoModel;
+
+    public function __construct()
+    {
+        $this->empresaModel = new EmpresaModel();
+        $this->lojaModel = new LojaModel();
+        $this->pedidoModel = new PedidoModel();
+        $this->produtoModel = new CadProdutoModel();
+    }
+
+    public function index()
+    {
+        return $this->render('pages/admin/reports/index');
+    }
+
+    // Relatório de Vendas (Retrato)
+    public function vendas()
+    {
+        $dataInicio = $_GET['data_inicio'] ?? date('Y-m-01');
+        $dataFim = $_GET['data_fim'] ?? date('Y-m-t');
+        $empresaId = $_GET['empresa_id'] ?? null;
+
+        $empresa = null;
+        if ($empresaId) {
+            $empresa = $this->empresaModel->findById($empresaId);
+        }
+
+        $vendas = $this->pedidoModel->getVendasPorPeriodo($dataInicio, $dataFim, $empresaId);
+        $totais = $this->pedidoModel->getTotaisVendas($dataInicio, $dataFim, $empresaId);
+
+        return $this->render('pages/admin/reports/vendas', [
+            'title' => 'Relatório de Vendas',
+            'orientation' => 'portrait',
+            'period' => date('d/m/Y', strtotime($dataInicio)) . ' a ' . date('d/m/Y', strtotime($dataFim)),
+            'company' => $empresa,
+            'vendas' => $vendas,
+            'totais' => $totais,
+            'data_inicio' => $dataInicio,
+            'data_fim' => $dataFim
+        ]);
+    }
+
+    // Relatório de Produtos (Paisagem)
+    public function produtos()
+    {
+        $empresaId = $_GET['empresa_id'] ?? null;
+        $categoria = $_GET['categoria'] ?? null;
+
+        $empresa = null;
+        if ($empresaId) {
+            $empresa = $this->empresaModel->findById($empresaId);
+        }
+
+        $produtos = $this->produtoModel->getRelatorioCompleto($empresaId, $categoria);
+        $estatisticas = $this->produtoModel->getEstatisticasProdutos($empresaId);
+
+        return $this->render('pages/admin/reports/produtos', [
+            'title' => 'Relatório de Produtos',
+            'orientation' => 'landscape',
+            'period' => 'Atualizado em ' . date('d/m/Y H:i:s'),
+            'company' => $empresa,
+            'produtos' => $produtos,
+            'estatisticas' => $estatisticas
+        ]);
+    }
+
+    // Relatório Financeiro (Retrato)
+    public function financeiro()
+    {
+        $dataInicio = $_GET['data_inicio'] ?? date('Y-m-01');
+        $dataFim = $_GET['data_fim'] ?? date('Y-m-t');
+        $empresaId = $_GET['empresa_id'] ?? null;
+
+        $empresa = null;
+        if ($empresaId) {
+            $empresa = $this->empresaModel->findById($empresaId);
+        }
+
+        $receitas = $this->pedidoModel->getReceitasPorPeriodo($dataInicio, $dataFim, $empresaId);
+        $resumoFinanceiro = $this->pedidoModel->getResumoFinanceiro($dataInicio, $dataFim, $empresaId);
+
+        return $this->render('pages/admin/reports/financeiro', [
+            'title' => 'Relatório Financeiro',
+            'orientation' => 'portrait',
+            'period' => date('d/m/Y', strtotime($dataInicio)) . ' a ' . date('d/m/Y', strtotime($dataFim)),
+            'company' => $empresa,
+            'receitas' => $receitas,
+            'resumo' => $resumoFinanceiro,
+            'data_inicio' => $dataInicio,
+            'data_fim' => $dataFim
+        ]);
+    }
+
+    // Relatório de Empresas (Paisagem)
+    public function empresas()
+    {
+        $empresas = $this->empresaModel->getRelatorioEmpresas();
+        $estatisticas = $this->empresaModel->getEstatisticasGerais();
+
+        return $this->render('pages/admin/reports/empresas', [
+            'title' => 'Relatório de Empresas',
+            'orientation' => 'landscape',
+            'period' => 'Atualizado em ' . date('d/m/Y H:i:s'),
+            'company' => [
+                'nome_fantasia' => 'Sistema Multi-Empresas',
+                'endereco' => 'Relatório Administrativo'
+            ],
+            'empresas' => $empresas,
+            'estatisticas' => $estatisticas
+        ]);
+    }
+}

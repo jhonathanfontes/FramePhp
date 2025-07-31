@@ -1,0 +1,100 @@
+
+{% extends 'layouts/reports.html.twig' %}
+
+{% block content %}
+<!-- Estatísticas gerais -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-value">{{ estatisticas.total_produtos | default(0) }}</div>
+        <div class="stat-label">Total de Produtos</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ estatisticas.produtos_ativos | default(0) }}</div>
+        <div class="stat-label">Produtos Ativos</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ estatisticas.categorias | default(0) }}</div>
+        <div class="stat-label">Categorias</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">R$ {{ estatisticas.valor_medio | default(0) | number_format(2, ',', '.') }}</div>
+        <div class="stat-label">Preço Médio</div>
+    </div>
+</div>
+
+<!-- Tabela de produtos (layout paisagem permite mais colunas) -->
+<table class="report-table">
+    <thead>
+        <tr>
+            <th>Código</th>
+            <th>Nome</th>
+            <th>Categoria</th>
+            <th>Fabricante</th>
+            <th class="text-right">Preço Custo</th>
+            <th class="text-right">Preço Venda</th>
+            <th class="text-center">Estoque</th>
+            <th class="text-center">Status</th>
+            <th>Última Atualização</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for produto in produtos %}
+        <tr>
+            <td class="text-center">{{ produto.codigo | default('-') }}</td>
+            <td>{{ produto.nome }}</td>
+            <td>{{ produto.categoria_nome | default('-') }}</td>
+            <td>{{ produto.fabricante_nome | default('-') }}</td>
+            <td class="text-currency">R$ {{ produto.preco_custo | default(0) | number_format(2, ',', '.') }}</td>
+            <td class="text-currency">R$ {{ produto.preco_venda | default(0) | number_format(2, ',', '.') }}</td>
+            <td class="text-center">{{ produto.estoque | default(0) }}</td>
+            <td class="text-center">
+                <span class="status-{{ produto.status | lower }}">
+                    {{ produto.status | upper }}
+                </span>
+            </td>
+            <td class="text-date">{{ produto.updated_at | date('d/m/Y') }}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="9" class="text-center">Nenhum produto encontrado</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Resumo por categoria -->
+{% if estatisticas.por_categoria %}
+<div style="margin-top: 30px;">
+    <h4>Resumo por Categoria:</h4>
+    <table class="report-table" style="width: 50%;">
+        <thead>
+            <tr>
+                <th>Categoria</th>
+                <th class="text-center">Quantidade</th>
+                <th class="text-right">Valor Médio</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for categoria in estatisticas.por_categoria %}
+            <tr>
+                <td>{{ categoria.nome }}</td>
+                <td class="text-center">{{ categoria.quantidade }}</td>
+                <td class="text-currency">R$ {{ categoria.valor_medio | number_format(2, ',', '.') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<!-- Observações -->
+<div style="margin-top: 30px; padding: 15px; background: #f8f9fa; border-left: 4px solid #28a745;">
+    <h4>Observações:</h4>
+    <ul>
+        <li>Relatório em formato paisagem para melhor visualização</li>
+        <li>Produtos ordenados por nome</li>
+        <li>Preços atualizados conforme última modificação</li>
+        <li>Status: ATIVO = Disponível para venda, INATIVO = Fora de linha</li>
+    </ul>
+</div>
+{% endblock %}

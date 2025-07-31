@@ -39,3 +39,36 @@ $router->middleware(['auth.admin']) // Middleware para proteger rotas de admin
             $router->get('/submenus/{id}/destroy', [MenuController::class, 'destroySubmenu'])->name('admin.menus.submenus.destroy');
         });
     });
+<?php
+
+use App\Controllers\Admin\AdminController;
+use App\Controllers\Admin\EmpresaController;
+use App\Controllers\Admin\ReportController;
+use App\Middleware\AuthenticationMiddleware;
+
+// Aplicar middleware de autenticação para todas as rotas admin
+$router->middleware([AuthenticationMiddleware::class])
+    ->group(['prefix' => 'admin'], function ($router) {
+        
+        // Dashboard administrativo
+        $router->get('/', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+        $router->get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard.alt');
+
+        // Gestão de empresas
+        $router->group(['prefix' => 'empresas'], function ($router) {
+            $router->get('/', [EmpresaController::class, 'index'])->name('admin.empresas');
+            $router->get('/create', [EmpresaController::class, 'create'])->name('admin.empresas.create');
+            $router->post('/', [EmpresaController::class, 'store'])->name('admin.empresas.store');
+            $router->get('/{id}/edit', [EmpresaController::class, 'edit'])->name('admin.empresas.edit');
+            $router->put('/{id}', [EmpresaController::class, 'update'])->name('admin.empresas.update');
+        });
+
+        // Sistema de relatórios
+        $router->group(['prefix' => 'reports'], function ($router) {
+            $router->get('/', [ReportController::class, 'index'])->name('admin.reports');
+            $router->get('/vendas', [ReportController::class, 'vendas'])->name('admin.reports.vendas');
+            $router->get('/produtos', [ReportController::class, 'produtos'])->name('admin.reports.produtos');
+            $router->get('/financeiro', [ReportController::class, 'financeiro'])->name('admin.reports.financeiro');
+            $router->get('/empresas', [ReportController::class, 'empresas'])->name('admin.reports.empresas');
+        });
+    });
