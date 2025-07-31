@@ -14,6 +14,24 @@ class Validator
         $this->data = $data;
     }
 
+    /**
+     * Método estático para criar uma instância do validador e validar dados
+     */
+    public static function make(array $data, array $rules, array $messages = []): self
+    {
+        $validator = new self($data);
+        $validator->validate($rules, $messages);
+        return $validator;
+    }
+
+    /**
+     * Verifica se houve falhas na validação
+     */
+    public function fails(): bool
+    {
+        return !empty($this->errors);
+    }
+
     public function validate(array $rules, array $messages = []): bool
     {
         $this->rules = $rules;
