@@ -20,13 +20,13 @@ $router->group(['middleware' => ['locale', 'csrf']], function ($router) {
     $router->get('/', [HomeController::class, 'index'])->name('home');
 
     // Páginas institucionais
-        
+        $router->get('/sobre', [ClientController::class, 'sobre'])->name('client.sobre');
         $router->get('/contato', [ClientController::class, 'contato'])->name('client.contato');
         $router->post('/contato/enviar', [ClientController::class, 'enviarContato'])->name('client.contato.enviar');
         $router->get('/loja', [ClientController::class, 'loja'])->name('client.loja');
 });
 
-$router->get('/sobre', [ClientController::class, 'sobre'])->name('client.sobre');
+
 
 // Rotas de autenticação (apenas para convidados/não logados)
 $router->group(['middleware' => ['guest', 'csrf']], function ($router) {
