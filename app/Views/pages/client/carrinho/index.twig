@@ -1,0 +1,242 @@
+
+{% extends "layouts/store.html.twig" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header do carrinho -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h2 mb-3">Carrinho de Compras</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/client">Início</a></li>
+                    <li class="breadcrumb-item active">Carrinho</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    {% if itens_carrinho|length > 0 %}
+    <div class="row">
+        <!-- Itens do carrinho -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Seus produtos ({{ itens_carrinho|length }} itens)</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% for item in itens_carrinho %}
+                    <div class="cart-item border-bottom p-3" data-produto-id="{{ item.produto.id_produto }}">
+                        <div class="row align-items-center">
+                            <div class="col-md-2">
+                                <img src="{{ item.produto.pro_imagem ?? '/assets/images/produto-sem-foto.jpg' }}" 
+                                     class="img-fluid rounded" alt="{{ item.produto.pro_nome }}">
+                            </div>
+                            <div class="col-md-4">
+                                <h6 class="mb-1">{{ item.produto.pro_nome }}</h6>
+                                <p class="text-muted small mb-0">{{ item.produto.pro_descricao|slice(0, 50) }}...</p>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="input-group input-group-sm">
+                                    <button class="btn btn-outline-secondary qty-btn" type="button" data-action="decrease">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <input type="number" class="form-control text-center qty-input" 
+                                           value="{{ item.quantidade }}" min="1" max="99">
+                                    <button class="btn btn-outline-secondary qty-btn" type="button" data-action="increase">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-2 text-center">
+                                <span class="item-price fw-bold">R$ {{ item.produto.pro_preco|number_format(2, ',', '.') }}</span>
+                            </div>
+                            <div class="col-md-2 text-center">
+                                <span class="item-subtotal fw-bold text-primary">R$ {{ item.subtotal|number_format(2, ',', '.') }}</span>
+                                <br>
+                                <button class="btn btn-sm btn-outline-danger mt-1 remove-item" 
+                                        data-produto-id="{{ item.produto.id_produto }}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Botões de ação -->
+            <div class="mt-3">
+                <a href="/client/loja" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left me-2"></i>Continuar comprando
+                </a>
+                <button class="btn btn-outline-secondary ms-2" id="clearCart">
+                    <i class="fas fa-trash me-2"></i>Limpar carrinho
+                </button>
+            </div>
+        </div>
+
+        <!-- Resumo do pedido -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Resumo do pedido</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal:</span>
+                        <span id="cartSubtotal">R$ {{ total|number_format(2, ',', '.') }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Frete:</span>
+                        <span class="text-success">Grátis</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-3">
+                        <strong>Total:</strong>
+                        <strong class="text-primary" id="cartTotal">R$ {{ total|number_format(2, ',', '.') }}</strong>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="/client/checkout" class="btn btn-primary btn-lg">
+                            <i class="fas fa-credit-card me-2"></i>Finalizar compra
+                        </a>
+                        <button class="btn btn-outline-info" data-bs-toggle="collapse" data-bs-target="#couponForm">
+                            <i class="fas fa-tag me-2"></i>Cupom de desconto
+                        </button>
+                    </div>
+
+                    <!-- Formulário de cupom -->
+                    <div class="collapse mt-3" id="couponForm">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Digite o cupom" id="couponCode">
+                            <button class="btn btn-outline-primary" type="button" id="applyCoupon">
+                                Aplicar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informações de segurança -->
+            <div class="card mt-3">
+                <div class="card-body text-center">
+                    <h6>Compra segura</h6>
+                    <div class="d-flex justify-content-center align-items-center">
+                        <i class="fas fa-shield-alt text-success me-2"></i>
+                        <small class="text-muted">Seus dados estão protegidos</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- Carrinho vazio -->
+    <div class="row">
+        <div class="col-12 text-center py-5">
+            <div class="empty-cart">
+                <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+                <h3>Seu carrinho está vazio</h3>
+                <p class="text-muted mb-4">Que tal adicionar alguns produtos?</p>
+                <a href="/client/loja" class="btn btn-primary btn-lg">
+                    <i class="fas fa-store me-2"></i>Ver produtos
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.cart-item:hover {
+    background-color: #f8f9fa;
+}
+
+.qty-input {
+    width: 60px;
+}
+
+.empty-cart {
+    padding: 60px 20px;
+}
+</style>
+
+<script>
+// Atualizar quantidade
+document.querySelectorAll('.qty-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const action = this.dataset.action;
+        const input = this.closest('.input-group').querySelector('.qty-input');
+        const currentValue = parseInt(input.value);
+        
+        if (action === 'increase') {
+            input.value = currentValue + 1;
+        } else if (action === 'decrease' && currentValue > 1) {
+            input.value = currentValue - 1;
+        }
+        
+        updateCartItem(input);
+    });
+});
+
+// Atualizar quantidade via input
+document.querySelectorAll('.qty-input').forEach(input => {
+    input.addEventListener('change', function() {
+        if (this.value < 1) this.value = 1;
+        updateCartItem(this);
+    });
+});
+
+// Remover item
+document.querySelectorAll('.remove-item').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const produtoId = this.dataset.produtoId;
+        if (confirm('Tem certeza que deseja remover este item?')) {
+            window.location.href = `/client/carrinho/remover/${produtoId}`;
+        }
+    });
+});
+
+// Limpar carrinho
+document.getElementById('clearCart')?.addEventListener('click', function() {
+    if (confirm('Tem certeza que deseja limpar todo o carrinho?')) {
+        // Implementar limpeza do carrinho
+        window.location.href = '/client/carrinho/limpar';
+    }
+});
+
+function updateCartItem(input) {
+    const cartItem = input.closest('.cart-item');
+    const produtoId = cartItem.dataset.produtoId;
+    const quantidade = input.value;
+    
+    fetch('/client/carrinho/atualizar', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `produto_id=${produtoId}&quantidade=${quantidade}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Recarregar página para atualizar totais
+            window.location.reload();
+        } else {
+            alert('Erro ao atualizar carrinho');
+        }
+    });
+}
+
+// Aplicar cupom
+document.getElementById('applyCoupon')?.addEventListener('click', function() {
+    const couponCode = document.getElementById('couponCode').value;
+    if (couponCode.trim()) {
+        // Implementar aplicação de cupom
+        alert('Funcionalidade de cupom será implementada em breve');
+    }
+});
+</script>
+{% endblock %}

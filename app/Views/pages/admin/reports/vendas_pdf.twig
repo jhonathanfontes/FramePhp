@@ -1,0 +1,46 @@
+
+<style>
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; font-weight: bold; }
+    .text-right { text-align: right; }
+    .text-center { text-align: center; }
+    .totals { background-color: #f9f9f9; font-weight: bold; }
+    h3 { color: #333; margin: 20px 0 10px 0; }
+</style>
+
+<h3>{{ __('reports.sales_summary') }}</h3>
+<table>
+    <tr>
+        <td><strong>{{ __('reports.total_orders') }}:</strong></td>
+        <td class="text-right">{{ totais.total_pedidos ?? 0 }}</td>
+    </tr>
+    <tr>
+        <td><strong>{{ __('reports.total_amount') }}:</strong></td>
+        <td class="text-right">R$ {{ totais.total_valor|number_format(2, ',', '.') }}</td>
+    </tr>
+</table>
+
+<h3>{{ __('reports.sales_details') }}</h3>
+<table>
+    <thead>
+        <tr>
+            <th>{{ __('reports.order_id') }}</th>
+            <th>{{ __('reports.date') }}</th>
+            <th>{{ __('reports.customer') }}</th>
+            <th>{{ __('reports.status') }}</th>
+            <th class="text-right">{{ __('reports.amount') }}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for venda in vendas %}
+        <tr>
+            <td class="text-center">#{{ venda.id }}</td>
+            <td>{{ venda.data_pedido|date('d/m/Y') }}</td>
+            <td>{{ venda.cliente_nome }}</td>
+            <td class="text-center">{{ venda.status }}</td>
+            <td class="text-right">R$ {{ venda.total|number_format(2, ',', '.') }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

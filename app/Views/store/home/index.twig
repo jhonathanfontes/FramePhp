@@ -1,0 +1,76 @@
+
+{% extends 'layouts/store.html.twig' %}
+
+{% block title %}{{ loja.nome_loja }} - Loja Online{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <h1>Bem-vindo à {{ loja.nome_loja }}</h1>
+            <p>{{ loja.descricao }}</p>
+            <a href="#produtos" class="btn btn-primary">Ver Produtos</a>
+        </div>
+    </div>
+</div>
+
+<section id="categorias" class="categories-section">
+    <div class="container">
+        <h2>Categorias</h2>
+        <div class="categories-grid">
+            {% for categoria in categorias %}
+            <div class="category-card">
+                <a href="/categoria/{{ categoria.cat_descricao|lower|replace({' ': '-'}) }}">
+                    <h3>{{ categoria.cat_descricao }}</h3>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section id="produtos" class="products-section">
+    <div class="container">
+        <h2>Produtos em Destaque</h2>
+        <div class="products-grid">
+            {% for produto in produtos %}
+            <div class="product-card">
+                <div class="product-image">
+                    <img src="/assets/img/products/default.jpg" alt="{{ produto.pro_descricao }}">
+                </div>
+                <div class="product-info">
+                    <h3>{{ produto.pro_descricao }}</h3>
+                    <p class="product-code">Código: {{ produto.pro_cod_fabricante }}</p>
+                    <div class="product-actions">
+                        <a href="/produto/{{ produto.id_produto }}" class="btn btn-outline">Ver Detalhes</a>
+                        <button class="btn btn-primary add-to-cart" data-product-id="{{ produto.id_produto }}">
+                            Adicionar ao Carrinho
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const addToCartButtons = document.querySelectorAll('.add-to-cart');
+    
+    addToCartButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            addToCart(productId);
+        });
+    });
+    
+    function addToCart(productId) {
+        // Implementar lógica de adicionar ao carrinho
+        alert('Produto adicionado ao carrinho!');
+    }
+});
+</script>
+{% endblock %}

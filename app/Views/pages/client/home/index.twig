@@ -1,0 +1,138 @@
+
+{% extends "layouts/store.html.twig" %}
+
+{% block title %}{{ title ?? 'Loja Online' }}{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <h1>Bem-vindo à Nossa Loja</h1>
+            <p>Encontre os melhores produtos com preços incríveis</p>
+            <a href="{{ route('client.catalogo') }}" class="btn btn-primary btn-large">Ver Catálogo</a>
+        </div>
+    </div>
+</section>
+
+<!-- Categorias -->
+{% if categorias %}
+<section class="categories-section">
+    <div class="container">
+        <h2>Categorias</h2>
+        <div class="categories-grid">
+            {% for categoria in categorias %}
+            <div class="category-card">
+                <a href="{{ route('client.catalogo') }}?categoria={{ categoria.id }}">
+                    <h3>{{ categoria.cat_nome }}</h3>
+                    <p>{{ categoria.cat_descricao ?? 'Explore nossa seleção' }}</p>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Produtos em Destaque -->
+{% if produtos_destaque %}
+<section class="products-section">
+    <div class="container">
+        <h2>Produtos em Destaque</h2>
+        <div class="products-grid">
+            {% for produto in produtos_destaque %}
+            <div class="product-card">
+                <div class="product-image">
+                    <img src="{{ produto.pro_imagem ?? '/assets/images/no-image.jpg' }}" alt="{{ produto.pro_nome }}">
+                </div>
+                <div class="product-info">
+                    <h3>{{ produto.pro_nome }}</h3>
+                    <div class="product-code">Cód: {{ produto.pro_sku }}</div>
+                    <div class="product-price">
+                        {% if produto.pro_preco_promocional %}
+                            <span class="old-price">R$ {{ produto.pro_preco|number_format(2, ',', '.') }}</span>
+                            <span class="current-price">R$ {{ produto.pro_preco_promocional|number_format(2, ',', '.') }}</span>
+                        {% else %}
+                            <span class="current-price">R$ {{ produto.pro_preco|number_format(2, ',', '.') }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="product-actions">
+                        <a href="{{ route('client.produto', {id: produto.id_produto}) }}" class="btn btn-outline">Ver Detalhes</a>
+                        <button class="btn btn-primary add-to-cart" data-produto-id="{{ produto.id_produto }}">
+                            Adicionar ao Carrinho
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Produtos em Promoção -->
+{% if produtos_promocao %}
+<section class="products-section">
+    <div class="container">
+        <h2>Promoções Especiais</h2>
+        <div class="products-grid">
+            {% for produto in produtos_promocao %}
+            <div class="product-card promotion">
+                <div class="product-image">
+                    <img src="{{ produto.pro_imagem ?? '/assets/images/no-image.jpg' }}" alt="{{ produto.pro_nome }}">
+                </div>
+                <div class="product-info">
+                    <h3>{{ produto.pro_nome }}</h3>
+                    <div class="product-code">Cód: {{ produto.pro_sku }}</div>
+                    <div class="product-price">
+                        <span class="old-price">R$ {{ produto.pro_preco|number_format(2, ',', '.') }}</span>
+                        <span class="current-price">R$ {{ produto.pro_preco_promocional|number_format(2, ',', '.') }}</span>
+                    </div>
+                    <div class="product-actions">
+                        <a href="{{ route('client.produto', {id: produto.id_produto}) }}" class="btn btn-outline">Ver Detalhes</a>
+                        <button class="btn btn-primary add-to-cart" data-produto-id="{{ produto.id_produto }}">
+                            Adicionar ao Carrinho
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Adicionar ao carrinho
+    document.querySelectorAll('.add-to-cart').forEach(button => {
+        button.addEventListener('click', function() {
+            const produtoId = this.dataset.produtoId;
+            
+            fetch('{{ route("client.carrinho.adicionar") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: `produto_id=${produtoId}&quantidade=1`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Produto adicionado ao carrinho!');
+                } else {
+                    alert('Erro ao adicionar produto: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao adicionar produto ao carrinho');
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,48 @@
+
+<style>
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 9px; }
+    th, td { border: 1px solid #ddd; padding: 6px; text-align: left; }
+    th { background-color: #f2f2f2; font-weight: bold; }
+    .text-right { text-align: right; }
+    .text-center { text-align: center; }
+    .totals { background-color: #f9f9f9; font-weight: bold; }
+    h3 { color: #333; margin: 20px 0 10px 0; font-size: 14px; }
+</style>
+
+<h3>{{ __('reports.products_summary') }}</h3>
+<table>
+    <tr>
+        <td><strong>{{ __('reports.total_products') }}:</strong></td>
+        <td class="text-right">{{ estatisticas.total_produtos ?? 0 }}</td>
+        <td><strong>{{ __('reports.active_products') }}:</strong></td>
+        <td class="text-right">{{ estatisticas.produtos_ativos ?? 0 }}</td>
+    </tr>
+</table>
+
+<h3>{{ __('reports.products_details') }}</h3>
+<table>
+    <thead>
+        <tr>
+            <th>{{ __('reports.code') }}</th>
+            <th>{{ __('reports.name') }}</th>
+            <th>{{ __('reports.category') }}</th>
+            <th>{{ __('reports.brand') }}</th>
+            <th class="text-right">{{ __('reports.stock') }}</th>
+            <th class="text-right">{{ __('reports.price') }}</th>
+            <th>{{ __('reports.status') }}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for produto in produtos %}
+        <tr>
+            <td>{{ produto.codigo }}</td>
+            <td>{{ produto.nome }}</td>
+            <td>{{ produto.categoria }}</td>
+            <td>{{ produto.fabricante }}</td>
+            <td class="text-right">{{ produto.estoque }}</td>
+            <td class="text-right">R$ {{ produto.preco|number_format(2, ',', '.') }}</td>
+            <td class="text-center">{{ produto.status }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

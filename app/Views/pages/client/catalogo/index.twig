@@ -1,0 +1,135 @@
+
+{% extends "layouts/store.html.twig" %}
+
+{% block title %}{{ title ?? 'Catálogo' }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="breadcrumb">
+        <a href="{{ route('client.home') }}">Início</a> > Catálogo
+    </div>
+
+    <h1>Catálogo de Produtos</h1>
+
+    <!-- Filtros e Busca -->
+    <div class="catalog-filters">
+        <form method="GET" class="filters-form">
+            <div class="filter-row">
+                <div class="search-filter">
+                    <input type="text" name="busca" value="{{ busca_atual }}" placeholder="Buscar produtos...">
+                </div>
+                
+                <div class="category-filter">
+                    <select name="categoria">
+                        <option value="">Todas as categorias</option>
+                        {% for categoria in categorias %}
+                        <option value="{{ categoria.id }}" {{ categoria_atual == categoria.id ? 'selected' : '' }}>
+                            {{ categoria.cat_nome }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="sort-filter">
+                    <select name="ordenacao">
+                        <option value="nome" {{ ordenacao_atual == 'nome' ? 'selected' : '' }}>Nome A-Z</option>
+                        <option value="preco_asc" {{ ordenacao_atual == 'preco_asc' ? 'selected' : '' }}>Menor preço</option>
+                        <option value="preco_desc" {{ ordenacao_atual == 'preco_desc' ? 'selected' : '' }}>Maior preço</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Filtrar</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Resultados -->
+    <div class="catalog-results">
+        <p>{{ total_produtos }} produto(s) encontrado(s)</p>
+        
+        {% if produtos %}
+        <div class="products-grid">
+            {% for produto in produtos %}
+            <div class="product-card">
+                <div class="product-image">
+                    <img src="{{ produto.pro_imagem ?? '/assets/images/no-image.jpg' }}" alt="{{ produto.pro_nome }}">
+                </div>
+                <div class="product-info">
+                    <h3>{{ produto.pro_nome }}</h3>
+                    <div class="product-code">Cód: {{ produto.pro_sku }}</div>
+                    <div class="product-description">{{ produto.pro_descricao|slice(0, 100) }}...</div>
+                    <div class="product-price">
+                        {% if produto.pro_preco_promocional %}
+                            <span class="old-price">R$ {{ produto.pro_preco|number_format(2, ',', '.') }}</span>
+                            <span class="current-price">R$ {{ produto.pro_preco_promocional|number_format(2, ',', '.') }}</span>
+                        {% else %}
+                            <span class="current-price">R$ {{ produto.pro_preco|number_format(2, ',', '.') }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="product-actions">
+                        <a href="{{ route('client.produto', {id: produto.id_produto}) }}" class="btn btn-outline">Ver Detalhes</a>
+                        <button class="btn btn-primary add-to-cart" data-produto-id="{{ produto.id_produto }}">
+                            Adicionar ao Carrinho
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Paginação -->
+        {% if total_paginas > 1 %}
+        <div class="pagination">
+            {% for i in 1..total_paginas %}
+                {% if i == pagina_atual %}
+                    <span class="current">{{ i }}</span>
+                {% else %}
+                    <a href="?pagina={{ i }}&categoria={{ categoria_atual }}&busca={{ busca_atual }}&ordenacao={{ ordenacao_atual }}">{{ i }}</a>
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <div class="no-products">
+            <p>Nenhum produto encontrado com os filtros selecionados.</p>
+            <a href="{{ route('client.catalogo') }}" class="btn btn-primary">Ver todos os produtos</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Adicionar ao carrinho
+    document.querySelectorAll('.add-to-cart').forEach(button => {
+        button.addEventListener('click', function() {
+            const produtoId = this.dataset.produtoId;
+            
+            fetch('{{ route("client.carrinho.adicionar") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: `produto_id=${produtoId}&quantidade=1`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Produto adicionado ao carrinho!');
+                } else {
+                    alert('Erro ao adicionar produto: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao adicionar produto ao carrinho');
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "layouts/reports.html.twig" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title">{{ trans('reports.vendas_title') }}</h3>
+                    <div>
+                        <a href="{{ url('admin/reports/vendas/pdf') }}" class="btn btn-danger btn-sm">
+                            <i class="fas fa-file-pdf"></i> {{ trans('reports.export_pdf') }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -98,7 +98,7 @@ class Database
         return $stmt->rowCount();
     }
 
-    public function find(string $table, string $columns = '*', string $where, array $whereParams = []): ?array
+    public function find(string $table, string $where, array $whereParams = [], string $columns = '*'): ?array
     {
         try {
             $this->validateTableName($table);
@@ -115,6 +115,30 @@ class Database
             $this->logError($sql ?? '', $whereParams, $e);
             throw $e;
         }
+    }
+
+    public function select(string $table, string $columns = '*', string $where = '1', array $whereParams = [], int $limit = null, int $offset = null): array
+    {
+        $this->validateTableName($table);
+
+        $sql = "SELECT {$columns} FROM `{$table}` WHERE {$where}";
+
+        if ($limit !== null) {
+            if ($limit <= 0) {
+                throw new \InvalidArgumentException("Limit deve ser maior que zero.");
+            }
+            $sql .= " LIMIT {$limit}";
+
+            if ($offset !== null) {
+                if ($offset < 0) {
+                    throw new \InvalidArgumentException("Offset não pode ser negativo.");
+                }
+                $sql .= " OFFSET {$offset}";
+            }
+        }
+
+        $stmt = $this->query($sql, $whereParams);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function findAll(string $table, string $columns = '*', string $where = '1', array $whereParams = [], string $orderBy = null, int $limit = null, int $offset = null): array
@@ -143,6 +167,18 @@ class Database
 
         $stmt = $this->query($sql, $whereParams);
         return $stmt->fetchAll(PDO::FETCH_ASSOC); // Fetch como array associativo por padrão
+    }
+
+    public function count(string $table, string $where = '1', array $whereParams = []): int
+    {
+        $this->validateTableName($table);
+
+        $sql = "SELECT COUNT(*) as total FROM `{$table}` WHERE {$where}";
+
+        $stmt = $this->query($sql, $whereParams);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return (int) $result['total'];
     }
 
     // Métodos de transação

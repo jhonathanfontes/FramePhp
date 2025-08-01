@@ -1,0 +1,98 @@
+{% extends "layouts/admin.html.twig" %}
+
+{% block title %}{{ __('reports.title') }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">{{ __('reports.title') }}</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4>{{ __('reports.sales_report') }}</h4>
+                                </div>
+                                <div class="card-body">
+                                    <p>{{ __('reports.sales_summary') }}</p>
+                                    <div class="btn-group" role="group">
+                                        <a href="/admin/reports/vendas" class="btn btn-primary">
+                                            <i class="fas fa-chart-line"></i> {{ __('reports.view_report') }}
+                                        </a>
+                                        <a href="/admin/reports/vendas?format=pdf" class="btn btn-danger" target="_blank">
+                                            <i class="fas fa-file-pdf"></i> {{ __('reports.export_pdf') }}
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4>{{ __('reports.products_report') }}</h4>
+                                </div>
+                                <div class="card-body">
+                                    <p>{{ __('reports.products_summary') }}</p>
+                                    <div class="btn-group" role="group">
+                                        <a href="/admin/reports/produtos" class="btn btn-primary">
+                                            <i class="fas fa-boxes"></i> {{ __('reports.view_report') }}
+                                        </a>
+                                        <a href="/admin/reports/produtos?format=pdf" class="btn btn-danger" target="_blank">
+                                            <i class="fas fa-file-pdf"></i> {{ __('reports.export_pdf') }}
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4>{{ __('reports.financial_report') }}</h4>
+                                </div>
+                                <div class="card-body">
+                                    <p>Análise financeira completa por período.</p>
+                                    <div class="btn-group" role="group">
+                                        <a href="/admin/reports/financeiro" class="btn btn-primary">
+                                            <i class="fas fa-chart-pie"></i> {{ __('reports.view_report') }}
+                                        </a>
+                                        <a href="/admin/reports/financeiro?format=pdf" class="btn btn-danger" target="_blank">
+                                            <i class="fas fa-file-pdf"></i> {{ __('reports.export_pdf') }}
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4>{{ __('reports.companies_report') }}</h4>
+                                </div>
+                                <div class="card-body">
+                                    <p>Relatório geral de todas as empresas cadastradas.</p>
+                                    <div class="btn-group" role="group">
+                                        <a href="/admin/reports/empresas" class="btn btn-primary">
+                                            <i class="fas fa-building"></i> {{ __('reports.view_report') }}
+                                        </a>
+                                        <a href="/admin/reports/empresas?format=pdf" class="btn btn-danger" target="_blank">
+                                            <i class="fas fa-file-pdf"></i> {{ __('reports.export_pdf') }}
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

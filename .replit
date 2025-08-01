@@ -1,0 +1,24 @@
+modules = ["php-8.2", "web"]
+run = "php -S 0.0.0.0:5000 -t public"
+
+[nix]
+channel = "stable-25_05"
+
+[workflows]
+runButton = "Start Server"
+
+[[workflows.workflow]]
+name = "Start Server"
+author = 28235553
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "php -S 0.0.0.0:5000 -t public"
+
+[deployment]
+run = ["sh", "-c", "php -S 0.0.0.0:5000 -t public"]
+
+[[ports]]
+localPort = 5000
+externalPort = 80

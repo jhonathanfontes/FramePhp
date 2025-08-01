@@ -36,7 +36,7 @@ class CadUsuarioModel extends Model
         }
     }
 
-    public function findByUsername(string $username): ?object // Retorna ?object
+    public function findByUsername(string $username): ?object
     {
         try {
             // Usa o QueryBuilder da classe pai (Model)
@@ -49,12 +49,12 @@ class CadUsuarioModel extends Model
         }
     }
 
-    public function create(array $data): self
+    public function create(array $data): int
     {
         // Hash da senha
         $data['use_password'] = password_hash($data['use_password'], PASSWORD_DEFAULT);
 
-       return parent::create($data);
+        return parent::create($data);
     }
 
     public function createPasswordReset(string $email, string $token): bool

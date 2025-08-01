@@ -1,0 +1,218 @@
+
+{% extends "layouts/store.html.twig" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header da loja -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h2 mb-3">Nossa Loja</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/client">Início</a></li>
+                    <li class="breadcrumb-item active">Loja</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Sidebar com filtros -->
+        <div class="col-lg-3 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Filtros</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Busca -->
+                    <div class="mb-3">
+                        <label class="form-label">Buscar produtos</label>
+                        <input type="text" class="form-control" id="busca" placeholder="Digite o nome do produto..."
+                               value="{{ busca_atual }}">
+                    </div>
+
+                    <!-- Categorias -->
+                    <div class="mb-3">
+                        <label class="form-label">Categorias</label>
+                        <div class="list-group list-group-flush">
+                            <a href="/client/loja" class="list-group-item list-group-item-action {% if not categoria_atual %}active{% endif %}">
+                                Todas as categorias
+                            </a>
+                            {% for categoria in categorias %}
+                            <a href="/client/loja?categoria={{ categoria.id_categoria }}" 
+                               class="list-group-item list-group-item-action {% if categoria_atual == categoria.id_categoria %}active{% endif %}">
+                                {{ categoria.cat_nome }}
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Produtos -->
+        <div class="col-lg-9">
+            <!-- Barra de ferramentas -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <p class="text-muted mb-0">
+                        Mostrando {{ produtos|length }} de {{ total_produtos }} produtos
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-end">
+                        <select class="form-select" style="width: auto;" id="ordenacao">
+                            <option value="nome" {% if ordenacao_atual == 'nome' %}selected{% endif %}>Nome A-Z</option>
+                            <option value="preco_asc" {% if ordenacao_atual == 'preco_asc' %}selected{% endif %}>Menor preço</option>
+                            <option value="preco_desc" {% if ordenacao_atual == 'preco_desc' %}selected{% endif %}>Maior preço</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grid de produtos -->
+            <div class="row">
+                {% for produto in produtos %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 product-card">
+                        <div class="card-img-top-wrapper">
+                            <img src="{{ produto.pro_imagem ?? '/assets/images/produto-sem-foto.jpg' }}" 
+                                 class="card-img-top" alt="{{ produto.pro_nome }}">
+                            {% if produto.pro_destaque %}
+                            <div class="product-badge badge-destaque">Destaque</div>
+                            {% endif %}
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h6 class="card-title">{{ produto.pro_nome }}</h6>
+                            <p class="card-text text-muted small">{{ produto.pro_descricao|slice(0, 80) }}...</p>
+                            <div class="mt-auto">
+                                <div class="price-section mb-2">
+                                    <span class="price-current">R$ {{ produto.pro_preco|number_format(2, ',', '.') }}</span>
+                                </div>
+                                <div class="d-grid gap-2">
+                                    <a href="/client/produto/{{ produto.id_produto }}" class="btn btn-primary btn-sm">
+                                        Ver detalhes
+                                    </a>
+                                    <button class="btn btn-outline-success btn-sm add-to-cart" 
+                                            data-produto-id="{{ produto.id_produto }}">
+                                        <i class="fas fa-cart-plus me-1"></i>Adicionar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Paginação -->
+            {% if total_paginas > 1 %}
+            <nav aria-label="Paginação dos produtos">
+                <ul class="pagination justify-content-center">
+                    {% if pagina_atual > 1 %}
+                    <li class="page-item">
+                        <a class="page-link" href="?pagina={{ pagina_atual - 1 }}{% if categoria_atual %}&categoria={{ categoria_atual }}{% endif %}{% if busca_atual %}&busca={{ busca_atual }}{% endif %}{% if ordenacao_atual %}&ordenacao={{ ordenacao_atual }}{% endif %}">
+                            Anterior
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for i in 1..total_paginas %}
+                    <li class="page-item {% if i == pagina_atual %}active{% endif %}">
+                        <a class="page-link" href="?pagina={{ i }}{% if categoria_atual %}&categoria={{ categoria_atual }}{% endif %}{% if busca_atual %}&busca={{ busca_atual }}{% endif %}{% if ordenacao_atual %}&ordenacao={{ ordenacao_atual }}{% endif %}">
+                            {{ i }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                    
+                    {% if pagina_atual < total_paginas %}
+                    <li class="page-item">
+                        <a class="page-link" href="?pagina={{ pagina_atual + 1 }}{% if categoria_atual %}&categoria={{ categoria_atual }}{% endif %}{% if busca_atual %}&busca={{ busca_atual }}{% endif %}{% if ordenacao_atual %}&ordenacao={{ ordenacao_atual }}{% endif %}">
+                            Próxima
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+// Filtro por ordenação
+document.getElementById('ordenacao').addEventListener('change', function() {
+    const url = new URL(window.location);
+    url.searchParams.set('ordenacao', this.value);
+    url.searchParams.delete('pagina');
+    window.location.href = url.toString();
+});
+
+// Busca
+document.getElementById('busca').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        const url = new URL(window.location);
+        if (this.value.trim()) {
+            url.searchParams.set('busca', this.value.trim());
+        } else {
+            url.searchParams.delete('busca');
+        }
+        url.searchParams.delete('pagina');
+        window.location.href = url.toString();
+    }
+});
+
+// Adicionar ao carrinho
+document.querySelectorAll('.add-to-cart').forEach(button => {
+    button.addEventListener('click', function() {
+        const produtoId = this.dataset.produtoId;
+        
+        fetch('/client/carrinho/adicionar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `produto_id=${produtoId}&quantidade=1`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Mostrar notificação de sucesso
+                showNotification(data.message, 'success');
+                // Atualizar contador do carrinho se existir
+                updateCartCount();
+            } else {
+                showNotification(data.message, 'error');
+            }
+        })
+        .catch(error => {
+            showNotification('Erro ao adicionar produto ao carrinho', 'error');
+        });
+    });
+});
+
+function showNotification(message, type = 'success') {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} position-fixed`;
+    notification.style.cssText = `
+        top: 20px;
+        right: 20px;
+        z-index: 1050;
+        min-width: 300px;
+    `;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+function updateCartCount() {
+    // Implementar atualização do contador do carrinho
+}
+</script>
+{% endblock %}

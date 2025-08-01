@@ -1,0 +1,103 @@
+
+#!/usr/bin/env php
+<?php
+
+define('BASE_PATH', __DIR__);
+
+require BASE_PATH . '/vendor/autoload.php';
+
+// Load environment variables
+if (file_exists(BASE_PATH . '/.env')) {
+    $dotenv = \Dotenv\Dotenv::createImmutable(BASE_PATH);
+    $dotenv->load();
+}
+
+use Core\Config\Constants;
+Constants::init();
+
+class Artisan
+{
+    private array $commands = [
+        'make:controller' => 'makeController',
+        'make:model' => 'makeModel',
+        'make:migration' => 'makeMigration',
+        'migrate' => 'migrate',
+        'cache:clear' => 'clearCache',
+        'serve' => 'serve'
+    ];
+
+    public function run(array $argv): void
+    {
+        if (count($argv) < 2) {
+            $this->showHelp();
+            return;
+        }
+
+        $command = $argv[1];
+        $args = array_slice($argv, 2);
+
+        if (!isset($this->commands[$command])) {
+            echo "Comando '{$command}' não encontrado.\n";
+            $this->showHelp();
+            return;
+        }
+
+        $method = $this->commands[$command];
+        $this->$method($args);
+    }
+
+    private function makeController(array $args): void
+    {
+        if (empty($args[0])) {
+            echo "Nome do controller é obrigatório.\n";
+            return;
+        }
+
+        $name = $args[0];
+        $namespace = 'App\\Controllers';
+        
+        $content = "<?php\n\nnamespace {$namespace};\n\nuse Core\\Controller\\BaseController;\n\nclass {$name} extends BaseController\n{\n    public function index()\n    {\n        // Implementar lógica\n    }\n}\n";
+        
+        $path = BASE_PATH . "/app/Controllers/{$name}.php";
+        file_put_contents($path, $content);
+        
+        echo "Controller {$name} criado com sucesso!\n";
+    }
+
+    private function clearCache(): void
+    {
+        $cacheDir = BASE_PATH . '/storage/cache';
+        if (is_dir($cacheDir)) {
+            $files = glob($cacheDir . '/*');
+            foreach ($files as $file) {
+                if (is_file($file)) {
+                    unlink($file);
+                }
+            }
+            echo "Cache limpo com sucesso!\n";
+        }
+    }
+
+    private function serve(array $args): void
+    {
+        $host = $args[0] ?? '0.0.0.0';
+        $port = $args[1] ?? '5000';
+        
+        echo "Servidor iniciado em http://{$host}:{$port}\n";
+        echo "Pressione Ctrl+C para parar.\n";
+        
+        exec("php -S {$host}:{$port} -t public");
+    }
+
+    private function showHelp(): void
+    {
+        echo "FramePhp - Comandos disponíveis:\n";
+        echo "  make:controller <name>  Criar um novo controller\n";
+        echo "  make:model <name>       Criar um novo model\n";
+        echo "  cache:clear             Limpar cache\n";
+        echo "  serve [host] [port]     Iniciar servidor de desenvolvimento\n";
+    }
+}
+
+$artisan = new Artisan();
+$artisan->run($argv);
