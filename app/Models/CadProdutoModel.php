@@ -6,10 +6,10 @@ use Core\Database\Model;
 
 class CadProdutoModel extends Model
 {
-    protected $table = 'cad_produto';
-    protected $primaryKey = 'id_produto';
+    protected string $table = 'cad_produto';
+    protected string $primaryKey = 'id_produto';
 
-    protected $fillable = [
+    protected array $fillable = [
         'pro_nome',
         'pro_descricao',
         'pro_preco',
@@ -36,7 +36,7 @@ class CadProdutoModel extends Model
      */
     public function findAllProdutos(): array
     {
-        return $this->findAll('deleted_at IS NULL AND status = "ativo"', [], '*', 'pro_nome ASC');
+        return $this->db->findAll('deleted_at IS NULL AND status = "ativo"', [], '*', 'pro_nome ASC');
     }
 
     /**
@@ -47,12 +47,12 @@ class CadProdutoModel extends Model
         $sql = 'categoria_id = ? AND deleted_at IS NULL AND status = "ativo"';
         $params = [$categoriaId];
         $orderBy = 'pro_nome ASC';
-        
+
         if ($limit) {
             $orderBy .= ' LIMIT ' . $limit;
         }
 
-        return $this->findAll($sql, $params, '*', $orderBy);
+        return $this->db->findAll($sql, '*', $params, $orderBy);
     }
 
     /**
@@ -64,7 +64,7 @@ class CadProdutoModel extends Model
         $termoBusca = '%' . $termo . '%';
         $params = [$termoBusca, $termoBusca, $termoBusca];
 
-        return $this->findAll($sql, $params, '*', 'pro_nome ASC');
+        return $this->db->findAll($sql, $params, '*', 'pro_nome ASC');
     }
 
     /**
@@ -73,8 +73,8 @@ class CadProdutoModel extends Model
     public function findEmDestaque(int $limit = 8): array
     {
         $sql = 'pro_destaque = 1 AND deleted_at IS NULL AND status = "ativo"';
-        
-        return $this->findAll($sql, [], '*', 'created_at DESC LIMIT ' . $limit);
+
+        return $this->db->findAll($sql, [], '*', 'created_at DESC LIMIT ' . $limit);
     }
 
     /**
@@ -83,8 +83,8 @@ class CadProdutoModel extends Model
     public function findEmPromocao(int $limit = 8): array
     {
         $sql = 'pro_preco_promocional IS NOT NULL AND pro_preco_promocional > 0 AND deleted_at IS NULL AND status = "ativo"';
-        
-        return $this->findAll($sql, [], '*', 'created_at DESC LIMIT ' . $limit);
+
+        return $this->db->findAll($sql, [], '*', 'created_at DESC LIMIT ' . $limit);
     }
 
     /**

@@ -2,6 +2,7 @@
 
 use App\Controllers\Auth\AuthController;
 use App\Controllers\Admin\AdminController;
+use App\Controllers\Site\ClientController;
 use App\Controllers\Site\HomeController;
 use App\Controllers\UserController;
 use Core\Error\ErrorHandler;
@@ -17,7 +18,15 @@ $router = \Core\Router\Router::getInstance();
 // Rotas públicas (para todos os visitantes)
 $router->group(['middleware' => ['locale', 'csrf']], function ($router) {
     $router->get('/', [HomeController::class, 'index'])->name('home');
+
+    // Páginas institucionais
+        
+        $router->get('/contato', [ClientController::class, 'contato'])->name('client.contato');
+        $router->post('/contato/enviar', [ClientController::class, 'enviarContato'])->name('client.contato.enviar');
+        $router->get('/loja', [ClientController::class, 'loja'])->name('client.loja');
 });
+
+$router->get('/sobre', [ClientController::class, 'sobre'])->name('client.sobre');
 
 // Rotas de autenticação (apenas para convidados/não logados)
 $router->group(['middleware' => ['guest', 'csrf']], function ($router) {

@@ -21,8 +21,6 @@ class CadFabricanteModel extends Model
         'deleted_at'
     ];
 
-    private $db; // Instância do banco de dados
-
     public function __construct()
     {
         // Instancia diretamente o Database, conforme o modelo fornecido.

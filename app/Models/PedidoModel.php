@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Models;
@@ -8,10 +7,10 @@ use Core\Database\Database;
 
 class PedidoModel extends Model
 {
-    protected $table = 'pedidos';
-    protected $primaryKey = 'id_pedido';
+    protected string $table = 'pedidos';
+    protected string $primaryKey = 'id_pedido';
 
-    protected $fillable = [
+    protected array $fillable = [
         'loja_id',
         'cliente_id',
         'numero_pedido',
@@ -27,8 +26,6 @@ class PedidoModel extends Model
         'created_at',
         'updated_at'
     ];
-
-    private $db;
 
     public function __construct()
     {
@@ -52,7 +49,7 @@ class PedidoModel extends Model
         return $this->db->insert($this->table, $data);
     }
 
-    public function update(int $id, array $data): int
+    public function update(int $id, array $data): bool
     {
         $data['updated_at'] = date('Y-m-d H:i:s');
         return $this->db->update($this->table, $data, 'id_pedido = ?', [$id]);

@@ -1,7 +1,3 @@
-The code adds PDF export functionality to the ReportController, including vendas and produtos reports, using the PdfService and TCPDF library, and improves translations.
-```
-
-```php
 <?php
 
 namespace App\Controllers\Admin;
