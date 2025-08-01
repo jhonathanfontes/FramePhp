@@ -1,7 +1,9 @@
 <?php
 
+use App\Controllers\Admin\UsuariosController;
 use App\Controllers\Auth\AuthController;
 use App\Controllers\Admin\AdminController;
+use App\Controllers\Backend\UsuarioController;
 use App\Controllers\Site\HomeController;
 use App\Controllers\UserController;
 use Core\Error\ErrorHandler;
@@ -80,14 +82,13 @@ $router->group([
 ], function ($router) {
    // $router->get('/', $router->redirect('dashboard'));
     $router->get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-    $router->get('/users', [AdminController::class, 'users'])->name('admin.users');
+    $router->get('/usuarios', [UsuariosController::class, 'index'])->name('admin.users');
     $router->get('/settings', [AdminController::class, 'settings'])->name('admin.settings');
     $router->get('/orders', [AdminController::class, 'orders'])->name('admin.orders');
     $router->get('/reports', [AdminController::class, 'reports'])->name('admin.reports');
     $router->get('/products', [AdminController::class, 'products'])->name('admin.products');
     $router->get('/profile', [AdminController::class, 'profile'])->name('admin.profile');
 });
-
 
 $router->group([
     'prefix' => 'user',

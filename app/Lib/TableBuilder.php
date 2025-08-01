@@ -27,7 +27,7 @@ class TableBuilder
     {
         $this->qtd = $qtd;
         $this->dataTableHtml = "";
-        return $this;
+        // return $this;
     }
 
     /**
