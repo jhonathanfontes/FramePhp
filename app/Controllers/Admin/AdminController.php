@@ -204,4 +204,8 @@ class AdminController extends BaseController
         return $this->render('templates/profile');
     }
 
+    public function teste()
+    {
+        return $this->render('loja/checkout');
+    }
 }

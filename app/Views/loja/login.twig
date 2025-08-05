@@ -1,0 +1,567 @@
+{% extends "loja/layout.twig" %}
+
+{% block title %}Login - {{ empresa.nome_fantasia }}{% endblock %}
+
+{% block content %}
+    <div class="auth-page">
+        <div class="auth-container">
+            <!-- Formulário de Login -->
+            <div class="auth-form-container">
+                <div class="auth-header">
+                    <h1 class="auth-title">🔐 Entrar na Sua Conta</h1>
+                    <p class="auth-subtitle">Acesse sua conta para acompanhar pedidos e fazer compras</p>
+                </div>
+
+                <form method="POST" action="/loja/login" class="auth-form" id="login-form">
+                    <div class="form-group">
+                        <label for="email" class="form-label">E-mail</label>
+                        <input type="email" 
+                               id="email" 
+                               name="email" 
+                               class="form-input" 
+                               required
+                               placeholder="seu@email.com"
+                               value="{{ old.email }}"
+                               aria-describedby="email-error">
+                        <div id="email-error" class="error-message" role="alert">
+                            {% if errors.email %}
+                                {{ errors.email }}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password" class="form-label">Senha</label>
+                        <div class="password-input-group">
+                            <input type="password" 
+                                   id="password" 
+                                   name="password" 
+                                   class="form-input" 
+                                   required
+                                   placeholder="Sua senha"
+                                   aria-describedby="password-error">
+                            <button type="button" 
+                                    class="password-toggle" 
+                                    onclick="togglePassword()"
+                                    aria-label="Mostrar/ocultar senha">
+                                👁️
+                            </button>
+                        </div>
+                        <div id="password-error" class="error-message" role="alert">
+                            {% if errors.password %}
+                                {{ errors.password }}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" 
+                                   name="remember" 
+                                   id="remember"
+                                   {% if old.remember %}checked{% endif %}>
+                            <span class="checkmark"></span>
+                            Lembrar de mim
+                        </label>
+                        
+                        <a href="/loja/recuperar-senha" class="forgot-password">
+                            Esqueceu sua senha?
+                        </a>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg auth-btn">
+                        <span class="btn-text">Entrar</span>
+                        <span class="btn-loading">⏳ Entrando...</span>
+                    </button>
+                </form>
+
+                <div class="auth-divider">
+                    <span>ou</span>
+                </div>
+
+                <div class="social-login">
+                    <button class="btn btn-social btn-google" onclick="loginSocial('google')">
+                        <span class="social-icon">🔍</span>
+                        Continuar com Google
+                    </button>
+                    
+                    <button class="btn btn-social btn-facebook" onclick="loginSocial('facebook')">
+                        <span class="social-icon">📘</span>
+                        Continuar com Facebook
+                    </button>
+                </div>
+
+                <div class="auth-footer">
+                    <p>Não tem uma conta?</p>
+                    <a href="/loja/cadastro" class="btn btn-secondary">
+                        Criar Conta
+                    </a>
+                </div>
+            </div>
+
+            <!-- Banner Lateral -->
+            <div class="auth-banner">
+                <div class="banner-content">
+                    <div class="banner-icon">🛍️</div>
+                    <h2 class="banner-title">Bem-vindo de volta!</h2>
+                    <p class="banner-text">
+                        Acesse sua conta para aproveitar todos os benefícios:
+                    </p>
+                    <ul class="banner-features">
+                        <li>✅ Acompanhe seus pedidos</li>
+                        <li>✅ Histórico de compras</li>
+                        <li>✅ Favoritos salvos</li>
+                        <li>✅ Endereços cadastrados</li>
+                        <li>✅ Cupons e descontos</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* ===== AUTH PAGE ===== */
+        .auth-page {
+            min-height: calc(100vh - 200px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-lg) 0;
+        }
+        
+        .auth-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            max-width: 1200px;
+            width: 100%;
+            background: var(--bg-white);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-hover);
+            overflow: hidden;
+        }
+        
+        /* ===== AUTH FORM ===== */
+        .auth-form-container {
+            padding: var(--spacing-xl);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .auth-header {
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .auth-title {
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            color: var(--text-color);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .auth-subtitle {
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+        
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xs);
+        }
+        
+        .form-label {
+            font-weight: 500;
+            color: var(--text-color);
+            font-size: 0.9rem;
+        }
+        
+        .form-input {
+            padding: var(--spacing-sm);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .form-input:focus {
+            outline: 2px solid var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .password-input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: var(--spacing-sm);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            color: var(--text-light);
+            padding: 0;
+        }
+        
+        .password-toggle:hover {
+            color: var(--primary-color);
+        }
+        
+        .error-message {
+            color: #dc3545;
+            font-size: 0.8rem;
+            min-height: 1rem;
+        }
+        
+        /* ===== FORM OPTIONS ===== */
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: var(--spacing-sm) 0;
+        }
+        
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: var(--text-color);
+        }
+        
+        .checkbox-label input[type="checkbox"] {
+            display: none;
+        }
+        
+        .checkmark {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border-color);
+            border-radius: 3px;
+            position: relative;
+            transition: var(--transition);
+        }
+        
+        .checkbox-label input[type="checkbox"]:checked + .checkmark {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .checkbox-label input[type="checkbox"]:checked + .checkmark::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--text-white);
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .forgot-password {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+        
+        /* ===== AUTH BUTTON ===== */
+        .auth-btn {
+            width: 100%;
+            margin: var(--spacing-md) 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-loading {
+            display: none;
+        }
+        
+        .auth-btn.loading .btn-text {
+            display: none;
+        }
+        
+        .auth-btn.loading .btn-loading {
+            display: inline;
+        }
+        
+        /* ===== SOCIAL LOGIN ===== */
+        .auth-divider {
+            text-align: center;
+            margin: var(--spacing-lg) 0;
+            position: relative;
+        }
+        
+        .auth-divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--border-color);
+        }
+        
+        .auth-divider span {
+            background: var(--bg-white);
+            padding: 0 var(--spacing-sm);
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+        
+        .social-login {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .btn-social {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm);
+            border: 1px solid var(--border-color);
+            background: var(--bg-white);
+            color: var(--text-color);
+            transition: var(--transition);
+        }
+        
+        .btn-social:hover {
+            background: var(--bg-light);
+            transform: translateY(-1px);
+        }
+        
+        .btn-google:hover {
+            border-color: #db4437;
+            color: #db4437;
+        }
+        
+        .btn-facebook:hover {
+            border-color: #4267B2;
+            color: #4267B2;
+        }
+        
+        .social-icon {
+            font-size: 1.2rem;
+        }
+        
+        /* ===== AUTH FOOTER ===== */
+        .auth-footer {
+            text-align: center;
+            margin-top: auto;
+        }
+        
+        .auth-footer p {
+            color: var(--text-light);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        /* ===== AUTH BANNER ===== */
+        .auth-banner {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--text-white);
+            padding: var(--spacing-xl);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        
+        .banner-content {
+            max-width: 400px;
+        }
+        
+        .banner-icon {
+            font-size: 4rem;
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .banner-title {
+            font-size: 1.8rem;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .banner-text {
+            margin-bottom: var(--spacing-lg);
+            opacity: 0.9;
+        }
+        
+        .banner-features {
+            list-style: none;
+            text-align: left;
+        }
+        
+        .banner-features li {
+            margin-bottom: var(--spacing-sm);
+            font-size: 0.9rem;
+        }
+        
+        /* ===== RESPONSIVIDADE ===== */
+        @media (max-width: 1024px) {
+            .auth-container {
+                grid-template-columns: 1fr;
+                max-width: 500px;
+            }
+            
+            .auth-banner {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .auth-page {
+                padding: var(--spacing-md) 0;
+            }
+            
+            .auth-form-container {
+                padding: var(--spacing-lg);
+            }
+            
+            .form-options {
+                flex-direction: column;
+                gap: var(--spacing-sm);
+                align-items: flex-start;
+            }
+            
+            .social-login {
+                gap: var(--spacing-xs);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .auth-container {
+                margin: 0 var(--spacing-sm);
+                border-radius: var(--border-radius);
+            }
+            
+            .auth-form-container {
+                padding: var(--spacing-md);
+            }
+            
+            .auth-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+
+    <script>
+        // Toggle password visibility
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleBtn = document.querySelector('.password-toggle');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleBtn.textContent = '🙈';
+            } else {
+                passwordInput.type = 'password';
+                toggleBtn.textContent = '👁️';
+            }
+        }
+        
+        // Form submission
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            const button = document.querySelector('.auth-btn');
+            button.classList.add('loading');
+            
+            // Simular delay de envio
+            setTimeout(() => {
+                button.classList.remove('loading');
+            }, 2000);
+        });
+        
+        // Social login
+        function loginSocial(provider) {
+            const button = event.target;
+            const originalText = button.innerHTML;
+            
+            button.disabled = true;
+            button.innerHTML = `<span class="social-icon">⏳</span> Conectando...`;
+            
+            // Simular login social
+            setTimeout(() => {
+                button.disabled = false;
+                button.innerHTML = originalText;
+                
+                // Redirecionar para OAuth
+                window.location.href = `/loja/auth/${provider}`;
+            }, 1000);
+        }
+        
+        // Auto-focus no campo de email
+        document.getElementById('email').focus();
+        
+        // Validação em tempo real
+        document.getElementById('email').addEventListener('blur', function() {
+            const email = this.value;
+            const error = document.getElementById('email-error');
+            
+            if (email && !isValidEmail(email)) {
+                error.textContent = 'E-mail inválido';
+            } else {
+                error.textContent = '';
+            }
+        });
+        
+        document.getElementById('password').addEventListener('blur', function() {
+            const password = this.value;
+            const error = document.getElementById('password-error');
+            
+            if (password && password.length < 6) {
+                error.textContent = 'A senha deve ter pelo menos 6 caracteres';
+            } else {
+                error.textContent = '';
+            }
+        });
+        
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+        
+        // Enter key to submit
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const form = document.getElementById('login-form');
+                if (form) {
+                    form.dispatchEvent(new Event('submit'));
+                }
+            }
+        });
+        
+        // Mostrar erros do servidor
+        {% if session.has('error') %}
+            mostrarNotificacao('{{ session.get('error') }}', 'error');
+        {% endif %}
+        
+        function mostrarNotificacao(mensagem, tipo) {
+            const notificacao = document.createElement('div');
+            notificacao.className = `alert alert-${tipo}`;
+            notificacao.setAttribute('role', 'alert');
+            notificacao.setAttribute('aria-live', 'polite');
+            notificacao.textContent = mensagem;
+            
+            const container = document.querySelector('.container');
+            container.insertBefore(notificacao, container.firstChild);
+            
+            setTimeout(() => {
+                notificacao.remove();
+            }, 5000);
+        }
+    </script>
+{% endblock %} 

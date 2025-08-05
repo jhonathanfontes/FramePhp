@@ -1,77 +1,112 @@
 <?php
 
-use App\Controllers\Admin\AdminController;
-use App\Controllers\Admin\MenuController;
-use App\Controllers\Auth\AuthController; // Para a rota de logout do admin, se necessário
+use App\Controllers\Admin\DashboardController;
+use App\Controllers\Admin\ProdutosController;
+use App\Controllers\Admin\CategoriasController;
+use App\Controllers\Admin\VendasController;
+use App\Controllers\Admin\PessoasController;
+use App\Controllers\Admin\UsuariosController;
+use App\Controllers\Admin\EstoqueController;
+use App\Controllers\Admin\RelatoriosController;
+use App\Controllers\Auth\AuthController;
 
-/*
-|--------------------------------------------------------------------------
-| Rotas Administrativas
-|--------------------------------------------------------------------------
-|
-| Aqui são definidas todas as rotas para a seção administrativa
-| do aplicativo. Essas rotas são agrupadas e geralmente protegidas
-| por middleware específico de administração.
-|
-*/
+// Rotas de autenticação do admin
+Route::group(['prefix' => '/admin'], function () {
+    Route::get('/login', [AuthController::class, 'loginAdmin']);
+    Route::post('/login', [AuthController::class, 'loginAdmin']);
+    Route::get('/logout', [AuthController::class, 'logout']);
+});
 
-$router->middleware(['auth.admin']) // Middleware para proteger rotas de admin
-    ->group(['prefix' => 'admin'], function ($router) {
-        $router->get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-        $router->get('/users', [AdminController::class, 'users'])->name('admin.users');
-        $router->get('/settings', [AdminController::class, 'settings'])->name('admin.settings');
-        $router->get('/logout', [AuthController::class, 'logout'])->name('admin.logout'); // Rota de logout específica para admin
+// Rotas protegidas do admin
+Route::group(['prefix' => '/admin', 'middleware' => 'auth:admin'], function () {
+    // Dashboard
+    Route::get('/', [DashboardController::class, 'index']);
+    Route::get('/dashboard', [DashboardController::class, 'index']);
+    Route::get('/relatorios', [DashboardController::class, 'relatorios']);
+    Route::get('/configuracoes', [DashboardController::class, 'configuracoes']);
+    Route::post('/configuracoes', [DashboardController::class, 'configuracoes']);
 
-        // Rotas para menus
-        $router->group(['prefix' => 'menus'], function ($router) {
-            $router->get('/', [MenuController::class, 'index'])->name('admin.menus.index');
-            $router->get('/create', [MenuController::class, 'create'])->name('admin.menus.create');
-            $router->post('/store', [MenuController::class, 'store'])->name('admin.menus.store');
-            $router->get('/{id}/edit', [MenuController::class, 'edit'])->name('admin.menus.edit');
-            $router->post('/{id}/update', [MenuController::class, 'update'])->name('admin.menus.update');
-            $router->get('/{id}/destroy', [MenuController::class, 'destroy'])->name('admin.menus.destroy');
-
-            // Rotas para submenus
-            $router->get('/{menuId}/submenus/create', [MenuController::class, 'createSubmenu'])->name('admin.menus.submenus.create');
-            $router->post('/{menuId}/submenus/store', [MenuController::class, 'storeSubmenu'])->name('admin.menus.submenus.store');
-            $router->get('/submenus/{id}/edit', [MenuController::class, 'editSubmenu'])->name('admin.menus.submenus.edit');
-            $router->post('/submenus/{id}/update', [MenuController::class, 'updateSubmenu'])->name('admin.menus.submenus.update');
-            $router->get('/submenus/{id}/destroy', [MenuController::class, 'destroySubmenu'])->name('admin.menus.submenus.destroy');
-        });
+    // Produtos
+    Route::group(['prefix' => '/produtos'], function () {
+        Route::get('/', [ProdutosController::class, 'index']);
+        Route::get('/create', [ProdutosController::class, 'create']);
+        Route::post('/', [ProdutosController::class, 'store']);
+        Route::get('/{id}', [ProdutosController::class, 'show']);
+        Route::get('/{id}/edit', [ProdutosController::class, 'edit']);
+        Route::put('/{id}', [ProdutosController::class, 'update']);
+        Route::delete('/{id}', [ProdutosController::class, 'destroy']);
+        Route::post('/{id}/toggle-status', [ProdutosController::class, 'toggleStatus']);
+        Route::post('/importar', [ProdutosController::class, 'importar']);
+        Route::get('/exportar', [ProdutosController::class, 'exportar']);
     });
 
-// <?php
+    // Categorias
+    Route::group(['prefix' => '/categorias'], function () {
+        Route::get('/', [CategoriasController::class, 'index']);
+        Route::get('/create', [CategoriasController::class, 'create']);
+        Route::post('/', [CategoriasController::class, 'store']);
+        Route::get('/{id}/edit', [CategoriasController::class, 'edit']);
+        Route::put('/{id}', [CategoriasController::class, 'update']);
+        Route::delete('/{id}', [CategoriasController::class, 'destroy']);
+        Route::post('/{id}/toggle-status', [CategoriasController::class, 'toggleStatus']);
+    });
 
-// use App\Controllers\Admin\AdminController;
-// use App\Controllers\Admin\EmpresaController;
-// use App\Controllers\Admin\ReportController;
-// use App\Middleware\AuthenticationMiddleware;
+    // Vendas
+    Route::group(['prefix' => '/vendas'], function () {
+        Route::get('/', [VendasController::class, 'index']);
+        Route::get('/create', [VendasController::class, 'create']);
+        Route::post('/', [VendasController::class, 'store']);
+        Route::get('/{id}', [VendasController::class, 'show']);
+        Route::get('/{id}/edit', [VendasController::class, 'edit']);
+        Route::put('/{id}', [VendasController::class, 'update']);
+        Route::delete('/{id}', [VendasController::class, 'destroy']);
+        Route::post('/{id}/atualizar-status', [VendasController::class, 'atualizarStatus']);
+        Route::get('/{id}/imprimir', [VendasController::class, 'imprimir']);
+        Route::get('/{id}/email', [VendasController::class, 'enviarEmail']);
+    });
 
-// // Aplicar middleware de autenticação para todas as rotas admin
-// $router->middleware([AuthenticationMiddleware::class])
-//     ->group(['prefix' => 'admin'], function ($router) {
+    // Pessoas (Clientes)
+    Route::group(['prefix' => '/pessoas'], function () {
+        Route::get('/', [PessoasController::class, 'index']);
+        Route::get('/create', [PessoasController::class, 'create']);
+        Route::post('/', [PessoasController::class, 'store']);
+        Route::get('/{id}', [PessoasController::class, 'show']);
+        Route::get('/{id}/edit', [PessoasController::class, 'edit']);
+        Route::put('/{id}', [PessoasController::class, 'update']);
+        Route::delete('/{id}', [PessoasController::class, 'destroy']);
+        Route::post('/{id}/toggle-status', [PessoasController::class, 'toggleStatus']);
+        Route::get('/exportar', [PessoasController::class, 'exportar']);
+    });
 
-//         // Dashboard administrativo
-//         $router->get('/', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-//         $router->get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard.alt');
+    // Usuários (Admin da empresa)
+    Route::group(['prefix' => '/usuarios'], function () {
+        Route::get('/', [UsuariosController::class, 'index']);
+        Route::get('/create', [UsuariosController::class, 'create']);
+        Route::post('/', [UsuariosController::class, 'store']);
+        Route::get('/{id}/edit', [UsuariosController::class, 'edit']);
+        Route::put('/{id}', [UsuariosController::class, 'update']);
+        Route::delete('/{id}', [UsuariosController::class, 'destroy']);
+        Route::post('/{id}/toggle-status', [UsuariosController::class, 'toggleStatus']);
+        Route::post('/{id}/reset-senha', [UsuariosController::class, 'resetSenha']);
+    });
 
-//         // Gestão de empresas
-//         $router->group(['prefix' => 'empresas'], function ($router) {
-//             $router->get('/', [EmpresaController::class, 'index'])->name('admin.empresas');
-//             $router->get('/create', [EmpresaController::class, 'create'])->name('admin.empresas.create');
-//             $router->post('/', [EmpresaController::class, 'store'])->name('admin.empresas.store');
-//             $router->get('/{id}/edit', [EmpresaController::class, 'edit'])->name('admin.empresas.edit');
-//             $router->put('/{id}', [EmpresaController::class, 'update'])->name('admin.empresas.update');
-//         });
+    // Estoque
+    Route::group(['prefix' => '/estoque'], function () {
+        Route::get('/', [EstoqueController::class, 'index']);
+        Route::get('/baixo-estoque', [EstoqueController::class, 'baixoEstoque']);
+        Route::post('/ajustar', [EstoqueController::class, 'ajustar']);
+        Route::post('/entrada', [EstoqueController::class, 'entrada']);
+        Route::post('/saida', [EstoqueController::class, 'saida']);
+        Route::get('/movimentacoes', [EstoqueController::class, 'movimentacoes']);
+        Route::get('/relatorio', [EstoqueController::class, 'relatorio']);
+    });
 
-//         // Sistema de relatórios
-//         $router->group(['prefix' => 'reports'], function ($router) {
-//             $router->get('/', [ReportController::class, 'index'])->name('admin.reports');
-//             $router->get('/vendas', [ReportController::class, 'vendas'])->name('admin.reports.vendas');
-//             $router->get('/produtos', [ReportController::class, 'produtos'])->name('admin.reports.produtos');
-//             $router->get('/financeiro', [ReportController::class, 'financeiro'])->name('admin.reports.financeiro');
-//             $router->get('/empresas', [ReportController::class, 'empresas'])->name('admin.reports.empresas');
-//             $router->get('/vendas/pdf', [ReportController::class, 'exportVendasPdf'])->name('admin.reports.vendas.pdf');
-//             $router->get('/produtos/pdf', [ReportController::class, 'exportProdutosPdf'])->name('admin.reports.produtos.pdf');
-//         });
-//     });
+    // Relatórios
+    Route::group(['prefix' => '/relatorios'], function () {
+        Route::get('/vendas', [RelatoriosController::class, 'vendas']);
+        Route::get('/produtos', [RelatoriosController::class, 'produtos']);
+        Route::get('/clientes', [RelatoriosController::class, 'clientes']);
+        Route::get('/financeiro', [RelatoriosController::class, 'financeiro']);
+        Route::get('/exportar/{tipo}', [RelatoriosController::class, 'exportar']);
+    });
+});

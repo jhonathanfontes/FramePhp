@@ -1,0 +1,332 @@
+{% extends "painel/layout.twig" %}
+
+{% block title %}Gestão de Usuários - Sistema de Vendas{% endblock %}
+{% block page_title %}Gestão de Usuários{% endblock %}
+
+{% block content %}
+    <!-- Filtros e Busca -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Filtros</h2>
+        </div>
+        <form method="GET" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: end;">
+            <div>
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Tipo</label>
+                <select name="tipo" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px; min-width: 150px;">
+                    <option value="">Todos os Tipos</option>
+                    <option value="admin_empresa" {% if request.get('tipo') == 'admin_empresa' %}selected{% endif %}>Admin Empresa</option>
+                    <option value="admin_geral" {% if request.get('tipo') == 'admin_geral' %}selected{% endif %}>Admin Geral</option>
+                </select>
+            </div>
+            
+            <div>
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Status</label>
+                <select name="status" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px; min-width: 150px;">
+                    <option value="">Todos os Status</option>
+                    <option value="ativo" {% if request.get('status') == 'ativo' %}selected{% endif %}>Ativos</option>
+                    <option value="inativo" {% if request.get('status') == 'inativo' %}selected{% endif %}>Inativos</option>
+                    <option value="pendente" {% if request.get('status') == 'pendente' %}selected{% endif %}>Pendentes</option>
+                </select>
+            </div>
+            
+            <div>
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Buscar</label>
+                <input type="text" name="busca" value="{{ request.get('busca') }}" placeholder="Nome ou email" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px; min-width: 200px;">
+            </div>
+            
+            <div>
+                <button type="submit" class="btn btn-primary">🔍 Filtrar</button>
+                <a href="/painel/usuarios" class="btn" style="background: #6c757d; color: white; margin-left: 0.5rem;">Limpar</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Estatísticas Rápidas -->
+    <div class="grid grid-4">
+        <div class="card">
+            <div style="text-align: center;">
+                <h3 style="color: #666; font-size: 0.9rem; margin-bottom: 0.5rem;">Total de Usuários</h3>
+                <p style="font-size: 2rem; font-weight: bold; color: #00d4ff; margin: 0;">{{ usuarios.total }}</p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div style="text-align: center;">
+                <h3 style="color: #666; font-size: 0.9rem; margin-bottom: 0.5rem;">Usuários Ativos</h3>
+                <p style="font-size: 2rem; font-weight: bold; color: #27ae60; margin: 0;">{{ usuariosAtivos }}</p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div style="text-align: center;">
+                <h3 style="color: #666; font-size: 0.9rem; margin-bottom: 0.5rem;">Admin Geral</h3>
+                <p style="font-size: 2rem; font-weight: bold; color: #e74c3c; margin: 0;">{{ adminGeral }}</p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div style="text-align: center;">
+                <h3 style="color: #666; font-size: 0.9rem; margin-bottom: 0.5rem;">Admin Empresa</h3>
+                <p style="font-size: 2rem; font-weight: bold; color: #f39c12; margin: 0;">{{ adminEmpresa }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Usuários -->
+    <div class="card">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h2 class="card-title">Usuários</h2>
+            <a href="/painel/usuarios/create" class="btn btn-primary">➕ Novo Usuário</a>
+        </div>
+        
+        {% if usuarios.data %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Usuário</th>
+                        <th>Email</th>
+                        <th>Tipo</th>
+                        <th>Empresa</th>
+                        <th>Status</th>
+                        <th>Último Acesso</th>
+                        <th>Data Cadastro</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for usuario in usuarios.data %}
+                        <tr>
+                            <td>
+                                <div>
+                                    <strong>{{ usuario.nome }}</strong>
+                                </div>
+                            </td>
+                            <td>{{ usuario.email }}</td>
+                            <td>
+                                <span class="badge {% if usuario.tipo == 'admin_geral' %}badge-primary{% else %}badge-info{% endif %}">
+                                    {{ usuario.tipo == 'admin_geral' ? 'Admin Geral' : 'Admin Empresa' }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if usuario.empresa %}
+                                    <a href="/painel/empresas/{{ usuario.empresa.id }}" style="color: #00d4ff; text-decoration: none;">
+                                        {{ usuario.empresa.nome_fantasia }}
+                                    </a>
+                                {% else %}
+                                    <span style="color: #999;">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge 
+                                    {% if usuario.status == 'ativo' %}badge-success{% endif %}
+                                    {% if usuario.status == 'inativo' %}badge-danger{% endif %}
+                                    {% if usuario.status == 'pendente' %}badge-warning{% endif %}
+                                ">
+                                    {{ usuario.status|title }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if usuario.ultimo_acesso %}
+                                    {{ usuario.ultimo_acesso|date('d/m/Y H:i') }}
+                                {% else %}
+                                    <span style="color: #999;">Nunca</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ usuario.data_cadastro|date('d/m/Y') }}</td>
+                            <td>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <a href="/painel/usuarios/{{ usuario.id }}/edit" class="btn" style="background: #f39c12; color: white; padding: 0.3rem 0.6rem; font-size: 0.8rem;">✏️</a>
+                                    <button onclick="toggleStatus({{ usuario.id }})" class="btn" style="background: {{ usuario.status == 'ativo' ? '#e74c3c' : '#27ae60' }}; color: white; padding: 0.3rem 0.6rem; font-size: 0.8rem; border: none; cursor: pointer;">
+                                        {{ usuario.status == 'ativo' ? '❌' : '✅' }}
+                                    </button>
+                                    <button onclick="resetSenha({{ usuario.id }})" class="btn" style="background: #9b59b6; color: white; padding: 0.3rem 0.6rem; font-size: 0.8rem; border: none; cursor: pointer;">🔑</button>
+                                    {% if usuario.id != auth.user().id %}
+                                        <button onclick="deletarUsuario({{ usuario.id }})" class="btn" style="background: #dc3545; color: white; padding: 0.3rem 0.6rem; font-size: 0.8rem; border: none; cursor: pointer;">🗑️</button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <!-- Paginação -->
+            {% if usuarios.last_page > 1 %}
+                <div style="display: flex; justify-content: center; margin-top: 2rem;">
+                    <div style="display: flex; gap: 0.5rem;">
+                        {% if usuarios.current_page > 1 %}
+                            <a href="?page={{ usuarios.current_page - 1 }}{% if request.get('tipo') %}&tipo={{ request.get('tipo') }}{% endif %}{% if request.get('status') %}&status={{ request.get('status') }}{% endif %}{% if request.get('busca') %}&busca={{ request.get('busca') }}{% endif %}" class="btn" style="background: #6c757d; color: white;">← Anterior</a>
+                        {% endif %}
+                        
+                        {% for page in range(1, usuarios.last_page) %}
+                            {% if page == usuarios.current_page %}
+                                <span class="btn" style="background: #00d4ff; color: white;">{{ page }}</span>
+                            {% else %}
+                                <a href="?page={{ page }}{% if request.get('tipo') %}&tipo={{ request.get('tipo') }}{% endif %}{% if request.get('status') %}&status={{ request.get('status') }}{% endif %}{% if request.get('busca') %}&busca={{ request.get('busca') }}{% endif %}" class="btn" style="background: #6c757d; color: white;">{{ page }}</a>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if usuarios.current_page < usuarios.last_page %}
+                            <a href="?page={{ usuarios.current_page + 1 }}{% if request.get('tipo') %}&tipo={{ request.get('tipo') }}{% endif %}{% if request.get('status') %}&status={{ request.get('status') }}{% endif %}{% if request.get('busca') %}&busca={{ request.get('busca') }}{% endif %}" class="btn" style="background: #6c757d; color: white;">Próximo →</a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        {% else %}
+            <p style="text-align: center; color: #666; padding: 2rem;">Nenhum usuário encontrado</p>
+        {% endif %}
+    </div>
+
+    <!-- Ações em Lote -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Ações em Lote</h2>
+        </div>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <button onclick="exportarUsuarios()" class="btn btn-primary">📊 Exportar Relatório</button>
+            <button onclick="enviarEmails()" class="btn btn-primary">📧 Enviar Emails</button>
+            <button onclick="resetSenhasEmLote()" class="btn btn-primary">🔑 Resetar Senhas</button>
+        </div>
+    </div>
+
+    <script>
+        function toggleStatus(usuarioId) {
+            if (confirm('Deseja alterar o status deste usuário?')) {
+                fetch(`/painel/usuarios/${usuarioId}/toggle-status`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Status alterado com sucesso!');
+                        location.reload();
+                    } else {
+                        alert('Erro ao alterar status: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao alterar status');
+                });
+            }
+        }
+
+        function resetSenha(usuarioId) {
+            if (confirm('Deseja resetar a senha deste usuário?')) {
+                fetch(`/painel/usuarios/${usuarioId}/reset-senha`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Senha resetada com sucesso! Nova senha: ' + data.nova_senha);
+                    } else {
+                        alert('Erro ao resetar senha: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao resetar senha');
+                });
+            }
+        }
+
+        function deletarUsuario(usuarioId) {
+            if (confirm('Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.')) {
+                fetch(`/painel/usuarios/${usuarioId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Usuário excluído com sucesso!');
+                        location.reload();
+                    } else {
+                        alert('Erro ao excluir usuário: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao excluir usuário');
+                });
+            }
+        }
+
+        function exportarUsuarios() {
+            const params = new URLSearchParams(window.location.search);
+            window.open(`/painel/usuarios/exportar?${params.toString()}`, '_blank');
+        }
+
+        function enviarEmails() {
+            if (confirm('Deseja enviar emails para todos os usuários ativos?')) {
+                fetch('/painel/usuarios/enviar-emails', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Emails enviados com sucesso!');
+                    } else {
+                        alert('Erro ao enviar emails: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao enviar emails');
+                });
+            }
+        }
+
+        function resetSenhasEmLote() {
+            if (confirm('Deseja resetar as senhas de todos os usuários selecionados?')) {
+                const usuariosSelecionados = document.querySelectorAll('input[name="usuarios[]"]:checked');
+                const ids = Array.from(usuariosSelecionados).map(input => input.value);
+                
+                if (ids.length === 0) {
+                    alert('Selecione pelo menos um usuário');
+                    return;
+                }
+                
+                fetch('/painel/usuarios/reset-senhas-lote', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        usuarios: ids
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Senhas resetadas com sucesso!');
+                        location.reload();
+                    } else {
+                        alert('Erro ao resetar senhas: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao resetar senhas');
+                });
+            }
+        }
+    </script>
+{% endblock %} 

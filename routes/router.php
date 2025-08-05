@@ -95,6 +95,9 @@ $router->group([
     $router->get('/reports', [AdminController::class, 'reports'])->name('admin.reports');
     $router->get('/products', [AdminController::class, 'products'])->name('admin.products');
     $router->get('/profile', [AdminController::class, 'profile'])->name('admin.profile');
+
+
+    $router->get('/teste', [AdminController::class, 'teste'])->name('admin.profile');
 });
 
 

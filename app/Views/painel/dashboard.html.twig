@@ -1,0 +1,245 @@
+{% extends "painel/layout.twig" %}
+
+{% block title %}Dashboard - Sistema de Vendas{% endblock %}
+{% block page_title %}Dashboard Geral{% endblock %}
+
+{% block content %}
+    <!-- Cards de Estatísticas -->
+    <div class="grid grid-4">
+        <div class="stats-card">
+            <div class="icon">🏢</div>
+            <div class="number">{{ totalEmpresas }}</div>
+            <h3>Empresas Ativas</h3>
+        </div>
+        
+        <div class="stats-card">
+            <div class="icon">👥</div>
+            <div class="number">{{ totalUsuarios }}</div>
+            <h3>Usuários Cadastrados</h3>
+        </div>
+        
+        <div class="stats-card">
+            <div class="icon">💰</div>
+            <div class="number">{{ totalVendas }}</div>
+            <h3>Vendas Totais</h3>
+        </div>
+        
+        <div class="stats-card">
+            <div class="icon">💵</div>
+            <div class="number">R$ {{ "%.2f"|format(receitaTotal) }}</div>
+            <h3>Receita Total</h3>
+        </div>
+    </div>
+
+    <div class="grid grid-2">
+        <!-- Empresas Mais Ativas -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Empresas Mais Ativas</h2>
+            </div>
+            
+            {% if empresasAtivas %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Empresa</th>
+                            <th>Vendas</th>
+                            <th>Receita</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for empresa in empresasAtivas %}
+                            <tr>
+                                <td>
+                                    <a href="/painel/empresas/{{ empresa.id }}" style="color: #00d4ff; text-decoration: none; font-weight: bold;">
+                                        {{ empresa.nome_fantasia }}
+                                    </a>
+                                </td>
+                                <td>{{ empresa.total_vendas }}</td>
+                                <td style="font-weight: bold;">R$ {{ "%.2f"|format(empresa.receita_total) }}</td>
+                                <td>
+                                    <span class="badge {% if empresa.ativo %}badge-success{% else %}badge-danger{% endif %}">
+                                        {{ empresa.ativo ? 'Ativa' : 'Inativa' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div style="display: flex; gap: 0.5rem;">
+                                        <a href="/painel/empresas/{{ empresa.id }}" class="btn" style="background: #00d4ff; color: white; padding: 0.3rem 0.6rem; font-size: 0.8rem;">👁️</a>
+                                        <a href="/painel/empresas/{{ empresa.id }}/edit" class="btn" style="background: #f39c12; color: white; padding: 0.3rem 0.6rem; font-size: 0.8rem;">✏️</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+                <div style="text-align: center; margin-top: 1rem;">
+                    <a href="/painel/empresas" class="btn btn-primary">Ver Todas as Empresas</a>
+                </div>
+            {% else %}
+                <p style="text-align: center; color: #666; padding: 2rem;">Nenhuma empresa encontrada</p>
+            {% endif %}
+        </div>
+
+        <!-- Vendas Recentes do Sistema -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Vendas Recentes do Sistema</h2>
+            </div>
+            
+            {% if vendasRecentes %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Empresa</th>
+                            <th>Pedido</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Data</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for venda in vendasRecentes %}
+                            <tr>
+                                <td>
+                                    <a href="/painel/empresas/{{ venda.empresa.id }}" style="color: #00d4ff; text-decoration: none;">
+                                        {{ venda.empresa.nome_fantasia }}
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="/admin/vendas/{{ venda.id }}" style="color: #00d4ff; text-decoration: none; font-weight: bold;">
+                                        #{{ venda.numero_pedido }}
+                                    </a>
+                                </td>
+                                <td style="font-weight: bold;">R$ {{ "%.2f"|format(venda.total) }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if venda.status == 'pendente' %}badge-warning{% endif %}
+                                        {% if venda.status == 'aprovado' %}badge-info{% endif %}
+                                        {% if venda.status == 'em_preparo' %}badge-info{% endif %}
+                                        {% if venda.status == 'enviado' %}badge-info{% endif %}
+                                        {% if venda.status == 'entregue' %}badge-success{% endif %}
+                                        {% if venda.status == 'cancelado' %}badge-danger{% endif %}
+                                    ">
+                                        {{ venda.status|title }}
+                                    </span>
+                                </td>
+                                <td>{{ venda.data_venda|date('d/m/Y H:i') }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+                <div style="text-align: center; margin-top: 1rem;">
+                    <a href="/painel/relatorios/vendas-gerais" class="btn btn-primary">Ver Todas as Vendas</a>
+                </div>
+            {% else %}
+                <p style="text-align: center; color: #666; padding: 2rem;">Nenhuma venda encontrada</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Gráficos e Análises -->
+    <div class="grid grid-2">
+        <!-- Gráfico de Empresas (Simulado) -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Crescimento de Empresas</h2>
+            </div>
+            <div style="height: 300px; display: flex; align-items: end; justify-content: space-around; padding: 2rem;">
+                <div style="background: linear-gradient(135deg, #667eea, #764ba2); width: 50px; height: 80px; border-radius: 5px 5px 0 0;"></div>
+                <div style="background: linear-gradient(135deg, #667eea, #764ba2); width: 50px; height: 120px; border-radius: 5px 5px 0 0;"></div>
+                <div style="background: linear-gradient(135deg, #667eea, #764ba2); width: 50px; height: 180px; border-radius: 5px 5px 0 0;"></div>
+                <div style="background: linear-gradient(135deg, #667eea, #764ba2); width: 50px; height: 150px; border-radius: 5px 5px 0 0;"></div>
+                <div style="background: linear-gradient(135deg, #667eea, #764ba2); width: 50px; height: 220px; border-radius: 5px 5px 0 0;"></div>
+                <div style="background: linear-gradient(135deg, #667eea, #764ba2); width: 50px; height: 200px; border-radius: 5px 5px 0 0;"></div>
+                <div style="background: linear-gradient(135deg, #667eea, #764ba2); width: 50px; height: 250px; border-radius: 5px 5px 0 0;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-around; margin-top: 1rem; font-size: 0.8rem; color: #666;">
+                <span>Jan</span>
+                <span>Fev</span>
+                <span>Mar</span>
+                <span>Abr</span>
+                <span>Mai</span>
+                <span>Jun</span>
+                <span>Jul</span>
+            </div>
+        </div>
+
+        <!-- Status do Sistema -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Status do Sistema</h2>
+            </div>
+            <div style="padding: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid #eee;">
+                    <span>Empresas Ativas</span>
+                    <span class="badge badge-success">{{ empresasAtivas|length }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid #eee;">
+                    <span>Usuários Ativos</span>
+                    <span class="badge badge-info">{{ usuariosAtivos }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid #eee;">
+                    <span>Vendas do Mês</span>
+                    <span class="badge badge-primary">{{ vendasMes }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0;">
+                    <span>Receita do Mês</span>
+                    <span class="badge badge-success">R$ {{ "%.2f"|format(receitaMes) }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ações Rápidas -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Ações Rápidas</h2>
+        </div>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <a href="/painel/empresas/create" class="btn btn-primary">➕ Nova Empresa</a>
+            <a href="/painel/usuarios/create" class="btn btn-primary">👥 Novo Usuário</a>
+            <a href="/painel/relatorios" class="btn btn-primary">📈 Relatórios</a>
+            <a href="/painel/backup" class="btn btn-primary">💾 Backup</a>
+            <a href="/painel/configuracoes" class="btn btn-primary">⚙️ Configurações</a>
+            <a href="/painel/logs" class="btn btn-primary">📋 Logs</a>
+        </div>
+    </div>
+
+    <!-- Alertas do Sistema -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Alertas do Sistema</h2>
+        </div>
+        <div style="padding: 1rem;">
+            {% if alertas %}
+                {% for alerta in alertas %}
+                    <div style="padding: 1rem; margin-bottom: 1rem; border-radius: 10px; 
+                         {% if alerta.tipo == 'warning' %}background: #fff3cd; color: #856404; border: 1px solid #ffeaa7;{% endif %}
+                         {% if alerta.tipo == 'danger' %}background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;{% endif %}
+                         {% if alerta.tipo == 'info' %}background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb;{% endif %}
+                         {% if alerta.tipo == 'success' %}background: #d4edda; color: #155724; border: 1px solid #c3e6cb;{% endif %}">
+                        <strong>{{ alerta.titulo }}</strong>
+                        <p style="margin: 0.5rem 0 0 0;">{{ alerta.mensagem }}</p>
+                        {% if alerta.acao %}
+                            <a href="{{ alerta.acao }}" class="btn btn-primary" style="margin-top: 0.5rem; font-size: 0.9rem;">{{ alerta.texto_acao }}</a>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p style="text-align: center; color: #666; padding: 2rem;">Nenhum alerta no momento</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Simular dados em tempo real
+        setInterval(function() {
+            // Aqui você pode adicionar atualizações em tempo real
+            console.log('Dashboard atualizado');
+        }, 30000); // Atualiza a cada 30 segundos
+    </script>
+{% endblock %} 
