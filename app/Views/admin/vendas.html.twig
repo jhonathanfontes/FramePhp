@@ -1,0 +1,256 @@
+{% extends "admin/layout.twig" %}
+
+{% block title %}Gestão de Vendas - {{ empresa.nome_fantasia }}{% endblock %}
+{% block page_title %}Gestão de Vendas{% endblock %}
+
+{% block content %}
+    <!-- Filtros e Busca -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Filtros</h2>
+        </div>
+        <form method="GET" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: end;">
+            <div>
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Status</label>
+                <select name="status" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px; min-width: 150px;">
+                    <option value="">Todos os Status</option>
+                    <option value="pendente" {% if request.get('status') == 'pendente' %}selected{% endif %}>Pendente</option>
+                    <option value="aprovado" {% if request.get('status') == 'aprovado' %}selected{% endif %}>Aprovado</option>
+                    <option value="em_preparo" {% if request.get('status') == 'em_preparo' %}selected{% endif %}>Em Preparo</option>
+                    <option value="enviado" {% if request.get('status') == 'enviado' %}selected{% endif %}>Enviado</option>
+                    <option value="entregue" {% if request.get('status') == 'entregue' %}selected{% endif %}>Entregue</option>
+                    <option value="cancelado" {% if request.get('status') == 'cancelado' %}selected{% endif %}>Cancelado</option>
+                </select>
+            </div>
+            
+            <div>
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Data Início</label>
+                <input type="date" name="data_inicio" value="{{ request.get('data_inicio') }}" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;">
+            </div>
+            
+            <div>
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Data Fim</label>
+                <input type="date" name="data_fim" value="{{ request.get('data_fim') }}" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;">
+            </div>
+            
+            <div>
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Buscar</label>
+                <input type="text" name="busca" value="{{ request.get('busca') }}" placeholder="Número do pedido ou cliente" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px; min-width: 200px;">
+            </div>
+            
+            <div>
+                <button type="submit" class="btn btn-primary">🔍 Filtrar</button>
+                <a href="/admin/vendas" class="btn" style="background: #6c757d; color: white; margin-left: 0.5rem;">Limpar</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Estatísticas Rápidas -->
+    <div class="grid grid-4">
+        <div class="card">
+            <div style="text-align: center;">
+                <h3 style="color: #666; font-size: 0.9rem; margin-bottom: 0.5rem;">Total de Vendas</h3>
+                <p style="font-size: 2rem; font-weight: bold; color: #3498db; margin: 0;">{{ vendas.total }}</p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div style="text-align: center;">
+                <h3 style="color: #666; font-size: 0.9rem; margin-bottom: 0.5rem;">Receita Total</h3>
+                <p style="font-size: 2rem; font-weight: bold; color: #27ae60; margin: 0;">R$ {{ "%.2f"|format(totalVendas) }}</p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div style="text-align: center;">
+                <h3 style="color: #666; font-size: 0.9rem; margin-bottom: 0.5rem;">Itens Vendidos</h3>
+                <p style="font-size: 2rem; font-weight: bold; color: #e74c3c; margin: 0;">{{ totalItens }}</p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div style="text-align: center;">
+                <h3 style="color: #666; font-size: 0.9rem; margin-bottom: 0.5rem;">Ticket Médio</h3>
+                <p style="font-size: 2rem; font-weight: bold; color: #f39c12; margin: 0;">R$ {{ "%.2f"|format(vendas.total > 0 ? totalVendas / vendas.total : 0) }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Vendas -->
+    <div class="card">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h2 class="card-title">Vendas</h2>
+            <a href="/admin/vendas/create" class="btn btn-primary">➕ Nova Venda</a>
+        </div>
+        
+        {% if vendas.data %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Pedido</th>
+                        <th>Cliente</th>
+                        <th>Data</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Pagamento</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for venda in vendas.data %}
+                        <tr>
+                            <td>
+                                <a href="/admin/vendas/{{ venda.id }}" style="color: #3498db; text-decoration: none; font-weight: bold;">
+                                    #{{ venda.numero_pedido }}
+                                </a>
+                            </td>
+                            <td>
+                                {% if venda.pessoa %}
+                                    <a href="/admin/pessoas/{{ venda.pessoa.id }}" style="color: #3498db; text-decoration: none;">
+                                        {{ venda.pessoa.nome }}
+                                    </a>
+                                {% else %}
+                                    <span style="color: #999;">Cliente não identificado</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ venda.data_venda|date('d/m/Y H:i') }}</td>
+                            <td style="font-weight: bold;">R$ {{ "%.2f"|format(venda.total) }}</td>
+                            <td>
+                                <span class="badge 
+                                    {% if venda.status == 'pendente' %}badge-warning{% endif %}
+                                    {% if venda.status == 'aprovado' %}badge-info{% endif %}
+                                    {% if venda.status == 'em_preparo' %}badge-info{% endif %}
+                                    {% if venda.status == 'enviado' %}badge-info{% endif %}
+                                    {% if venda.status == 'entregue' %}badge-success{% endif %}
+                                    {% if venda.status == 'cancelado' %}badge-danger{% endif %}
+                                ">
+                                    {{ venda.status|title }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if venda.forma_pagamento %}
+                                    {{ venda.forma_pagamento|replace('_', ' ')|title }}
+                                {% else %}
+                                    <span style="color: #999;">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <a href="/admin/vendas/{{ venda.id }}" class="btn" style="background: #3498db; color: white; padding: 0.3rem 0.6rem; font-size: 0.8rem;">👁️</a>
+                                    <a href="/admin/vendas/{{ venda.id }}/edit" class="btn" style="background: #f39c12; color: white; padding: 0.3rem 0.6rem; font-size: 0.8rem;">✏️</a>
+                                    <a href="/admin/vendas/{{ venda.id }}/imprimir" class="btn" style="background: #27ae60; color: white; padding: 0.3rem 0.6rem; font-size: 0.8rem;">🖨️</a>
+                                    {% if venda.status != 'cancelado' %}
+                                        <button onclick="atualizarStatus({{ venda.id }})" class="btn" style="background: #9b59b6; color: white; padding: 0.3rem 0.6rem; font-size: 0.8rem; border: none; cursor: pointer;">🔄</button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <!-- Paginação -->
+            {% if vendas.last_page > 1 %}
+                <div style="display: flex; justify-content: center; margin-top: 2rem;">
+                    <div style="display: flex; gap: 0.5rem;">
+                        {% if vendas.current_page > 1 %}
+                            <a href="?page={{ vendas.current_page - 1 }}{% if request.get('status') %}&status={{ request.get('status') }}{% endif %}{% if request.get('data_inicio') %}&data_inicio={{ request.get('data_inicio') }}{% endif %}{% if request.get('data_fim') %}&data_fim={{ request.get('data_fim') }}{% endif %}{% if request.get('busca') %}&busca={{ request.get('busca') }}{% endif %}" class="btn" style="background: #6c757d; color: white;">← Anterior</a>
+                        {% endif %}
+                        
+                        {% for page in range(1, vendas.last_page) %}
+                            {% if page == vendas.current_page %}
+                                <span class="btn" style="background: #3498db; color: white;">{{ page }}</span>
+                            {% else %}
+                                <a href="?page={{ page }}{% if request.get('status') %}&status={{ request.get('status') }}{% endif %}{% if request.get('data_inicio') %}&data_inicio={{ request.get('data_inicio') }}{% endif %}{% if request.get('data_fim') %}&data_fim={{ request.get('data_fim') }}{% endif %}{% if request.get('busca') %}&busca={{ request.get('busca') }}{% endif %}" class="btn" style="background: #6c757d; color: white;">{{ page }}</a>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if vendas.current_page < vendas.last_page %}
+                            <a href="?page={{ vendas.current_page + 1 }}{% if request.get('status') %}&status={{ request.get('status') }}{% endif %}{% if request.get('data_inicio') %}&data_inicio={{ request.get('data_inicio') }}{% endif %}{% if request.get('data_fim') %}&data_fim={{ request.get('data_fim') }}{% endif %}{% if request.get('busca') %}&busca={{ request.get('busca') }}{% endif %}" class="btn" style="background: #6c757d; color: white;">Próximo →</a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        {% else %}
+            <p style="text-align: center; color: #666; padding: 2rem;">Nenhuma venda encontrada</p>
+        {% endif %}
+    </div>
+
+    <!-- Ações em Lote -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Ações em Lote</h2>
+        </div>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <button onclick="exportarVendas()" class="btn btn-primary">📊 Exportar Relatório</button>
+            <button onclick="enviarEmails()" class="btn btn-primary">📧 Enviar Emails</button>
+            <button onclick="imprimirEtiquetas()" class="btn btn-primary">🏷️ Imprimir Etiquetas</button>
+        </div>
+    </div>
+
+    <script>
+        function atualizarStatus(vendaId) {
+            const status = prompt('Digite o novo status (pendente, aprovado, em_preparo, enviado, entregue, cancelado):');
+            
+            if (status) {
+                fetch(`/admin/vendas/${vendaId}/atualizar-status`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        status: status
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Status atualizado com sucesso!');
+                        location.reload();
+                    } else {
+                        alert('Erro ao atualizar status: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao atualizar status');
+                });
+            }
+        }
+
+        function exportarVendas() {
+            const params = new URLSearchParams(window.location.search);
+            window.open(`/admin/vendas/exportar?${params.toString()}`, '_blank');
+        }
+
+        function enviarEmails() {
+            if (confirm('Deseja enviar emails de atualização para todos os clientes com pedidos pendentes?')) {
+                fetch('/admin/vendas/enviar-emails', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Emails enviados com sucesso!');
+                    } else {
+                        alert('Erro ao enviar emails: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao enviar emails');
+                });
+            }
+        }
+
+        function imprimirEtiquetas() {
+            const params = new URLSearchParams(window.location.search);
+            window.open(`/admin/vendas/imprimir-etiquetas?${params.toString()}`, '_blank');
+        }
+    </script>
+{% endblock %} 

@@ -1,0 +1,523 @@
+{% extends "loja/layout.twig" %}
+
+{% block title %}{{ error_code }} - {{ empresa.nome_fantasia }}{% endblock %}
+
+{% block content %}
+    <div class="error-page">
+        <div class="error-container">
+            <!-- Ícone de Erro -->
+            <div class="error-icon">
+                {% if error_code == '404' %}
+                    🔍
+                {% elseif error_code == '500' %}
+                    ⚠️
+                {% elseif error_code == '403' %}
+                    🚫
+                {% elseif error_code == '401' %}
+                    🔐
+                {% else %}
+                    ❌
+                {% endif %}
+            </div>
+
+            <!-- Título do Erro -->
+            <h1 class="error-title">
+                {% if error_code == '404' %}
+                    Página não encontrada
+                {% elseif error_code == '500' %}
+                    Erro interno do servidor
+                {% elseif error_code == '403' %}
+                    Acesso negado
+                {% elseif error_code == '401' %}
+                    Não autorizado
+                {% else %}
+                    Ocorreu um erro
+                {% endif %}
+            </h1>
+
+            <!-- Código do Erro -->
+            <div class="error-code">
+                {{ error_code }}
+            </div>
+
+            <!-- Mensagem do Erro -->
+            <p class="error-message">
+                {% if error_code == '404' %}
+                    A página que você está procurando não existe ou foi movida.
+                {% elseif error_code == '500' %}
+                    Ocorreu um erro interno no servidor. Tente novamente mais tarde.
+                {% elseif error_code == '403' %}
+                    Você não tem permissão para acessar esta página.
+                {% elseif error_code == '401' %}
+                    Você precisa fazer login para acessar esta página.
+                {% else %}
+                    {{ error_message|default('Ocorreu um erro inesperado. Tente novamente.') }}
+                {% endif %}
+            </p>
+
+            <!-- Sugestões -->
+            <div class="error-suggestions">
+                <h3>O que você pode fazer:</h3>
+                <ul class="suggestions-list">
+                    {% if error_code == '404' %}
+                        <li>Verificar se o endereço está correto</li>
+                        <li>Usar a busca para encontrar o que procura</li>
+                        <li>Navegar pelas categorias de produtos</li>
+                        <li>Voltar à página inicial</li>
+                    {% elseif error_code == '500' %}
+                        <li>Aguardar alguns minutos e tentar novamente</li>
+                        <li>Verificar sua conexão com a internet</li>
+                        <li>Limpar o cache do navegador</li>
+                        <li>Entrar em contato conosco se o problema persistir</li>
+                    {% elseif error_code == '403' %}
+                        <li>Verificar se você tem as permissões necessárias</li>
+                        <li>Fazer login com uma conta diferente</li>
+                        <li>Entrar em contato com o suporte</li>
+                    {% elseif error_code == '401' %}
+                        <li>Fazer login na sua conta</li>
+                        <li>Criar uma nova conta</li>
+                        <li>Recuperar sua senha</li>
+                    {% else %}
+                        <li>Recarregar a página</li>
+                        <li>Verificar sua conexão</li>
+                        <li>Limpar o cache do navegador</li>
+                        <li>Entrar em contato conosco</li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <!-- Ações -->
+            <div class="error-actions">
+                <a href="/" class="btn btn-primary">
+                    🏠 Voltar ao Início
+                </a>
+                
+                <a href="/produtos" class="btn btn-secondary">
+                    🛍️ Ver Produtos
+                </a>
+                
+                {% if error_code == '401' %}
+                    <a href="/loja/login" class="btn btn-secondary">
+                        🔐 Fazer Login
+                    </a>
+                {% endif %}
+                
+                <button onclick="history.back()" class="btn btn-outline">
+                    ← Voltar
+                </button>
+            </div>
+
+            <!-- Busca -->
+            {% if error_code == '404' %}
+                <div class="error-search">
+                    <h3>Procurar por algo específico?</h3>
+                    <div class="search-box">
+                        <input type="text" 
+                               id="error-search" 
+                               placeholder="Digite o que você procura..." 
+                               class="search-input"
+                               aria-label="Buscar produtos">
+                        <button type="button" 
+                                class="search-btn" 
+                                onclick="buscarProduto()"
+                                aria-label="Buscar">
+                            🔍
+                        </button>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Links Úteis -->
+            <div class="useful-links">
+                <h3>Links úteis:</h3>
+                <div class="links-grid">
+                    <a href="/produtos" class="link-card">
+                        <span class="link-icon">🛍️</span>
+                        <span class="link-text">Produtos</span>
+                    </a>
+                    
+                    <a href="/categorias" class="link-card">
+                        <span class="link-icon">📂</span>
+                        <span class="link-text">Categorias</span>
+                    </a>
+                    
+                    <a href="/sobre" class="link-card">
+                        <span class="link-icon">ℹ️</span>
+                        <span class="link-text">Sobre Nós</span>
+                    </a>
+                    
+                    <a href="/contato" class="link-card">
+                        <span class="link-icon">📞</span>
+                        <span class="link-text">Contato</span>
+                    </a>
+                    
+                    <a href="/ajuda" class="link-card">
+                        <span class="link-icon">❓</span>
+                        <span class="link-text">Ajuda</span>
+                    </a>
+                    
+                    <a href="/termos" class="link-card">
+                        <span class="link-icon">📄</span>
+                        <span class="link-text">Termos de Uso</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Informações Técnicas (apenas para desenvolvedores) -->
+            {% if debug %}
+                <details class="error-details">
+                    <summary>Informações Técnicas</summary>
+                    <div class="debug-info">
+                        <p><strong>Erro:</strong> {{ error_message }}</p>
+                        <p><strong>Arquivo:</strong> {{ error_file }}</p>
+                        <p><strong>Linha:</strong> {{ error_line }}</p>
+                        <p><strong>URL:</strong> {{ request_url }}</p>
+                        <p><strong>Data:</strong> {{ error_date }}</p>
+                    </div>
+                </details>
+            {% endif %}
+        </div>
+    </div>
+
+    <style>
+        /* ===== ERROR PAGE ===== */
+        .error-page {
+            min-height: calc(100vh - 200px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-lg) 0;
+        }
+        
+        .error-container {
+            max-width: 800px;
+            text-align: center;
+            padding: var(--spacing-xl);
+        }
+        
+        /* ===== ERROR ICON ===== */
+        .error-icon {
+            font-size: 8rem;
+            margin-bottom: var(--spacing-lg);
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        /* ===== ERROR TITLE ===== */
+        .error-title {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            color: var(--text-color);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        /* ===== ERROR CODE ===== */
+        .error-code {
+            font-size: 4rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: var(--spacing-lg);
+            opacity: 0.8;
+        }
+        
+        /* ===== ERROR MESSAGE ===== */
+        .error-message {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            margin-bottom: var(--spacing-xl);
+            line-height: 1.6;
+        }
+        
+        /* ===== ERROR SUGGESTIONS ===== */
+        .error-suggestions {
+            background: var(--bg-white);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+            text-align: left;
+        }
+        
+        .error-suggestions h3 {
+            color: var(--text-color);
+            margin-bottom: var(--spacing-md);
+            text-align: center;
+        }
+        
+        .suggestions-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .suggestions-list li {
+            padding: var(--spacing-sm) 0;
+            color: var(--text-color);
+            position: relative;
+            padding-left: var(--spacing-lg);
+        }
+        
+        .suggestions-list li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+        
+        /* ===== ERROR ACTIONS ===== */
+        .error-actions {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        /* ===== ERROR SEARCH ===== */
+        .error-search {
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .error-search h3 {
+            color: var(--text-color);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .search-box {
+            display: flex;
+            gap: var(--spacing-xs);
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: var(--spacing-sm);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+        }
+        
+        .search-input:focus {
+            outline: 2px solid var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .search-btn {
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: var(--primary-color);
+            color: var(--text-white);
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .search-btn:hover {
+            background: var(--secondary-color);
+        }
+        
+        /* ===== USEFUL LINKS ===== */
+        .useful-links {
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .useful-links h3 {
+            color: var(--text-color);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: var(--spacing-md);
+        }
+        
+        .link-card {
+            background: var(--bg-white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: var(--spacing-md);
+            text-decoration: none;
+            color: var(--text-color);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+        
+        .link-card:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-2px);
+            color: var(--primary-color);
+        }
+        
+        .link-icon {
+            font-size: 1.5rem;
+        }
+        
+        .link-text {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        /* ===== ERROR DETAILS ===== */
+        .error-details {
+            background: var(--bg-light);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-md);
+            margin-top: var(--spacing-lg);
+        }
+        
+        .error-details summary {
+            cursor: pointer;
+            color: var(--text-color);
+            font-weight: 500;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .debug-info {
+            text-align: left;
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+        
+        .debug-info p {
+            margin: var(--spacing-xs) 0;
+        }
+        
+        /* ===== RESPONSIVIDADE ===== */
+        @media (max-width: 768px) {
+            .error-container {
+                padding: var(--spacing-lg);
+            }
+            
+            .error-icon {
+                font-size: 6rem;
+            }
+            
+            .error-code {
+                font-size: 3rem;
+            }
+            
+            .error-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .links-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .error-container {
+                padding: var(--spacing-md);
+            }
+            
+            .error-icon {
+                font-size: 4rem;
+            }
+            
+            .error-code {
+                font-size: 2.5rem;
+            }
+            
+            .links-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    <script>
+        // Buscar produto
+        function buscarProduto() {
+            const termo = document.getElementById('error-search').value.trim();
+            if (termo) {
+                window.location.href = `/produtos?busca=${encodeURIComponent(termo)}`;
+            }
+        }
+        
+        // Buscar ao pressionar Enter
+        document.getElementById('error-search').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                buscarProduto();
+            }
+        });
+        
+        // Auto-focus na busca se existir
+        const searchInput = document.getElementById('error-search');
+        if (searchInput) {
+            searchInput.focus();
+        }
+        
+        // Relatório de erro (opcional)
+        function reportarErro() {
+            const dados = {
+                error_code: '{{ error_code }}',
+                error_message: '{{ error_message }}',
+                url: window.location.href,
+                user_agent: navigator.userAgent,
+                timestamp: new Date().toISOString()
+            };
+            
+            // Enviar relatório para o servidor
+            fetch('/erro/reportar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify(dados)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarNotificacao('Relatório enviado com sucesso!', 'success');
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao enviar relatório:', error);
+            });
+        }
+        
+        function mostrarNotificacao(mensagem, tipo) {
+            const notificacao = document.createElement('div');
+            notificacao.className = `alert alert-${tipo}`;
+            notificacao.setAttribute('role', 'alert');
+            notificacao.setAttribute('aria-live', 'polite');
+            notificacao.textContent = mensagem;
+            
+            const container = document.querySelector('.container');
+            container.insertBefore(notificacao, container.firstChild);
+            
+            setTimeout(() => {
+                notificacao.remove();
+            }, 5000);
+        }
+        
+        // Adicionar botão de relatório se for erro 500
+        {% if error_code == '500' %}
+            document.addEventListener('DOMContentLoaded', function() {
+                const actions = document.querySelector('.error-actions');
+                const reportBtn = document.createElement('button');
+                reportBtn.className = 'btn btn-outline';
+                reportBtn.textContent = '📊 Reportar Erro';
+                reportBtn.onclick = reportarErro;
+                actions.appendChild(reportBtn);
+            });
+        {% endif %}
+    </script>
+{% endblock %} 

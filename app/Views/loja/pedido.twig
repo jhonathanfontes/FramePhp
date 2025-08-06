@@ -1,0 +1,231 @@
+{% extends "loja/layout.twig" %}
+
+{% block title %}Pedido #{{ pedido.numero_pedido }} - {{ empresa.nome_fantasia }}{% endblock %}
+
+{% block content %}
+    <h1 style="text-align: center; margin-bottom: 2rem; color: {{ empresa.cor_primaria }};">📦 Detalhes do Pedido</h1>
+
+    <div class="grid grid-2" style="gap: 2rem;">
+        <!-- Informações do Pedido -->
+        <div style="background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h2 style="margin-bottom: 2rem; color: {{ empresa.cor_primaria }};">Informações do Pedido</h2>
+            
+            <div style="margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                    <strong>Número do Pedido:</strong>
+                    <span style="font-weight: bold; color: {{ empresa.cor_primaria }};">#{{ pedido.numero_pedido }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                    <strong>Data do Pedido:</strong>
+                    <span>{{ pedido.data_venda|date('d/m/Y H:i') }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                    <strong>Status:</strong>
+                    <span style="
+                        padding: 0.3rem 0.8rem; 
+                        border-radius: 20px; 
+                        font-size: 0.9rem;
+                        {% if pedido.status == 'pendente' %}background: #fff3cd; color: #856404;{% endif %}
+                        {% if pedido.status == 'aprovado' %}background: #d1ecf1; color: #0c5460;{% endif %}
+                        {% if pedido.status == 'em_preparo' %}background: #d4edda; color: #155724;{% endif %}
+                        {% if pedido.status == 'enviado' %}background: #cce5ff; color: #004085;{% endif %}
+                        {% if pedido.status == 'entregue' %}background: #d4edda; color: #155724;{% endif %}
+                        {% if pedido.status == 'cancelado' %}background: #f8d7da; color: #721c24;{% endif %}
+                    ">
+                        {{ pedido.status|title }}
+                    </span>
+                </div>
+                {% if pedido.forma_pagamento %}
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                        <strong>Forma de Pagamento:</strong>
+                        <span>{{ pedido.forma_pagamento|replace('_', ' ')|title }}</span>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Timeline do Pedido -->
+            <div style="margin-bottom: 2rem;">
+                <h3 style="margin-bottom: 1rem;">Acompanhe seu Pedido</h3>
+                <div style="position: relative; padding-left: 2rem;">
+                    <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: #ddd;"></div>
+                    
+                    <div style="position: relative; margin-bottom: 1.5rem;">
+                        <div style="position: absolute; left: -0.5rem; top: 0.2rem; width: 1rem; height: 1rem; background: #28a745; border-radius: 50%;"></div>
+                        <div style="margin-left: 1rem;">
+                            <strong>Pedido Realizado</strong>
+                            <p style="color: #666; font-size: 0.9rem; margin: 0;">{{ pedido.data_venda|date('d/m/Y às H:i') }}</p>
+                        </div>
+                    </div>
+
+                    {% if pedido.status != 'pendente' %}
+                        <div style="position: relative; margin-bottom: 1.5rem;">
+                            <div style="position: absolute; left: -0.5rem; top: 0.2rem; width: 1rem; height: 1rem; background: #28a745; border-radius: 50%;"></div>
+                            <div style="margin-left: 1rem;">
+                                <strong>Pedido Aprovado</strong>
+                                <p style="color: #666; font-size: 0.9rem; margin: 0;">Pagamento confirmado</p>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if pedido.status in ['em_preparo', 'enviado', 'entregue'] %}
+                        <div style="position: relative; margin-bottom: 1.5rem;">
+                            <div style="position: absolute; left: -0.5rem; top: 0.2rem; width: 1rem; height: 1rem; background: #28a745; border-radius: 50%;"></div>
+                            <div style="margin-left: 1rem;">
+                                <strong>Em Preparação</strong>
+                                <p style="color: #666; font-size: 0.9rem; margin: 0;">Produtos sendo separados</p>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if pedido.status in ['enviado', 'entregue'] %}
+                        <div style="position: relative; margin-bottom: 1.5rem;">
+                            <div style="position: absolute; left: -0.5rem; top: 0.2rem; width: 1rem; height: 1rem; background: #28a745; border-radius: 50%;"></div>
+                            <div style="margin-left: 1rem;">
+                                <strong>Enviado</strong>
+                                <p style="color: #666; font-size: 0.9rem; margin: 0;">Produto em transporte</p>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if pedido.status == 'entregue' %}
+                        <div style="position: relative; margin-bottom: 1.5rem;">
+                            <div style="position: absolute; left: -0.5rem; top: 0.2rem; width: 1rem; height: 1rem; background: #28a745; border-radius: 50%;"></div>
+                            <div style="margin-left: 1rem;">
+                                <strong>Entregue</strong>
+                                <p style="color: #666; font-size: 0.9rem; margin: 0;">Produto entregue com sucesso</p>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if pedido.status == 'cancelado' %}
+                        <div style="position: relative; margin-bottom: 1.5rem;">
+                            <div style="position: absolute; left: -0.5rem; top: 0.2rem; width: 1rem; height: 1rem; background: #dc3545; border-radius: 50%;"></div>
+                            <div style="margin-left: 1rem;">
+                                <strong>Cancelado</strong>
+                                <p style="color: #666; font-size: 0.9rem; margin: 0;">Pedido cancelado</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Endereço de Entrega -->
+            {% if pedido.endereco_entrega %}
+                <div style="margin-bottom: 2rem;">
+                    <h3 style="margin-bottom: 1rem;">Endereço de Entrega</h3>
+                    <div style="background: #f8f9fa; padding: 1rem; border-radius: 5px;">
+                        <p style="margin: 0;">{{ pedido.endereco_entrega }}</p>
+                        <p style="margin: 0;">{{ pedido.cidade_entrega }} - {{ pedido.estado_entrega }}</p>
+                        <p style="margin: 0;">CEP: {{ pedido.cep_entrega }}</p>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Observações -->
+            {% if pedido.observacoes %}
+                <div style="margin-bottom: 2rem;">
+                    <h3 style="margin-bottom: 1rem;">Observações</h3>
+                    <div style="background: #f8f9fa; padding: 1rem; border-radius: 5px;">
+                        <p style="margin: 0;">{{ pedido.observacoes }}</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Produtos do Pedido -->
+        <div style="background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h2 style="margin-bottom: 2rem; color: {{ empresa.cor_primaria }};">Produtos do Pedido</h2>
+            
+            {% for item in itens %}
+                <div style="display: flex; gap: 1rem; padding: 1rem; border: 1px solid #eee; border-radius: 10px; margin-bottom: 1rem;">
+                    <!-- Imagem do Produto -->
+                    <div style="flex-shrink: 0;">
+                        {% if item.produto.imagem %}
+                            <img src="{{ item.produto.imagem }}" alt="{{ item.produto.nome }}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 5px;">
+                        {% else %}
+                            <div style="width: 80px; height: 80px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #999; border-radius: 5px;">📦</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Informações do Produto -->
+                    <div style="flex: 1;">
+                        <h3 style="margin-bottom: 0.5rem;">{{ item.produto.nome }}</h3>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 0.5rem;">Código: {{ item.produto.codigo }}</p>
+                        <p style="font-weight: bold; color: {{ empresa.cor_primaria }}; margin-bottom: 0.5rem;">
+                            R$ {{ "%.2f"|format(item.preco_unitario) }}
+                        </p>
+                        <p style="color: #666;">Quantidade: {{ item.quantidade }}</p>
+                    </div>
+                    
+                    <!-- Subtotal -->
+                    <div style="text-align: right;">
+                        <p style="font-weight: bold; color: {{ empresa.cor_primaria }};">
+                            R$ {{ "%.2f"|format(item.total) }}
+                        </p>
+                    </div>
+                </div>
+            {% endfor %}
+
+            <!-- Resumo Financeiro -->
+            <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #eee;">
+                <h3 style="margin-bottom: 1rem;">Resumo Financeiro</h3>
+                <div style="margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>Subtotal:</span>
+                        <span>R$ {{ "%.2f"|format(pedido.subtotal) }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>Frete:</span>
+                        <span>R$ {{ "%.2f"|format(pedido.frete) }}</span>
+                    </div>
+                    {% if pedido.desconto > 0 %}
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; color: #28a745;">
+                            <span>Desconto:</span>
+                            <span>-R$ {{ "%.2f"|format(pedido.desconto) }}</span>
+                        </div>
+                    {% endif %}
+                    <hr style="margin: 1rem 0; border: none; border-top: 1px solid #eee;">
+                    <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 1.2rem; color: {{ empresa.cor_primaria }};">
+                        <span>Total:</span>
+                        <span>R$ {{ "%.2f"|format(pedido.total) }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ações -->
+            <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+                <a href="/loja/meus-pedidos" class="btn" style="background: #6c757d; color: white; text-decoration: none; padding: 0.8rem 1.5rem; border-radius: 5px;">Voltar aos Pedidos</a>
+                {% if pedido.status == 'pendente' %}
+                    <button onclick="cancelarPedido()" style="background: #dc3545; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 5px; cursor: pointer;">Cancelar Pedido</button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function cancelarPedido() {
+            if (confirm('Tem certeza que deseja cancelar este pedido?')) {
+                fetch('/loja/cancelar-pedido/{{ pedido.id }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Pedido cancelado com sucesso!');
+                        location.reload();
+                    } else {
+                        alert('Erro ao cancelar pedido: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao cancelar pedido');
+                });
+            }
+        }
+    </script>
+{% endblock %} 

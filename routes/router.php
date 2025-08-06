@@ -3,8 +3,6 @@
 use App\Controllers\Admin\UsuariosController;
 use App\Controllers\Auth\AuthController;
 use App\Controllers\Admin\AdminController;
-use App\Controllers\Backend\UsuarioController;
-use App\Controllers\Site\ClientController;
 use App\Controllers\Site\HomeController;
 use App\Controllers\UserController;
 use Core\Error\ErrorHandler;
@@ -20,7 +18,6 @@ $router = \Core\Router\Router::getInstance();
 // Rotas públicas (para todos os visitantes)
 $router->group(['middleware' => ['locale', 'csrf']], function ($router) {
     $router->get('/', [HomeController::class, 'index'])->name('home');
-
 });
 
 // Páginas institucionais
@@ -100,6 +97,9 @@ $router->group([
     $router->get('/reports', [AdminController::class, 'reports'])->name('admin.reports');
     $router->get('/products', [AdminController::class, 'products'])->name('admin.products');
     $router->get('/profile', [AdminController::class, 'profile'])->name('admin.profile');
+
+
+    $router->get('/teste', [AdminController::class, 'teste'])->name('admin.profile');
 });
 
 $router->group([

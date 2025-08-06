@@ -1,0 +1,229 @@
+{% extends "loja/layout.twig" %}
+
+{% block title %}{{ produto.nome }} - {{ empresa.nome_fantasia }}{% endblock %}
+
+{% block content %}
+    <!-- Breadcrumb -->
+    <nav style="margin-bottom: 2rem;">
+        <a href="/" style="color: {{ empresa.cor_primaria }};">Home</a> > 
+        <a href="/produtos" style="color: {{ empresa.cor_primaria }};">Produtos</a> > 
+        <span>{{ produto.nome }}</span>
+    </nav>
+
+    <!-- Produto Detalhes -->
+    <div class="grid grid-2" style="margin-bottom: 3rem;">
+        <!-- Imagem do Produto -->
+        <div style="background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            {% if produto.imagem %}
+                <img src="{{ produto.imagem }}" alt="{{ produto.nome }}" style="width: 100%; max-width: 400px; height: auto; border-radius: 10px;">
+            {% else %}
+                <div style="width: 100%; height: 400px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #999; font-size: 4rem; border-radius: 10px;">📦</div>
+            {% endif %}
+        </div>
+
+        <!-- Informações do Produto -->
+        <div style="background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h1 style="font-size: 2rem; margin-bottom: 1rem; color: {{ empresa.cor_primaria }};">{{ produto.nome }}</h1>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <span style="font-size: 2rem; font-weight: bold; color: {{ empresa.cor_primaria }};">
+                    R$ {{ "%.2f"|format(produto.preco) }}
+                </span>
+                {% if produto.preco_promocional %}
+                    <span style="text-decoration: line-through; color: #999; font-size: 1.2rem; margin-left: 1rem;">
+                        R$ {{ "%.2f"|format(produto.preco_promocional) }}
+                    </span>
+                    <span style="background: #ff6b6b; color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.9rem; margin-left: 1rem;">
+                        {{ (((produto.preco_promocional - produto.preco) / produto.preco_promocional) * 100)|round }}% OFF
+                    </span>
+                {% endif %}
+            </div>
+
+            {% if produto.descricao %}
+                <div style="margin-bottom: 1.5rem;">
+                    <h3>Descrição</h3>
+                    <p style="line-height: 1.8; color: #666;">{{ produto.descricao }}</p>
+                </div>
+            {% endif %}
+
+            <div style="margin-bottom: 1.5rem;">
+                <h3>Informações do Produto</h3>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="padding: 0.5rem 0; border-bottom: 1px solid #eee;">
+                        <strong>Código:</strong> {{ produto.codigo }}
+                    </li>
+                    <li style="padding: 0.5rem 0; border-bottom: 1px solid #eee;">
+                        <strong>Estoque:</strong> 
+                        {% if produto.estoque > 0 %}
+                            <span style="color: #28a745;">{{ produto.estoque }} unidades disponíveis</span>
+                        {% else %}
+                            <span style="color: #dc3545;">Produto indisponível</span>
+                        {% endif %}
+                    </li>
+                    {% if produto.peso %}
+                        <li style="padding: 0.5rem 0; border-bottom: 1px solid #eee;">
+                            <strong>Peso:</strong> {{ produto.peso }} kg
+                        </li>
+                    {% endif %}
+                    {% if produto.altura and produto.largura and produto.comprimento %}
+                        <li style="padding: 0.5rem 0; border-bottom: 1px solid #eee;">
+                            <strong>Dimensões:</strong> {{ produto.altura }} x {{ produto.largura }} x {{ produto.comprimento }} cm
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <!-- Adicionar ao Carrinho -->
+            {% if produto.estoque > 0 %}
+                <div style="margin-bottom: 1.5rem;">
+                    <h3>Quantidade</h3>
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                        <button onclick="alterarQuantidade(-1)" style="background: {{ empresa.cor_primaria }}; color: white; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer; font-size: 1.2rem;">-</button>
+                        <input type="number" id="quantidade" value="1" min="1" max="{{ produto.estoque }}" style="width: 80px; padding: 0.5rem; text-align: center; border: 1px solid #ddd; border-radius: 5px;">
+                        <button onclick="alterarQuantidade(1)" style="background: {{ empresa.cor_primaria }}; color: white; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer; font-size: 1.2rem;">+</button>
+                    </div>
+                    <button onclick="adicionarAoCarrinho()" class="btn btn-primary" style="width: 100%; font-size: 1.1rem; padding: 1rem;">
+                        🛒 Adicionar ao Carrinho
+                    </button>
+                </div>
+            {% else %}
+                <div style="background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 5px; text-align: center;">
+                    <strong>Produto indisponível no momento</strong>
+                </div>
+            {% endif %}
+
+            <!-- Compartilhar -->
+            <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #eee;">
+                <h4>Compartilhar:</h4>
+                <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                    <button onclick="compartilhar('whatsapp')" style="background: #25d366; color: white; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;">📱 WhatsApp</button>
+                    <button onclick="compartilhar('facebook')" style="background: #1877f2; color: white; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;">📘 Facebook</button>
+                    <button onclick="compartilhar('twitter')" style="background: #1da1f2; color: white; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;">🐦 Twitter</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Produtos Relacionados -->
+    {% if produtosRelacionados %}
+        <section style="margin-bottom: 3rem;">
+            <h2 style="text-align: center; margin-bottom: 2rem; color: {{ empresa.cor_primaria }};">Produtos Relacionados</h2>
+            <div class="grid grid-4">
+                {% for produtoRel in produtosRelacionados %}
+                    <div style="background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+                        {% if produtoRel.imagem %}
+                            <img src="{{ produtoRel.imagem }}" alt="{{ produtoRel.nome }}" style="width: 100%; height: 150px; object-fit: cover;">
+                        {% else %}
+                            <div style="width: 100%; height: 150px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #999; font-size: 2rem;">📦</div>
+                        {% endif %}
+                        
+                        <div style="padding: 1rem;">
+                            <h3 style="margin-bottom: 0.5rem; font-size: 1rem;">{{ produtoRel.nome }}</h3>
+                            <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem; height: 2.5rem; overflow: hidden;">{{ produtoRel.descricao|slice(0, 60) }}{% if produtoRel.descricao|length > 60 %}...{% endif %}</p>
+                            
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                <span style="font-weight: bold; color: {{ empresa.cor_primaria }};">
+                                    R$ {{ "%.2f"|format(produtoRel.preco) }}
+                                </span>
+                            </div>
+                            
+                            <div style="display: flex; gap: 0.5rem;">
+                                <a href="/produto/{{ produtoRel.id }}" class="btn btn-primary" style="flex: 1; text-align: center; font-size: 0.9rem;">Ver Detalhes</a>
+                                <button onclick="adicionarAoCarrinhoRapido({{ produtoRel.id }})" class="btn" style="background: #28a745; color: white; border: none; padding: 0.5rem; border-radius: 5px; cursor: pointer;">🛒</button>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+
+    <script>
+        function alterarQuantidade(delta) {
+            const input = document.getElementById('quantidade');
+            const novaQuantidade = parseInt(input.value) + delta;
+            const maxQuantidade = {{ produto.estoque }};
+            
+            if (novaQuantidade >= 1 && novaQuantidade <= maxQuantidade) {
+                input.value = novaQuantidade;
+            }
+        }
+
+        function adicionarAoCarrinho() {
+            const quantidade = document.getElementById('quantidade').value;
+            
+            fetch('/carrinho/adicionar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    produto_id: {{ produto.id }},
+                    quantidade: parseInt(quantidade)
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Produto adicionado ao carrinho!');
+                } else {
+                    alert('Erro ao adicionar produto: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao adicionar produto ao carrinho');
+            });
+        }
+
+        function adicionarAoCarrinhoRapido(produtoId) {
+            fetch('/carrinho/adicionar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    produto_id: produtoId,
+                    quantidade: 1
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Produto adicionado ao carrinho!');
+                } else {
+                    alert('Erro ao adicionar produto: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao adicionar produto ao carrinho');
+            });
+        }
+
+        function compartilhar(plataforma) {
+            const url = window.location.href;
+            const texto = 'Confira este produto: {{ produto.nome }}';
+            
+            let shareUrl = '';
+            
+            switch(plataforma) {
+                case 'whatsapp':
+                    shareUrl = `https://wa.me/?text=${encodeURIComponent(texto + ' ' + url)}`;
+                    break;
+                case 'facebook':
+                    shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+                    break;
+                case 'twitter':
+                    shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(texto)}&url=${encodeURIComponent(url)}`;
+                    break;
+            }
+            
+            if (shareUrl) {
+                window.open(shareUrl, '_blank', 'width=600,height=400');
+            }
+        }
+    </script>
+{% endblock %} 

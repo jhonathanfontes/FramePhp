@@ -7,10 +7,10 @@ use Core\Database\Database;
 
 class PedidoModel extends Model
 {
-    protected $table = 'pedidos';
-    protected $primaryKey = 'id_pedido';
+    protected string $table = 'pedidos';
+    protected string $primaryKey = 'id_pedido';
 
-    protected $fillable = [
+    protected array $fillable = [
         'loja_id',
         'cliente_id',
         'numero_pedido',

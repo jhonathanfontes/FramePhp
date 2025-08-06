@@ -167,23 +167,23 @@ class AuthController extends BaseController
         ]);
 
         if ($userId) {
-            $atributosArray = $userId->toArray();
 
-            $user = $this->userModel->find($atributosArray['id_usuario']);
-    
+            $user = $this->userModel->find($userId);
+
             $userData = [
-                'id' => $user->id_usuario,
-                'name' => $user->use_nome,
-                'username' => $user->use_username,
-                'email' => $user->use_email,
-                'role' => $user->permissao_id == 1 ? 'admin' : 'user',
-                'avatar' => $user->use_avatar,
-                'status' => $user->status,
+                'id' => $user['id_usuario'],
+                'name' => $user['use_nome'],
+                'username' => $user['use_username'],
+                'email' => $user['use_email'],
+                'role' => $user['permissao_id'] == 1 ? 'admin' : 'user',
+                'avatar' => $user['use_avatar'],
+                'status' => $user['status'],
                 'type' => 'admin',
             ];
 
             Auth::login($userData);
         }
+
         return Response::redirectResponse(base_url('admin/dashboard'));
     }
 

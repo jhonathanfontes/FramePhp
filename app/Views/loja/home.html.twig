@@ -1,0 +1,128 @@
+{% extends "loja/layout.twig" %}
+
+{% block title %}Home - {{ empresa.nome_fantasia }}{% endblock %}
+
+{% block content %}
+    <!-- Hero Section -->
+    <section style="background: linear-gradient(135deg, {{ empresa.cor_primaria }}, {{ empresa.cor_secundaria }}); color: white; padding: 3rem 0; border-radius: 10px; margin-bottom: 2rem; text-align: center;">
+        <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">Bem-vindo à {{ empresa.nome_fantasia }}</h1>
+        <p style="font-size: 1.2rem; margin-bottom: 2rem;">Descubra nossos produtos de qualidade com os melhores preços!</p>
+        <a href="/produtos" class="btn btn-primary" style="background: white; color: {{ empresa.cor_primaria }}; font-size: 1.1rem; padding: 1rem 2rem;">Ver Produtos</a>
+    </section>
+
+    <!-- Categorias -->
+    {% if categorias %}
+        <section style="margin-bottom: 3rem;">
+            <h2 style="text-align: center; margin-bottom: 2rem; color: {{ empresa.cor_primaria }};">Nossas Categorias</h2>
+            <div class="grid grid-4">
+                {% for categoria in categorias %}
+                    <div style="background: white; padding: 1.5rem; border-radius: 10px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+                        {% if categoria.imagem %}
+                            <img src="{{ categoria.imagem }}" alt="{{ categoria.nome }}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 50%; margin-bottom: 1rem;">
+                        {% else %}
+                            <div style="width: 80px; height: 80px; background: {{ empresa.cor_primaria }}; border-radius: 50%; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">📦</div>
+                        {% endif %}
+                        <h3 style="margin-bottom: 0.5rem;">{{ categoria.nome }}</h3>
+                        {% if categoria.descricao %}
+                            <p style="color: #666; font-size: 0.9rem;">{{ categoria.descricao }}</p>
+                        {% endif %}
+                        <a href="/categoria/{{ categoria.id }}" class="btn btn-primary" style="margin-top: 1rem;">Ver Produtos</a>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+
+    <!-- Produtos em Destaque -->
+    {% if produtos %}
+        <section style="margin-bottom: 3rem;">
+            <h2 style="text-align: center; margin-bottom: 2rem; color: {{ empresa.cor_primaria }};">Produtos em Destaque</h2>
+            <div class="grid grid-4">
+                {% for produto in produtos %}
+                    <div style="background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+                        {% if produto.imagem %}
+                            <img src="{{ produto.imagem }}" alt="{{ produto.nome }}" style="width: 100%; height: 200px; object-fit: cover;">
+                        {% else %}
+                            <div style="width: 100%; height: 200px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #999; font-size: 3rem;">📦</div>
+                        {% endif %}
+                        
+                        <div style="padding: 1.5rem;">
+                            <h3 style="margin-bottom: 0.5rem; font-size: 1.1rem;">{{ produto.nome }}</h3>
+                            <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem; height: 3rem; overflow: hidden;">{{ produto.descricao|slice(0, 80) }}{% if produto.descricao|length > 80 %}...{% endif %}</p>
+                            
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                <span style="font-size: 1.2rem; font-weight: bold; color: {{ empresa.cor_primaria }};">
+                                    R$ {{ "%.2f"|format(produto.preco) }}
+                                </span>
+                                {% if produto.preco_promocional %}
+                                    <span style="text-decoration: line-through; color: #999; font-size: 0.9rem;">
+                                        R$ {{ "%.2f"|format(produto.preco_promocional) }}
+                                    </span>
+                                {% endif %}
+                            </div>
+                            
+                            <div style="display: flex; gap: 0.5rem;">
+                                <a href="/produto/{{ produto.id }}" class="btn btn-primary" style="flex: 1; text-align: center;">Ver Detalhes</a>
+                                <button onclick="adicionarAoCarrinho({{ produto.id }})" class="btn" style="background: #28a745; color: white; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;">🛒</button>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <div style="text-align: center; margin-top: 2rem;">
+                <a href="/produtos" class="btn btn-primary" style="font-size: 1.1rem; padding: 1rem 2rem;">Ver Todos os Produtos</a>
+            </div>
+        </section>
+    {% endif %}
+
+    <!-- Sobre a Empresa -->
+    <section style="background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <h2 style="text-align: center; margin-bottom: 2rem; color: {{ empresa.cor_primaria }};">Sobre a {{ empresa.nome_fantasia }}</h2>
+        <div class="grid grid-2">
+            <div>
+                <h3>Nossa História</h3>
+                <p>A {{ empresa.nome_fantasia }} é uma empresa comprometida em oferecer produtos de qualidade com os melhores preços do mercado. Nossa missão é proporcionar uma experiência de compra excepcional para nossos clientes.</p>
+                <p>Com anos de experiência no mercado, construímos uma reputação sólida baseada na confiança, qualidade e atendimento personalizado.</p>
+            </div>
+            <div>
+                <h3>Por que escolher a {{ empresa.nome_fantasia }}?</h3>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="padding: 0.5rem 0; border-bottom: 1px solid #eee;">✅ Produtos de qualidade garantida</li>
+                    <li style="padding: 0.5rem 0; border-bottom: 1px solid #eee;">✅ Preços competitivos</li>
+                    <li style="padding: 0.5rem 0; border-bottom: 1px solid #eee;">✅ Entrega rápida e segura</li>
+                    <li style="padding: 0.5rem 0; border-bottom: 1px solid #eee;">✅ Atendimento personalizado</li>
+                    <li style="padding: 0.5rem 0;">✅ Garantia em todos os produtos</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        function adicionarAoCarrinho(produtoId) {
+            fetch('/carrinho/adicionar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    produto_id: produtoId,
+                    quantidade: 1
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Produto adicionado ao carrinho!');
+                } else {
+                    alert('Erro ao adicionar produto: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao adicionar produto ao carrinho');
+            });
+        }
+    </script>
+{% endblock %} 

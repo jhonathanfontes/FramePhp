@@ -1,0 +1,832 @@
+{% extends "loja/layout.twig" %}
+
+{% block title %}Meus Pedidos - {{ empresa.nome_fantasia }}{% endblock %}
+
+{% block content %}
+    <div class="orders-page">
+        <header class="page-header">
+            <h1 class="page-title">📋 Meus Pedidos</h1>
+            <p class="page-subtitle">Acompanhe todos os seus pedidos e compras</p>
+        </header>
+
+        <!-- Filtros -->
+        <section class="filters-section" aria-labelledby="filters-title">
+            <div class="filters-container">
+                <div class="search-box">
+                    <input type="text" 
+                           id="search-input" 
+                           placeholder="Buscar pedidos..." 
+                           class="search-input"
+                           aria-label="Buscar pedidos">
+                    <button type="button" class="search-btn" aria-label="Buscar">
+                        🔍
+                    </button>
+                </div>
+
+                <div class="filters-row">
+                    <div class="filter-group">
+                        <label for="status-filter" class="filter-label">Status</label>
+                        <select id="status-filter" class="filter-select">
+                            <option value="">Todos os Status</option>
+                            <option value="pendente">Pendente</option>
+                            <option value="aprovado">Aprovado</option>
+                            <option value="em_preparo">Em Preparo</option>
+                            <option value="enviado">Enviado</option>
+                            <option value="entregue">Entregue</option>
+                            <option value="cancelado">Cancelado</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="date-filter" class="filter-label">Período</label>
+                        <select id="date-filter" class="filter-select">
+                            <option value="">Todos os Períodos</option>
+                            <option value="7">Últimos 7 dias</option>
+                            <option value="30">Últimos 30 dias</option>
+                            <option value="90">Últimos 3 meses</option>
+                            <option value="365">Último ano</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="sort-filter" class="filter-label">Ordenar por</label>
+                        <select id="sort-filter" class="filter-select">
+                            <option value="recent">Mais Recentes</option>
+                            <option value="old">Mais Antigos</option>
+                            <option value="value-high">Maior Valor</option>
+                            <option value="value-low">Menor Valor</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Estatísticas -->
+        <section class="stats-section" aria-labelledby="stats-title">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📦</div>
+                    <div class="stat-content">
+                        <h3 class="stat-title">Total de Pedidos</h3>
+                        <p class="stat-value">{{ totalPedidos }}</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-content">
+                        <h3 class="stat-title">Valor Total</h3>
+                        <p class="stat-value">R$ {{ "%.2f"|format(valorTotal) }}</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-content">
+                        <h3 class="stat-title">Pedidos Entregues</h3>
+                        <p class="stat-value">{{ pedidosEntregues }}</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-content">
+                        <h3 class="stat-title">Em Andamento</h3>
+                        <p class="stat-value">{{ pedidosEmAndamento }}</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Lista de Pedidos -->
+        <section class="orders-section" aria-labelledby="orders-title">
+            <div class="section-header">
+                <h2 id="orders-title" class="section-title">
+                    Histórico de Pedidos
+                    <span class="orders-count">({{ pedidos|length }} pedidos)</span>
+                </h2>
+            </div>
+
+            {% if pedidos %}
+                <div class="orders-list">
+                    {% for pedido in pedidos %}
+                        <article class="order-card" data-order-id="{{ pedido.id }}">
+                            <div class="order-header">
+                                <div class="order-info">
+                                    <h3 class="order-number">
+                                        Pedido #{{ pedido.numero_pedido }}
+                                    </h3>
+                                    <p class="order-date">
+                                        {{ pedido.data_pedido|date('d/m/Y às H:i') }}
+                                    </p>
+                                </div>
+                                
+                                <div class="order-status">
+                                    <span class="status-badge status-{{ pedido.status }}">
+                                        {{ pedido.status|title }}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="order-items">
+                                {% for item in pedido.itens %}
+                                    <div class="order-item">
+                                        <div class="item-image">
+                                            {% if item.produto.imagem %}
+                                                <img src="{{ item.produto.imagem }}" 
+                                                     alt="{{ item.produto.nome }}"
+                                                     loading="lazy">
+                                            {% else %}
+                                                <div class="item-placeholder">📦</div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="item-info">
+                                            <h4 class="item-name">{{ item.produto.nome }}</h4>
+                                            <p class="item-details">
+                                                Qtd: {{ item.quantidade }} | 
+                                                R$ {{ "%.2f"|format(item.preco_unitario) }} cada
+                                            </p>
+                                        </div>
+                                        
+                                        <div class="item-total">
+                                            R$ {{ "%.2f"|format(item.total) }}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <div class="order-footer">
+                                <div class="order-total">
+                                    <span class="total-label">Total:</span>
+                                    <span class="total-value">R$ {{ "%.2f"|format(pedido.total) }}</span>
+                                </div>
+                                
+                                <div class="order-actions">
+                                    <a href="/pedido/{{ pedido.id }}" 
+                                       class="btn btn-primary"
+                                       aria-label="Ver detalhes do pedido {{ pedido.numero_pedido }}">
+                                        👁️ Ver Detalhes
+                                    </a>
+                                    
+                                    {% if pedido.status == 'pendente' %}
+                                        <button class="btn btn-danger" 
+                                                onclick="cancelarPedido({{ pedido.id }})"
+                                                aria-label="Cancelar pedido {{ pedido.numero_pedido }}">
+                                            ❌ Cancelar
+                                        </button>
+                                    {% endif %}
+                                    
+                                    {% if pedido.status == 'enviado' %}
+                                        <button class="btn btn-secondary" 
+                                                onclick="rastrearPedido({{ pedido.id }})"
+                                                aria-label="Rastrear pedido {{ pedido.numero_pedido }}">
+                                            📍 Rastrear
+                                        </button>
+                                    {% endif %}
+                                    
+                                    {% if pedido.status == 'entregue' %}
+                                        <button class="btn btn-secondary" 
+                                                onclick="avaliarPedido({{ pedido.id }})"
+                                                aria-label="Avaliar pedido {{ pedido.numero_pedido }}">
+                                            ⭐ Avaliar
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <!-- Timeline do Pedido -->
+                            <div class="order-timeline">
+                                <div class="timeline-item {% if pedido.status == 'pendente' %}active{% endif %}">
+                                    <div class="timeline-icon">📝</div>
+                                    <div class="timeline-content">
+                                        <h4>Pedido Realizado</h4>
+                                        <p>{{ pedido.data_pedido|date('d/m/Y H:i') }}</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="timeline-item {% if pedido.status in ['aprovado', 'em_preparo', 'enviado', 'entregue'] %}active{% endif %}">
+                                    <div class="timeline-icon">✅</div>
+                                    <div class="timeline-content">
+                                        <h4>Pedido Aprovado</h4>
+                                        <p>{{ pedido.data_aprovacao ? pedido.data_aprovacao|date('d/m/Y H:i') : 'Pendente' }}</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="timeline-item {% if pedido.status in ['em_preparo', 'enviado', 'entregue'] %}active{% endif %}">
+                                    <div class="timeline-icon">👨‍🍳</div>
+                                    <div class="timeline-content">
+                                        <h4>Em Preparo</h4>
+                                        <p>{{ pedido.data_preparo ? pedido.data_preparo|date('d/m/Y H:i') : 'Pendente' }}</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="timeline-item {% if pedido.status in ['enviado', 'entregue'] %}active{% endif %}">
+                                    <div class="timeline-icon">🚚</div>
+                                    <div class="timeline-content">
+                                        <h4>Enviado</h4>
+                                        <p>{{ pedido.data_envio ? pedido.data_envio|date('d/m/Y H:i') : 'Pendente' }}</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="timeline-item {% if pedido.status == 'entregue' %}active{% endif %}">
+                                    <div class="timeline-icon">📦</div>
+                                    <div class="timeline-content">
+                                        <h4>Entregue</h4>
+                                        <p>{{ pedido.data_entrega ? pedido.data_entrega|date('d/m/Y H:i') : 'Pendente' }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+
+                <!-- Paginação -->
+                {% if pagination %}
+                    <nav class="pagination" aria-label="Navegação de páginas">
+                        {% if pagination.current_page > 1 %}
+                            <a href="?page={{ pagination.current_page - 1 }}" class="pagination-btn">
+                                ← Anterior
+                            </a>
+                        {% endif %}
+                        
+                        {% for page in range(1, pagination.last_page) %}
+                            {% if page == pagination.current_page %}
+                                <span class="pagination-btn active">{{ page }}</span>
+                            {% else %}
+                                <a href="?page={{ page }}" class="pagination-btn">{{ page }}</a>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if pagination.current_page < pagination.last_page %}
+                            <a href="?page={{ pagination.current_page + 1 }}" class="pagination-btn">
+                                Próxima →
+                            </a>
+                        {% endif %}
+                    </nav>
+                {% endif %}
+            {% else %}
+                <!-- Estado Vazio -->
+                <div class="empty-state">
+                    <div class="empty-icon">📋</div>
+                    <h3>Nenhum pedido encontrado</h3>
+                    <p>Você ainda não fez nenhum pedido. Que tal começar a comprar?</p>
+                    <a href="/produtos" class="btn btn-primary">
+                        Ver Produtos
+                    </a>
+                </div>
+            {% endif %}
+        </section>
+    </div>
+
+    <style>
+        /* ===== ORDERS PAGE ===== */
+        .orders-page {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .page-title {
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            color: var(--text-color);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .page-subtitle {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+        
+        /* ===== FILTERS SECTION ===== */
+        .filters-section {
+            background: var(--bg-white);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .filters-container {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+        
+        .search-box {
+            display: flex;
+            gap: var(--spacing-xs);
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: var(--spacing-sm);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+        }
+        
+        .search-input:focus {
+            outline: 2px solid var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .search-btn {
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: var(--primary-color);
+            color: var(--text-white);
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .search-btn:hover {
+            background: var(--secondary-color);
+        }
+        
+        .filters-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xs);
+        }
+        
+        .filter-label {
+            font-weight: 500;
+            color: var(--text-color);
+            font-size: 0.9rem;
+        }
+        
+        .filter-select {
+            padding: var(--spacing-sm);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+            background: var(--bg-white);
+        }
+        
+        .filter-select:focus {
+            outline: 2px solid var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        /* ===== STATS SECTION ===== */
+        .stats-section {
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+        }
+        
+        .stat-card {
+            background: var(--bg-white);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow);
+            padding: var(--spacing-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            transition: var(--transition);
+        }
+        
+        .stat-card:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-2px);
+        }
+        
+        .stat-icon {
+            font-size: 2rem;
+            opacity: 0.8;
+        }
+        
+        .stat-content {
+            flex: 1;
+        }
+        
+        .stat-title {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: var(--spacing-xs);
+            font-weight: 500;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+        
+        /* ===== ORDERS SECTION ===== */
+        .section-header {
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            color: var(--text-color);
+            margin: 0;
+        }
+        
+        .orders-count {
+            color: var(--text-light);
+            font-weight: normal;
+        }
+        
+        /* ===== ORDER CARDS ===== */
+        .orders-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-lg);
+        }
+        
+        .order-card {
+            background: var(--bg-white);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        
+        .order-card:hover {
+            box-shadow: var(--shadow-hover);
+        }
+        
+        .order-header {
+            padding: var(--spacing-lg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .order-number {
+            font-size: 1.2rem;
+            color: var(--text-color);
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .order-date {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+        
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-pendente { background: #fff3cd; color: #856404; }
+        .status-aprovado { background: #d1ecf1; color: #0c5460; }
+        .status-em_preparo { background: #d4edda; color: #155724; }
+        .status-enviado { background: #cce5ff; color: #004085; }
+        .status-entregue { background: #d4edda; color: #155724; }
+        .status-cancelado { background: #f8d7da; color: #721c24; }
+        
+        /* ===== ORDER ITEMS ===== */
+        .order-items {
+            padding: var(--spacing-lg);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .order-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            padding: var(--spacing-sm) 0;
+        }
+        
+        .order-item:not(:last-child) {
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .item-image {
+            width: 60px;
+            height: 60px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        
+        .item-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .item-placeholder {
+            width: 100%;
+            height: 100%;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 1.5rem;
+        }
+        
+        .item-info {
+            flex: 1;
+        }
+        
+        .item-name {
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .item-details {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+        
+        .item-total {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        /* ===== ORDER FOOTER ===== */
+        .order-footer {
+            padding: var(--spacing-lg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: var(--spacing-md);
+        }
+        
+        .order-total {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+        
+        .total-label {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+        
+        .total-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .order-actions {
+            display: flex;
+            gap: var(--spacing-xs);
+            flex-wrap: wrap;
+        }
+        
+        /* ===== TIMELINE ===== */
+        .order-timeline {
+            padding: var(--spacing-lg);
+            background: var(--bg-light);
+        }
+        
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+            opacity: 0.5;
+            transition: var(--transition);
+        }
+        
+        .timeline-item.active {
+            opacity: 1;
+        }
+        
+        .timeline-icon {
+            font-size: 1.2rem;
+            width: 30px;
+            text-align: center;
+        }
+        
+        .timeline-content h4 {
+            font-size: 0.9rem;
+            color: var(--text-color);
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .timeline-content p {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+        
+        /* ===== PAGINATION ===== */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-xs);
+            flex-wrap: wrap;
+            margin-top: var(--spacing-xl);
+        }
+        
+        .pagination-btn {
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: var(--bg-light);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        
+        .pagination-btn:hover,
+        .pagination-btn.active {
+            background: var(--primary-color);
+            color: var(--text-white);
+            border-color: var(--primary-color);
+        }
+        
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            text-align: center;
+            padding: var(--spacing-xl);
+            color: var(--text-light);
+        }
+        
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: var(--spacing-md);
+            opacity: 0.5;
+        }
+        
+        .empty-state h3 {
+            color: var(--text-color);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        /* ===== RESPONSIVIDADE ===== */
+        @media (max-width: 768px) {
+            .filters-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .order-header {
+                flex-direction: column;
+                gap: var(--spacing-sm);
+                align-items: flex-start;
+            }
+            
+            .order-footer {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .order-actions {
+                justify-content: center;
+            }
+            
+            .order-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--spacing-sm);
+            }
+            
+            .item-total {
+                align-self: flex-end;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .order-actions {
+                flex-direction: column;
+            }
+            
+            .timeline-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--spacing-sm);
+            }
+        }
+    </style>
+
+    <script>
+        // Funções de filtro
+        function aplicarFiltros() {
+            const status = document.getElementById('status-filter').value;
+            const periodo = document.getElementById('date-filter').value;
+            const ordenacao = document.getElementById('sort-filter').value;
+            const busca = document.getElementById('search-input').value;
+            
+            // Construir URL com filtros
+            const params = new URLSearchParams();
+            if (status) params.append('status', status);
+            if (periodo) params.append('periodo', periodo);
+            if (ordenacao) params.append('ordenacao', ordenacao);
+            if (busca) params.append('busca', busca);
+            
+            // Redirecionar com filtros
+            window.location.href = '/meus-pedidos?' + params.toString();
+        }
+        
+        // Aplicar filtros quando mudar
+        document.getElementById('status-filter').addEventListener('change', aplicarFiltros);
+        document.getElementById('date-filter').addEventListener('change', aplicarFiltros);
+        document.getElementById('sort-filter').addEventListener('change', aplicarFiltros);
+        
+        // Busca em tempo real
+        let searchTimeout;
+        document.getElementById('search-input').addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                aplicarFiltros();
+            }, 500);
+        });
+        
+        // Buscar ao pressionar Enter
+        document.getElementById('search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                aplicarFiltros();
+            }
+        });
+        
+        // Buscar ao clicar no botão
+        document.querySelector('.search-btn').addEventListener('click', aplicarFiltros);
+        
+        // Cancelar pedido
+        function cancelarPedido(pedidoId) {
+            if (confirm('Tem certeza que deseja cancelar este pedido?')) {
+                const button = event.target;
+                const originalText = button.innerHTML;
+                
+                button.disabled = true;
+                button.innerHTML = '⏳ Cancelando...';
+                
+                fetch(`/pedido/${pedidoId}/cancelar`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        mostrarNotificacao('Pedido cancelado com sucesso!', 'success');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        throw new Error(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    button.disabled = false;
+                    button.innerHTML = originalText;
+                    mostrarNotificacao('Erro ao cancelar pedido: ' + error.message, 'error');
+                });
+            }
+        }
+        
+        // Rastrear pedido
+        function rastrearPedido(pedidoId) {
+            window.open(`/pedido/${pedidoId}/rastreamento`, '_blank');
+        }
+        
+        // Avaliar pedido
+        function avaliarPedido(pedidoId) {
+            window.location.href = `/pedido/${pedidoId}/avaliar`;
+        }
+        
+        function mostrarNotificacao(mensagem, tipo) {
+            const notificacao = document.createElement('div');
+            notificacao.className = `alert alert-${tipo}`;
+            notificacao.setAttribute('role', 'alert');
+            notificacao.setAttribute('aria-live', 'polite');
+            notificacao.textContent = mensagem;
+            
+            const container = document.querySelector('.container');
+            container.insertBefore(notificacao, container.firstChild);
+            
+            setTimeout(() => {
+                notificacao.remove();
+            }, 5000);
+        }
+    </script>
+{% endblock %} 

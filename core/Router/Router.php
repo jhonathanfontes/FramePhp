@@ -41,15 +41,37 @@ class Router
 
     // --- O restante da classe com todas as funcionalidades ---
 
-    public function get(string $uri, $callback): RouteDefinition { return $this->addRoute('GET', $uri, $callback); }
-    public function post(string $uri, $callback): RouteDefinition { return $this->addRoute('POST', $uri, $callback); }
-    public function put(string $uri, $callback): RouteDefinition { return $this->addRoute('PUT', $uri, $callback); }
-    public function patch(string $uri, $callback): RouteDefinition { return $this->addRoute('PATCH', $uri, $callback); }
-    public function delete(string $uri, $callback): RouteDefinition { return $this->addRoute('DELETE', $uri, $callback); }
+    public function get(string $uri, $callback): RouteDefinition
+    {
+        return $this->addRoute('GET', $uri, $callback);
+    }
+    public function post(string $uri, $callback): RouteDefinition
+    {
+        return $this->addRoute('POST', $uri, $callback);
+    }
+    public function put(string $uri, $callback): RouteDefinition
+    {
+        return $this->addRoute('PUT', $uri, $callback);
+    }
+    public function patch(string $uri, $callback): RouteDefinition
+    {
+        return $this->addRoute('PATCH', $uri, $callback);
+    }
+    public function delete(string $uri, $callback): RouteDefinition
+    {
+        return $this->addRoute('DELETE', $uri, $callback);
+    }
 
     private function addRoute(string $method, string $uri, $callback): RouteDefinition
     {
-        $fullUri = rtrim($this->prefix . '/' . trim($uri, '/'), '/') ?: '/';
+        // Constrói a URI completa de forma mais robusta
+        $fullUri = rtrim($this->prefix, '/') . '/' . ltrim($uri, '/');
+
+        // Corrige rotas como '//' ou '' para '/'
+        if ($fullUri === '//' || $fullUri === '') {
+            $fullUri = '/';
+        }
+
         $routeDefinition = new RouteDefinition($method, $fullUri, $callback, $this->groupMiddleware);
         $this->routes[] = $routeDefinition;
         return $routeDefinition;
@@ -60,7 +82,11 @@ class Router
         $originalPrefix = $this->prefix;
         $originalGroupMiddleware = $this->groupMiddleware;
 
-        $this->prefix .= '/' . trim($options['prefix'] ?? '', '/');
+        if (isset($options['prefix'])) {
+            $this->prefix .= '/' . trim($options['prefix'], '/');
+            $this->prefix = str_replace('//', '/', $this->prefix); // Remove barras duplas
+        }
+  
         if (isset($options['middleware'])) {
             $this->groupMiddleware = array_merge($this->groupMiddleware, (array) $options['middleware']);
         }
@@ -75,10 +101,12 @@ class Router
     {
         $this->namedRoutes[$name] = $route;
     }
-    
+
     public function generateUrl(string $name, array $params = []): ?string
     {
-        if (!isset($this->namedRoutes[$name])) { return null; }
+        if (!isset($this->namedRoutes[$name])) {
+            return null;
+        }
         $route = $this->namedRoutes[$name];
         $url = $route->getUri();
         foreach ($params as $key => $value) {
@@ -86,14 +114,14 @@ class Router
         }
         return base_url($url);
     }
-    
+
     private function resolveMiddleware(string $middleware): array
     {
         [$name, $params] = array_pad(explode(':', $middleware, 2), 2, null);
         $className = $this->middlewareAliases[$name] ?? $name;
         return [$className, $params ? explode(',', $params) : []];
     }
-    
+
     private function processRoute(RouteDefinition $route, Request $request): void
     {
         $middlewares = array_map([$this, 'resolveMiddleware'], $route->getMiddlewares());
@@ -118,7 +146,7 @@ class Router
                 }
                 return $response;
             });
-        
+
         $response->send();
     }
 
