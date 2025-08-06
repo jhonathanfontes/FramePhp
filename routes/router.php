@@ -1,11 +1,12 @@
 <?php
 
 use App\Controllers\Admin\AuthController as AdminAuthController;
-use App\Controllers\Admin\UsuariosController;
+use App\Controllers\Admin\UsuariosController as AdminUsuarios;
 use App\Controllers\Admin\AdminController;
-use App\Controllers\Admin\DashboardController;
+use App\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Controllers\Backend\Painel\AuthController as PainelAuthController;
 use App\Controllers\Client\ClientController;
+use App\Controllers\Loja\DashboardController;
 use App\Controllers\Site\HomeController;
 use App\Controllers\UserController;
 use Core\Error\ErrorHandler;
@@ -23,15 +24,22 @@ $router->group(['middleware' => ['locale', 'csrf']], function ($router) {
     $router->get('/', [HomeController::class, 'index'])->name('home');
 });
 
-// Páginas institucionais
-$router->get('/sobre', [ClientController::class, 'sobre'])->name('client.sobre');
-$router->get('/contato', [ClientController::class, 'contato'])->name('client.contato');
-$router->post('/contato/enviar', [ClientController::class, 'enviarContato'])->name('client.contato.enviar');
-$router->get('/loja', [ClientController::class, 'loja'])->name('client.loja');
-// Catálogo de produtos
-$router->get('/catalogo', [ClientController::class, 'catalogo'])->name('client.catalogo');
-$router->get('/produto/{id}', [ClientController::class, 'produto'])->name('client.produto');
-// Rotas de autenticação (apenas para convidados/não logados)
+$router->group([
+    'prefix' => 'loja',
+    'middleware' => ['csrf']
+], function ($router) {
+    // Páginas institucionais
+    $router->get('/sobre', [DashboardController::class, 'sobre'])->name('loja.sobre');
+    $router->get('/contato', [DashboardController::class, 'contato'])->name('loja.contato');
+    $router->post('/contato/enviar', [DashboardController::class, 'enviarContato'])->name('loja.contato.enviar');
+    $router->get('/loja', [DashboardController::class, 'loja'])->name('loja.loja');
+    // Catálogo de produtos
+    $router->get('/catalogo', [DashboardController::class, 'catalogo'])->name('loja.catalogo');
+    $router->get('/produto/{id}', [DashboardController::class, 'produto'])->name('loja.produto');
+    // Rotas de autenticação (apenas para convidados/não logados)
+});
+
+
 $router->group(['middleware' => ['guest', 'csrf']], function ($router) {
     $router->get('/home', [HomeController::class, 'index'])->name('home');
 });
@@ -93,8 +101,8 @@ $router->group([
     'middleware' => ['auth', 'permission:admin'] // Usa o alias 'permission' com o parâmetro 'admin'
 ], function ($router) {
     // $router->get('/', $router->redirect('dashboard'));
-    $router->get('/dashboard', [DashboardController::class, 'dashboard'])->name('admin.dashboard');
-    $router->get('/usuarios', [UsuariosController::class, 'index'])->name('admin.users');
+    $router->get('/dashboard', [AdminDashboard::class, 'dashboard'])->name('admin.dashboard');
+    $router->get('/usuarios', [AdminUsuarios::class, 'index'])->name('admin.users');
     $router->get('/settings', [AdminController::class, 'settings'])->name('admin.settings');
     $router->get('/orders', [AdminController::class, 'orders'])->name('admin.orders');
     $router->get('/reports', [AdminController::class, 'reports'])->name('admin.reports');

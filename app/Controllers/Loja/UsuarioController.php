@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controllers\Backend\Loja;
+namespace App\Controllers\Loja;
 
 use App\Models\CadUsuarioModel;
 

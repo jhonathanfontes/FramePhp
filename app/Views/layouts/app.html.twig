@@ -61,19 +61,19 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="/">Home</a>
+                        <a class="nav-link active" aria-current="page" href="{{ url('home') }}">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/about">Sobre</a>
+                        <a class="nav-link" href="{{ url('loja.sobre') }}">Sobre</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/contact">Contato</a>
+                        <a class="nav-link" href="{{ url('loja.contato') }}">Contato</a>
                     </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/shop">Loja</a>
+                    <a class="nav-link" href="{{ url('loja.catalogo') }}">Loja</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/carrinho">
+                    <a class="nav-link" href="{{ url('carrinho') }}">
                         <i class="fas fa-shopping-cart"></i> Carrinho
                         <span id="cart-count" class="badge bg-primary"></span>
                     </a>
