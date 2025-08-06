@@ -2,7 +2,9 @@
 
 namespace App\Controllers\Client;
 
-class ClientController
+use Core\Controller\BaseController;
+
+class ClientController extends BaseController
 {
     public function dashboard()
     {
@@ -17,5 +19,26 @@ class ClientController
     public function profile()
     {
         // Implementação do método profile
+    }
+
+    
+    /**
+     * Página Sobre
+     */
+    public function sobre()
+    {
+        echo $this->render('pages/client/sobre/index', [
+            'title' => 'Sobre Nós'
+        ]);
+    }
+
+    /**
+     * Página Contato
+     */
+    public function contato()
+    {
+        echo $this->view('pages/client/contato/index', [
+            'title' => 'Contato'
+        ]);
     }
 }

@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Models;
@@ -28,11 +27,15 @@ class PedidoModel extends Model
         'updated_at'
     ];
 
-    private $db;
-
     public function __construct()
     {
         $this->db = Database::getInstance();
+    }
+
+
+    public function findByUserId(int $userId): array
+    {
+        return $this->db->findAll($this->table, '*', 'cliente_id = ?', [$userId], 'created_at DESC');
     }
 
     public function findById(int $id): ?array
@@ -52,7 +55,7 @@ class PedidoModel extends Model
         return $this->db->insert($this->table, $data);
     }
 
-    public function update(int $id, array $data): int
+    public function update(int $id, array $data): bool
     {
         $data['updated_at'] = date('Y-m-d H:i:s');
         return $this->db->update($this->table, $data, 'id_pedido = ?', [$id]);

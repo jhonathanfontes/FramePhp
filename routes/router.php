@@ -4,6 +4,7 @@ use App\Controllers\Admin\UsuariosController;
 use App\Controllers\Auth\AuthController;
 use App\Controllers\Admin\AdminController;
 use App\Controllers\Backend\UsuarioController;
+use App\Controllers\Site\ClientController;
 use App\Controllers\Site\HomeController;
 use App\Controllers\UserController;
 use Core\Error\ErrorHandler;
@@ -19,8 +20,17 @@ $router = \Core\Router\Router::getInstance();
 // Rotas públicas (para todos os visitantes)
 $router->group(['middleware' => ['locale', 'csrf']], function ($router) {
     $router->get('/', [HomeController::class, 'index'])->name('home');
+
 });
 
+// Páginas institucionais
+$router->get('/sobre', [ClientController::class, 'sobre'])->name('client.sobre');
+$router->get('/contato', [ClientController::class, 'contato'])->name('client.contato');
+$router->post('/contato/enviar', [ClientController::class, 'enviarContato'])->name('client.contato.enviar');
+$router->get('/loja', [ClientController::class, 'loja'])->name('client.loja');
+// Catálogo de produtos
+$router->get('/catalogo', [ClientController::class, 'catalogo'])->name('client.catalogo');
+$router->get('/produto/{id}', [ClientController::class, 'produto'])->name('client.produto');
 // Rotas de autenticação (apenas para convidados/não logados)
 $router->group(['middleware' => ['guest', 'csrf']], function ($router) {
     $router->get('/home', [HomeController::class, 'index'])->name('home');
@@ -36,6 +46,8 @@ $router->group(['prefix' => 'auth', 'middleware' => ['guest', 'csrf']], function
     $router->post('/forgot-password', [AuthController::class, 'forgotPassword']);
     $router->get('/reset-password/{token}', [AuthController::class, 'resetPasswordForm'])->name('esqueci-senha');
     $router->post('/reset-password', [AuthController::class, 'resetPassword']);
+
+    $router->get('/sobre', [ClientController::class, 'sobre'])->name('client.sobre');
 });
 
 /*
@@ -80,7 +92,7 @@ $router->group([
     'prefix' => 'admin',
     'middleware' => ['auth', 'permission:admin'] // Usa o alias 'permission' com o parâmetro 'admin'
 ], function ($router) {
-   // $router->get('/', $router->redirect('dashboard'));
+    // $router->get('/', $router->redirect('dashboard'));
     $router->get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     $router->get('/usuarios', [UsuariosController::class, 'index'])->name('admin.users');
     $router->get('/settings', [AdminController::class, 'settings'])->name('admin.settings');
@@ -94,7 +106,7 @@ $router->group([
     'prefix' => 'user',
     'middleware' => ['auth', 'permission:admin,user'] // Usa o alias 'permission' com o parâmetro 'admin'
 ], function ($router) {
-  //  $router->get('/', $router->redirect('dashboard'));
+    //  $router->get('/', $router->redirect('dashboard'));
     $router->get('/dashboard', [AdminController::class, 'dashboard'])->name('user.dashboard');
     $router->get('/users', [AdminController::class, 'users'])->name('user.users');
     $router->get('/settings', [AdminController::class, 'settings'])->name('user.settings');
