@@ -1,0 +1,28 @@
+<section class="marcas-parceiras">
+    <div class="container">
+        <h2 class="section-title">Nossas Marcas Parceiras</h2>
+        <p class="section-subtitle">As melhores marcas do mercado</p>
+        
+        <div class="marcas-grid">
+            {% for marca in marcas_parceiras %}
+                <div class="marca-item animate-on-scroll">
+                    <img src="{{ marca.logo }}" alt="{{ marca.nome }}" class="marca-logo" loading="lazy">
+                    <span class="marca-nome">{{ marca.nome }}</span>
+                </div>
+            {% else %}
+                <div class="marcas-empty">
+                    <i class="icon-award"></i>
+                    <h3>Nenhuma marca parceira</h3>
+                    <p>Em breve teremos parcerias incríveis!</p>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="marcas-actions">
+            <a href="{{ url('loja.marcas') }}" class="btn btn-outline">
+                <i class="icon-award"></i>
+                <span>Ver Todas as Marcas</span>
+            </a>
+        </div>
+    </div>
+</section> 

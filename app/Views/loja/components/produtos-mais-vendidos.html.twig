@@ -1,0 +1,83 @@
+<section class="produtos-mais-vendidos">
+    <div class="container">
+        <h2 class="section-title">Mais Vendidos</h2>
+        <p class="section-subtitle">Os produtos mais populares da nossa loja</p>
+        
+        <div class="produtos-grid">
+            {% for produto in produtos_mais_vendidos %}
+                <div class="produto-card produto-bestseller animate-on-scroll">
+                    <div class="produto-badge bestseller">Mais Vendido</div>
+                    
+                    <div class="produto-image-container">
+                        <img src="{{ produto.imagem }}" alt="{{ produto.nome }}" class="produto-image" loading="lazy">
+                        
+                        <div class="produto-overlay">
+                            <button class="btn btn-quick-view" data-product-id="{{ produto.id }}" aria-label="Visualização rápida">
+                                <i class="icon-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="produto-content">
+                        <h3 class="produto-title">
+                            <a href="{{ url('loja.produto', {id: produto.id}) }}">{{ produto.nome }}</a>
+                        </h3>
+                        
+                        <div class="produto-categoria">
+                            <a href="{{ url('loja.categoria', {id: produto.categoria.id}) }}">{{ produto.categoria.nome }}</a>
+                        </div>
+                        
+                        <div class="produto-rating">
+                            {% for i in 1..5 %}
+                                <i class="icon-star{{ i <= produto.avaliacao ? '-fill' : '' }}"></i>
+                            {% endfor %}
+                            <span class="rating-count">({{ produto.total_avaliacoes }})</span>
+                        </div>
+                        
+                        <div class="produto-price">
+                            {% if produto.preco_antigo %}
+                                <span class="produto-old-price">R$ {{ produto.preco_antigo|number_format(2, ',', '.') }}</span>
+                            {% endif %}
+                            <span class="produto-current-price">R$ {{ produto.preco|number_format(2, ',', '.') }}</span>
+                        </div>
+                        
+                        {% if produto.parcelas %}
+                            <div class="produto-parcelas">
+                                ou {{ produto.parcelas }}x de R$ {{ (produto.preco / produto.parcelas)|number_format(2, ',', '.') }}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="produto-actions">
+                            <button class="btn btn-add-cart" data-product-id="{{ produto.id }}">
+                                <i class="icon-shopping-cart"></i>
+                                <span>Adicionar</span>
+                            </button>
+                            
+                            <button class="btn btn-favorite" data-product-id="{{ produto.id }}" aria-label="Favoritar produto">
+                                <i class="icon-heart"></i>
+                            </button>
+                        </div>
+                        
+                        {% if produto.estoque <= 5 and produto.estoque > 0 %}
+                            <div class="produto-estoque">
+                                <i class="icon-alert-triangle"></i>
+                                <span>Apenas {{ produto.estoque }} em estoque!</span>
+                            </div>
+                        {% elseif produto.estoque == 0 %}
+                            <div class="produto-esgotado">
+                                <i class="icon-x-circle"></i>
+                                <span>Produto esgotado</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% else %}
+                <div class="produtos-empty">
+                    <i class="icon-trending-up"></i>
+                    <h3>Nenhum produto mais vendido</h3>
+                    <p>Em breve teremos produtos populares para você!</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section> 

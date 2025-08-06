@@ -1,0 +1,142 @@
+<header class="header" role="banner">
+    <div class="container">
+        <div class="header-content">
+            <!-- Logo -->
+            <div class="logo-container">
+                <a href="{{ url('loja.home') }}" class="logo" aria-label="Página inicial">
+                    {% if empresa.logo %}
+                        <img src="{{ empresa.logo }}" alt="{{ empresa.nome_fantasia }}" class="logo-img">
+                    {% else %}
+                        <span class="logo-text">{{ empresa.nome_fantasia }}</span>
+                    {% endif %}
+                </a>
+            </div>
+            
+            <!-- Menu de Navegação -->
+            <nav class="nav" role="navigation" aria-label="Menu principal">
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="{{ url('loja.home') }}" class="nav-link" aria-current="{{ request.path == '/' ? 'page' : 'false' }}">
+                            <i class="icon-home"></i>
+                            <span>Home</span>
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a href="{{ url('loja.produtos') }}" class="nav-link" aria-current="{{ request.path starts with '/produtos' ? 'page' : 'false' }}">
+                            <i class="icon-shopping-bag"></i>
+                            <span>Produtos</span>
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle" aria-expanded="false">
+                            <i class="icon-grid"></i>
+                            <span>Categorias</span>
+                            <i class="icon-chevron-down"></i>
+                        </a>
+                        <ul class="dropdown-menu">
+                            {% for categoria in categorias %}
+                                <li>
+                                    <a href="{{ url('loja.categoria', {id: categoria.id}) }}" class="dropdown-item">
+                                        {{ categoria.nome }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a href="{{ url('loja.sobre') }}" class="nav-link">
+                            <i class="icon-info"></i>
+                            <span>Sobre</span>
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a href="{{ url('loja.contato') }}" class="nav-link">
+                            <i class="icon-mail"></i>
+                            <span>Contato</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <!-- Menu do Usuário -->
+            <div class="user-menu">
+                <!-- Busca -->
+                <div class="search-container">
+                    <form action="{{ url('loja.busca') }}" method="GET" class="search-form">
+                        <div class="search-input-group">
+                            <input type="text" name="q" placeholder="Buscar produtos..." class="search-input" 
+                                   value="{{ request.get('q') }}" aria-label="Buscar produtos">
+                            <button type="submit" class="search-btn" aria-label="Buscar">
+                                <i class="icon-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Carrinho -->
+                <a href="{{ url('loja.carrinho') }}" class="btn btn-cart" aria-label="Ver carrinho de compras">
+                    <i class="icon-shopping-cart"></i>
+                    <span class="cart-count" id="cart-count">{{ carrinho.total_itens|default(0) }}</span>
+                </a>
+                
+                <!-- Menu do Usuário -->
+                {% if auth.check('loja') %}
+                    <div class="user-dropdown">
+                        <button class="btn btn-user dropdown-toggle" aria-expanded="false" aria-label="Menu do usuário">
+                            <i class="icon-user"></i>
+                            <span>{{ auth.user().nome|default('Usuário') }}</span>
+                            <i class="icon-chevron-down"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="{{ url('loja.perfil') }}" class="dropdown-item">
+                                    <i class="icon-user"></i>
+                                    <span>Meu Perfil</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ url('loja.pedidos') }}" class="dropdown-item">
+                                    <i class="icon-package"></i>
+                                    <span>Meus Pedidos</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ url('loja.favoritos') }}" class="dropdown-item">
+                                    <i class="icon-heart"></i>
+                                    <span>Favoritos</span>
+                                </a>
+                            </li>
+                            <li class="dropdown-divider"></li>
+                            <li>
+                                <a href="{{ url('loja.logout') }}" class="dropdown-item">
+                                    <i class="icon-log-out"></i>
+                                    <span>Sair</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                {% else %}
+                    <div class="auth-buttons">
+                        <a href="{{ url('loja.login') }}" class="btn btn-outline">
+                            <i class="icon-log-in"></i>
+                            <span>Entrar</span>
+                        </a>
+                        <a href="{{ url('loja.cadastro') }}" class="btn btn-primary">
+                            <i class="icon-user-plus"></i>
+                            <span>Cadastrar</span>
+                        </a>
+                    </div>
+                {% endif %}
+                
+                <!-- Menu Mobile -->
+                <button class="btn btn-menu-mobile" aria-label="Abrir menu" aria-expanded="false">
+                    <i class="icon-menu"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</header> 

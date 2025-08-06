@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ empresa.nome_fantasia }}{% endblock %}</title>
+    
+    <!-- Meta tags SEO -->
+    <meta name="description" content="{% block description %}{{ empresa.descricao|default('Loja online com os melhores produtos') }}{% endblock %}">
+    <meta name="keywords" content="{% block keywords %}{{ empresa.palavras_chave|default('loja, produtos, online') }}{% endblock %}">
+    <meta name="author" content="{{ empresa.nome_fantasia }}">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="{% block og_title %}{{ empresa.nome_fantasia }}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{{ empresa.descricao|default('Loja online com os melhores produtos') }}{% endblock %}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.url }}">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ empresa.favicon|default('/assets/images/favicon.ico') }}">
+    
+    <!-- CSS Base -->
+    <link rel="stylesheet" href="/assets/css/loja/base.css">
+    
+    <!-- CSS do Tema -->
+    {% set tema = session.get('tema', 'default') %}
+    <link rel="stylesheet" href="/assets/css/loja/temas/{{ tema }}.css">
+    
+    <!-- CSS da Página -->
+    {% block page_css %}{% endblock %}
+    
+    <!-- CSS Customizado -->
+    <style>
+        :root {
+            --primary-color: {{ empresa.cor_primaria|default('#007bff') }};
+            --secondary-color: {{ empresa.cor_secundaria|default('#6c757d') }};
+            --accent-color: {{ empresa.cor_destaque|default('#28a745') }};
+            --text-color: {{ empresa.cor_texto|default('#333') }};
+            --bg-color: {{ empresa.cor_fundo|default('#f8f9fa') }};
+            --font-family: {{ empresa.fonte|default('Segoe UI, Tahoma, Geneva, Verdana, sans-serif') }};
+        }
+    </style>
+</head>
+<body class="theme-{{ tema }}">
+    <!-- Header -->
+    {% include 'loja/components/header.html.twig' %}
+    
+    <!-- Main Content -->
+    <main class="main" role="main">
+        <div class="container">
+            <!-- Mensagens Flash -->
+            {% include 'loja/components/messages.html.twig' %}
+            
+            <!-- Conteúdo da Página -->
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    {% include 'loja/components/footer.html.twig' %}
+    
+    <!-- JavaScript Base -->
+    <script src="/assets/js/loja/base.js"></script>
+    
+    <!-- JavaScript da Página -->
+    {% block page_js %}{% endblock %}
+    
+    <!-- Scripts Customizados -->
+    <script>
+        // Configurações globais
+        window.APP_CONFIG = {
+            empresa: {{ empresa|json_encode|raw }},
+            user: {{ auth.user()|json_encode|raw }},
+            routes: {
+                home: '{{ url("loja.home") }}',
+                produtos: '{{ url("loja.produtos") }}',
+                carrinho: '{{ url("loja.carrinho") }}',
+                checkout: '{{ url("loja.checkout") }}',
+                login: '{{ url("loja.login") }}',
+                perfil: '{{ url("loja.perfil") }}'
+            },
+            csrf_token: '{{ csrf_token() }}'
+        };
+    </script>
+</body>
+</html> 

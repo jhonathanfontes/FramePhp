@@ -1,0 +1,45 @@
+<section class="depoimentos">
+    <div class="container">
+        <h2 class="section-title">O que nossos clientes dizem</h2>
+        <p class="section-subtitle">Depoimentos de clientes satisfeitos</p>
+        
+        <div class="depoimentos-grid">
+            {% for depoimento in depoimentos %}
+                <div class="depoimento-card animate-on-scroll">
+                    <div class="depoimento-rating">
+                        {% for i in 1..5 %}
+                            <i class="icon-star{{ i <= depoimento.avaliacao ? '-fill' : '' }}"></i>
+                        {% endfor %}
+                    </div>
+                    
+                    <blockquote class="depoimento-text">
+                        "{{ depoimento.texto }}"
+                    </blockquote>
+                    
+                    <div class="depoimento-author">
+                        <div class="author-avatar">
+                            <i class="icon-user"></i>
+                        </div>
+                        <div class="author-info">
+                            <div class="author-name">{{ depoimento.nome }}</div>
+                            <div class="author-location">{{ depoimento.cidade }}</div>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="depoimentos-empty">
+                    <i class="icon-message-circle"></i>
+                    <h3>Nenhum depoimento ainda</h3>
+                    <p>Seja o primeiro a deixar um depoimento!</p>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="depoimentos-actions">
+            <a href="{{ url('loja.depoimentos') }}" class="btn btn-outline">
+                <i class="icon-message-square"></i>
+                <span>Ver Todos os Depoimentos</span>
+            </a>
+        </div>
+    </div>
+</section> 

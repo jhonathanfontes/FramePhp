@@ -1,0 +1,70 @@
+<!-- Mensagens Flash -->
+{% if session.has('success') %}
+    <div class="alert alert-success" role="alert" aria-live="polite">
+        <div class="alert-content">
+            <i class="icon-check-circle"></i>
+            <span>{{ session.get('success') }}</span>
+            <button type="button" class="alert-close" aria-label="Fechar mensagem">
+                <i class="icon-x"></i>
+            </button>
+        </div>
+    </div>
+{% endif %}
+
+{% if session.has('error') %}
+    <div class="alert alert-error" role="alert" aria-live="polite">
+        <div class="alert-content">
+            <i class="icon-alert-circle"></i>
+            <span>{{ session.get('error') }}</span>
+            <button type="button" class="alert-close" aria-label="Fechar mensagem">
+                <i class="icon-x"></i>
+            </button>
+        </div>
+    </div>
+{% endif %}
+
+{% if session.has('warning') %}
+    <div class="alert alert-warning" role="alert" aria-live="polite">
+        <div class="alert-content">
+            <i class="icon-alert-triangle"></i>
+            <span>{{ session.get('warning') }}</span>
+            <button type="button" class="alert-close" aria-label="Fechar mensagem">
+                <i class="icon-x"></i>
+            </button>
+        </div>
+    </div>
+{% endif %}
+
+{% if session.has('info') %}
+    <div class="alert alert-info" role="alert" aria-live="polite">
+        <div class="alert-content">
+            <i class="icon-info"></i>
+            <span>{{ session.get('info') }}</span>
+            <button type="button" class="alert-close" aria-label="Fechar mensagem">
+                <i class="icon-x"></i>
+            </button>
+        </div>
+    </div>
+{% endif %}
+
+<!-- Mensagens de Validação -->
+{% if errors is defined and errors|length > 0 %}
+    <div class="alert alert-error" role="alert" aria-live="polite">
+        <div class="alert-content">
+            <i class="icon-alert-circle"></i>
+            <div class="alert-messages">
+                <h4>Erros de validação:</h4>
+                <ul>
+                    {% for field, fieldErrors in errors %}
+                        {% for error in fieldErrors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+            <button type="button" class="alert-close" aria-label="Fechar mensagem">
+                <i class="icon-x"></i>
+            </button>
+        </div>
+    </div>
+{% endif %} 

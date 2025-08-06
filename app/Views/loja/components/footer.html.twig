@@ -1,0 +1,105 @@
+<footer class="footer" role="contentinfo">
+    <div class="container">
+        <div class="footer-content">
+            <!-- Informações da Empresa -->
+            <div class="footer-section">
+                <h3 class="footer-title">{{ empresa.nome_fantasia }}</h3>
+                <p class="footer-description">{{ empresa.descricao|default('Sua loja online de confiança') }}</p>
+                
+                <div class="footer-contact">
+                    <p><i class="icon-map-pin"></i> {{ empresa.endereco }}, {{ empresa.cidade }} - {{ empresa.estado }}</p>
+                    <p><i class="icon-phone"></i> {{ empresa.telefone }}</p>
+                    <p><i class="icon-mail"></i> {{ empresa.email }}</p>
+                </div>
+                
+                <!-- Redes Sociais -->
+                <div class="social-links">
+                    {% if empresa.facebook %}
+                        <a href="{{ empresa.facebook }}" class="social-link" aria-label="Facebook">
+                            <i class="icon-facebook"></i>
+                        </a>
+                    {% endif %}
+                    
+                    {% if empresa.instagram %}
+                        <a href="{{ empresa.instagram }}" class="social-link" aria-label="Instagram">
+                            <i class="icon-instagram"></i>
+                        </a>
+                    {% endif %}
+                    
+                    {% if empresa.whatsapp %}
+                        <a href="https://wa.me/{{ empresa.whatsapp }}" class="social-link" aria-label="WhatsApp">
+                            <i class="icon-whatsapp"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Links Rápidos -->
+            <div class="footer-section">
+                <h3 class="footer-title">Links Rápidos</h3>
+                <ul class="footer-links">
+                    <li><a href="{{ url('loja.home') }}">Home</a></li>
+                    <li><a href="{{ url('loja.produtos') }}">Produtos</a></li>
+                    <li><a href="{{ url('loja.sobre') }}">Sobre Nós</a></li>
+                    <li><a href="{{ url('loja.contato') }}">Contato</a></li>
+                    <li><a href="{{ url('loja.faq') }}">FAQ</a></li>
+                </ul>
+            </div>
+            
+            <!-- Categorias -->
+            <div class="footer-section">
+                <h3 class="footer-title">Categorias</h3>
+                <ul class="footer-links">
+                    {% for categoria in categorias|slice(0, 5) %}
+                        <li>
+                            <a href="{{ url('loja.categoria', {id: categoria.id}) }}">
+                                {{ categoria.nome }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <!-- Informações Legais -->
+            <div class="footer-section">
+                <h3 class="footer-title">Informações</h3>
+                <ul class="footer-links">
+                    <li><a href="{{ url('loja.termos') }}">Termos de Uso</a></li>
+                    <li><a href="{{ url('loja.privacidade') }}">Política de Privacidade</a></li>
+                    <li><a href="{{ url('loja.trocas') }}">Política de Trocas</a></li>
+                    <li><a href="{{ url('loja.frete') }}">Informações de Frete</a></li>
+                    <li><a href="{{ url('loja.pagamento') }}">Formas de Pagamento</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Newsletter -->
+        <div class="newsletter-section">
+            <div class="newsletter-content">
+                <h3>Receba nossas ofertas</h3>
+                <p>Cadastre-se e receba as melhores ofertas em primeira mão!</p>
+                
+                <form action="{{ url('loja.newsletter') }}" method="POST" class="newsletter-form">
+                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                    <div class="newsletter-input-group">
+                        <input type="email" name="email" placeholder="Seu e-mail" required class="newsletter-input">
+                        <button type="submit" class="btn btn-primary">Cadastrar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Footer Bottom -->
+        <div class="footer-bottom">
+            <div class="footer-bottom-content">
+                <p>&copy; {{ "now"|date("Y") }} {{ empresa.nome_fantasia }}. Todos os direitos reservados.</p>
+                
+                <div class="footer-bottom-links">
+                    <a href="{{ url('loja.termos') }}">Termos</a>
+                    <a href="{{ url('loja.privacidade') }}">Privacidade</a>
+                    <a href="{{ url('loja.cookies') }}">Cookies</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer> 

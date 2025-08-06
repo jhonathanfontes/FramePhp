@@ -1,0 +1,32 @@
+<section class="categorias-destaque">
+    <div class="container">
+        <h2 class="section-title">Categorias em Destaque</h2>
+        <p class="section-subtitle">Explore nossas principais categorias</p>
+        
+        <div class="categorias-grid">
+            {% for categoria in categorias|slice(0, 6) %}
+                <a href="{{ url('loja.categoria', {id: categoria.id}) }}" class="categoria-card animate-on-scroll">
+                    <div class="categoria-image-container">
+                        <img src="{{ categoria.imagem }}" alt="{{ categoria.nome }}" class="categoria-image" loading="lazy">
+                        <div class="categoria-overlay">
+                            <i class="icon-arrow-right"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="categoria-content">
+                        <h3 class="categoria-title">{{ categoria.nome }}</h3>
+                        <p class="categoria-descricao">{{ categoria.descricao }}</p>
+                        <div class="categoria-count">{{ categoria.total_produtos }} produtos</div>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+        
+        <div class="categorias-actions">
+            <a href="{{ url('loja.categorias') }}" class="btn btn-outline btn-lg">
+                <i class="icon-grid"></i>
+                <span>Ver Todas as Categorias</span>
+            </a>
+        </div>
+    </div>
+</section> 

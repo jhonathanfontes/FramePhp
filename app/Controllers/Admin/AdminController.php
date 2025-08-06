@@ -133,6 +133,6 @@ class AdminController extends BaseController
 
     public function teste()
     {
-        return $this->render('loja/checkout');
+        return $this->render('loja/home1');
     }
 }

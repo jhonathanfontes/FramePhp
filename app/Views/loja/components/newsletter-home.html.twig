@@ -1,0 +1,42 @@
+<section class="newsletter-home">
+    <div class="container">
+        <div class="newsletter-content">
+            <h2 class="section-title">Receba nossas ofertas</h2>
+            <p class="section-subtitle">Cadastre-se e receba as melhores ofertas em primeira mão!</p>
+            
+            <form action="{{ url('loja.newsletter') }}" method="POST" class="newsletter-form">
+                <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                
+                <div class="newsletter-input-group">
+                    <input type="email" name="email" placeholder="Seu melhor e-mail" required class="newsletter-input">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="icon-mail"></i>
+                        <span>Cadastrar</span>
+                    </button>
+                </div>
+                
+                <div class="newsletter-benefits">
+                    <div class="benefit-item">
+                        <i class="icon-bell"></i>
+                        <span>Ofertas exclusivas</span>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="icon-gift"></i>
+                        <span>Cupons de desconto</span>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="icon-clock"></i>
+                        <span>Lançamentos em primeira mão</span>
+                    </div>
+                </div>
+                
+                <div class="newsletter-privacy">
+                    <small>
+                        Ao cadastrar, você concorda com nossa 
+                        <a href="{{ url('loja.privacidade') }}">Política de Privacidade</a>
+                    </small>
+                </div>
+            </form>
+        </div>
+    </div>
+</section> 

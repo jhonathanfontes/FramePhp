@@ -8,10 +8,10 @@ class DashboardController extends BaseController
 {
     public function sobre()
     {
-        return $this->render('loja/sobre');
+        return $this->render('pages/client/sobre/index');
     }
     public function contato()
     {
-        return $this->render('loja/contato');
+        return $this->render('pages/client/contato/index');
     }
 }

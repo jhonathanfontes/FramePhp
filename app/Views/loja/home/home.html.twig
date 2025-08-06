@@ -1,0 +1,39 @@
+{% extends 'loja/layouts/base.html.twig' %}
+
+{% block title %}Home - {{ empresa.nome_fantasia }}{% endblock %}
+
+{% block description %}{{ empresa.descricao|default('Bem-vindo à nossa loja online. Encontre os melhores produtos com qualidade e preços imbatíveis.') }}{% endblock %}
+
+{% block page_css %}
+    <link rel="stylesheet" href="/assets/css/loja/home/home.css">
+{% endblock %}
+
+{% block content %}
+    <!-- Hero Section -->
+    {% include 'loja/components/hero.html.twig' %}
+    
+    <!-- Categorias Destaque -->
+    {% include 'loja/components/categorias-destaque.html.twig' %}
+    
+    <!-- Produtos em Destaque -->
+    {% include 'loja/components/produtos-destaque.html.twig' %}
+    
+    <!-- Banner Promocional -->
+    {% include 'loja/components/banner-promocional.html.twig' %}
+    
+    <!-- Produtos Mais Vendidos -->
+    {% include 'loja/components/produtos-mais-vendidos.html.twig' %}
+    
+    <!-- Depoimentos -->
+    {% include 'loja/components/depoimentos.html.twig' %}
+    
+    <!-- Newsletter -->
+    {% include 'loja/components/newsletter-home.html.twig' %}
+    
+    <!-- Marcas Parceiras -->
+    {% include 'loja/components/marcas-parceiras.html.twig' %}
+{% endblock %}
+
+{% block page_js %}
+    <script src="/assets/js/loja/home/home.js"></script>
+{% endblock %} 
