@@ -6,61 +6,98 @@ use App\Controllers\Painel\UsuariosController;
 use App\Controllers\Painel\RelatoriosController;
 use App\Controllers\Auth\AuthController;
 
+use App\Controllers\Backend\Loja\CarrinhoController as BackendCarrinhoController;
+use App\Controllers\Backend\Loja\CheckoutController as BackendCheckoutController;
+use App\Controllers\Backend\Loja\UsuarioController as BackendUsuarioController;
+use App\Controllers\Loja\CarrinhoController as LojaCarrinhoController;
+use App\Controllers\Loja\HomeController as LojaHomeController;
+use App\Controllers\Loja\UsuarioController as LojaUsuarioController;
+use App\Controllers\Site\AuthController as SiteAuthController;
+
+$router = \Core\Router\Router::getInstance();
+
+/*
+|--------------------------------------------------------------------------
+| Rotas da Aplicação Web
+|--------------------------------------------------------------------------
+*/
+
+// Rotas públicas (para todos os visitantes)
+$router->group(['middleware' => ['locale', 'csrf']], function ($router) {
+    $router->get('/', [LojaHomeController::class, 'index'])->name('home');
+});
+
+
+$router->group([
+    'prefix' => 'loja',
+    'middleware' => ['csrf']
+], function ($router) {
+    // Páginas institucionais
+    $router->get('/sobre', [DashboardController::class, 'sobre'])->name('loja.sobre');
+    $router->get('/contato', [DashboardController::class, 'contato'])->name('loja.contato');
+    $router->post('/contato/enviar', [DashboardController::class, 'enviarContato'])->name('loja.contato.enviar');
+    $router->get('/loja', [DashboardController::class, 'loja'])->name('loja.loja');
+    // Catálogo de produtos
+    $router->get('/catalogo', [DashboardController::class, 'catalogo'])->name('loja.catalogo');
+    $router->get('/produto/{id}', [DashboardController::class, 'produto'])->name('loja.produto');
+    // Rotas de autenticação (apenas para convidados/não logados)
+});
+
 // Rotas de autenticação do painel
-Route::group(['prefix' => '/painel'], function () {
-    Route::get('/login', [AuthController::class, 'loginPainel']);
-    Route::post('/login', [AuthController::class, 'loginPainel']);
-    Route::get('/logout', [AuthController::class, 'logout']);
+$router->group(['prefix' => '/painel'], function () {
+    $router->get('/login', [AuthController::class, 'loginPainel']);
+    $router->post('/login', [AuthController::class, 'loginPainel']);
+    $router->get('/logout', [AuthController::class, 'logout']);
 });
 
 // Rotas protegidas do painel
-Route::group(['prefix' => '/painel', 'middleware' => 'auth:painel'], function () {
+$router->group(['prefix' => '/painel', 'middleware' => 'auth:painel'], function () {
     // Dashboard
-    Route::get('/', [DashboardController::class, 'index']);
-    Route::get('/dashboard', [DashboardController::class, 'index']);
+    $router->get('/', [DashboardController::class, 'index']);
+    $router->get('/dashboard', [DashboardController::class, 'index']);
 
     // Empresas
-    Route::group(['prefix' => '/empresas'], function () {
-        Route::get('/', [EmpresasController::class, 'index']);
-        Route::get('/create', [EmpresasController::class, 'create']);
-        Route::post('/', [EmpresasController::class, 'store']);
-        Route::get('/{id}', [EmpresasController::class, 'show']);
-        Route::get('/{id}/edit', [EmpresasController::class, 'edit']);
-        Route::put('/{id}', [EmpresasController::class, 'update']);
-        Route::delete('/{id}', [EmpresasController::class, 'destroy']);
-        Route::post('/{id}/toggle-status', [EmpresasController::class, 'toggleStatus']);
-        Route::get('/{id}/usuarios', [EmpresasController::class, 'usuarios']);
-        Route::get('/{id}/estatisticas', [EmpresasController::class, 'estatisticas']);
+    $router->group(['prefix' => '/empresas'], function () {
+        $router->get('/', [EmpresasController::class, 'index']);
+        $router->get('/create', [EmpresasController::class, 'create']);
+        $router->post('/', [EmpresasController::class, 'store']);
+        $router->get('/{id}', [EmpresasController::class, 'show']);
+        $router->get('/{id}/edit', [EmpresasController::class, 'edit']);
+        $router->put('/{id}', [EmpresasController::class, 'update']);
+        $router->delete('/{id}', [EmpresasController::class, 'destroy']);
+        $router->post('/{id}/toggle-status', [EmpresasController::class, 'toggleStatus']);
+        $router->get('/{id}/usuarios', [EmpresasController::class, 'usuarios']);
+        $router->get('/{id}/estatisticas', [EmpresasController::class, 'estatisticas']);
     });
 
     // Usuários do painel
-    Route::group(['prefix' => '/usuarios'], function () {
-        Route::get('/', [UsuariosController::class, 'index']);
-        Route::get('/create', [UsuariosController::class, 'create']);
-        Route::post('/', [UsuariosController::class, 'store']);
-        Route::get('/{id}/edit', [UsuariosController::class, 'edit']);
-        Route::put('/{id}', [UsuariosController::class, 'update']);
-        Route::delete('/{id}', [UsuariosController::class, 'destroy']);
-        Route::post('/{id}/toggle-status', [UsuariosController::class, 'toggleStatus']);
-        Route::post('/{id}/reset-senha', [UsuariosController::class, 'resetSenha']);
+    $router->group(['prefix' => '/usuarios'], function () {
+        $router->get('/', [UsuariosController::class, 'index']);
+        $router->get('/create', [UsuariosController::class, 'create']);
+        $router->post('/', [UsuariosController::class, 'store']);
+        $router->get('/{id}/edit', [UsuariosController::class, 'edit']);
+        $router->put('/{id}', [UsuariosController::class, 'update']);
+        $router->delete('/{id}', [UsuariosController::class, 'destroy']);
+        $router->post('/{id}/toggle-status', [UsuariosController::class, 'toggleStatus']);
+        $router->post('/{id}/reset-senha', [UsuariosController::class, 'resetSenha']);
     });
 
     // Relatórios gerais
-    Route::group(['prefix' => '/relatorios'], function () {
-        Route::get('/', [RelatoriosController::class, 'index']);
-        Route::get('/empresas', [RelatoriosController::class, 'empresas']);
-        Route::get('/vendas-gerais', [RelatoriosController::class, 'vendasGerais']);
-        Route::get('/usuarios', [RelatoriosController::class, 'usuarios']);
-        Route::get('/financeiro', [RelatoriosController::class, 'financeiro']);
-        Route::get('/exportar/{tipo}', [RelatoriosController::class, 'exportar']);
+    $router->group(['prefix' => '/relatorios'], function () {
+        $router->get('/', [RelatoriosController::class, 'index']);
+        $router->get('/empresas', [RelatoriosController::class, 'empresas']);
+        $router->get('/vendas-gerais', [RelatoriosController::class, 'vendasGerais']);
+        $router->get('/usuarios', [RelatoriosController::class, 'usuarios']);
+        $router->get('/financeiro', [RelatoriosController::class, 'financeiro']);
+        $router->get('/exportar/{tipo}', [RelatoriosController::class, 'exportar']);
     });
 
     // Configurações do sistema
-    Route::group(['prefix' => '/configuracoes'], function () {
-        Route::get('/', [DashboardController::class, 'configuracoes']);
-        Route::post('/', [DashboardController::class, 'configuracoes']);
-        Route::get('/backup', [DashboardController::class, 'backup']);
-        Route::post('/backup', [DashboardController::class, 'backup']);
-        Route::get('/logs', [DashboardController::class, 'logs']);
+    $router->group(['prefix' => '/configuracoes'], function () {
+        $router->get('/', [DashboardController::class, 'configuracoes']);
+        $router->post('/', [DashboardController::class, 'configuracoes']);
+        $router->get('/backup', [DashboardController::class, 'backup']);
+        $router->post('/backup', [DashboardController::class, 'backup']);
+        $router->get('/logs', [DashboardController::class, 'logs']);
     });
 }); 
