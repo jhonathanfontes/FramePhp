@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controllers\Store;
+namespace App\Controllers\Loja;
 
 use Core\Controller\BaseController;
 use App\Models\LojaModel;

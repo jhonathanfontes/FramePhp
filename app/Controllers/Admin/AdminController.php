@@ -14,7 +14,6 @@ class AdminController extends BaseController
     }
 
   
-
     public function settings()
     {
         return $this->render('templates/settings');

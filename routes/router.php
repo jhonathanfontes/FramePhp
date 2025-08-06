@@ -1,8 +1,11 @@
 <?php
 
+use App\Controllers\Admin\AuthController as AdminAuthController;
 use App\Controllers\Admin\UsuariosController;
-use App\Controllers\Auth\AuthController;
 use App\Controllers\Admin\AdminController;
+use App\Controllers\Admin\DashboardController;
+use App\Controllers\Backend\Painel\AuthController as PainelAuthController;
+use App\Controllers\Client\ClientController;
 use App\Controllers\Site\HomeController;
 use App\Controllers\UserController;
 use Core\Error\ErrorHandler;
@@ -35,14 +38,14 @@ $router->group(['middleware' => ['guest', 'csrf']], function ($router) {
 
 $router->group(['prefix' => 'auth', 'middleware' => ['guest', 'csrf']], function ($router) {
     // A rota para '/login' se torna '/auth/login'
-    $router->get('/login', [AuthController::class, 'loginForm'])->name('AdminLogin');
-    $router->post('/login', [AuthController::class, 'login']);
-    $router->get('/register', [AuthController::class, 'registerForm'])->name('register');
-    $router->post('/register', [AuthController::class, 'register']);
-    $router->get('/forgot-password', [AuthController::class, 'forgotPasswordForm'])->name('forgot-password');
-    $router->post('/forgot-password', [AuthController::class, 'forgotPassword']);
-    $router->get('/reset-password/{token}', [AuthController::class, 'resetPasswordForm'])->name('esqueci-senha');
-    $router->post('/reset-password', [AuthController::class, 'resetPassword']);
+    $router->get('/login', [AdminAuthController::class, 'loginForm'])->name('AdminLogin');
+    $router->post('/login', [PainelAuthController::class, 'login']);
+    $router->get('/register', [AdminAuthController::class, 'registerForm'])->name('register');
+    $router->post('/register', [PainelAuthController::class, 'register']);
+    $router->get('/forgot-password', [AdminAuthController::class, 'forgotPasswordForm'])->name('forgot-password');
+    $router->post('/forgot-password', [PainelAuthController::class, 'forgotPassword']);
+    $router->get('/reset-password/{token}', [AdminAuthController::class, 'resetPasswordForm'])->name('esqueci-senha');
+    $router->post('/reset-password', [PainelAuthController::class, 'resetPassword']);
 
     $router->get('/sobre', [ClientController::class, 'sobre'])->name('client.sobre');
 });
@@ -59,7 +62,7 @@ $router->group([
     'prefix' => 'admin',
     'middleware' => ['auth', 'permission:admin', 'csrf']
 ], function ($router) {
-    $router->get('/logout', [AuthController::class, 'logout'])->name('logout');
+    $router->get('/logout', [AdminAuthController::class, 'logout'])->name('logout');
     $router->get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     $router->get('/users', [AdminController::class, 'users'])->name('users.dashboard');
 
@@ -90,7 +93,7 @@ $router->group([
     'middleware' => ['auth', 'permission:admin'] // Usa o alias 'permission' com o parâmetro 'admin'
 ], function ($router) {
     // $router->get('/', $router->redirect('dashboard'));
-    $router->get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    $router->get('/dashboard', [DashboardController::class, 'dashboard'])->name('admin.dashboard');
     $router->get('/usuarios', [UsuariosController::class, 'index'])->name('admin.users');
     $router->get('/settings', [AdminController::class, 'settings'])->name('admin.settings');
     $router->get('/orders', [AdminController::class, 'orders'])->name('admin.orders');
@@ -120,13 +123,13 @@ $router->group([
 |--------------------------------------------------------------------------
 | Rotas da API
 |--------------------------------------------------------------------------
-*/
-$router->group(['prefix' => 'api'], function ($router) {
-    // Rotas de API que exigem um token JWT válido
-    $router->group(['middleware' => ['jwt']], function ($router) {
-        $router->get('/profile', [App\Controllers\Api\AuthController::class, 'me'])->name('api.me');
-    });
-});
+// */
+// $router->group(['prefix' => 'api'], function ($router) {
+//     // Rotas de API que exigem um token JWT válido
+//     $router->group(['middleware' => ['jwt']], function ($router) {
+//         $router->get('/profile', [App\Controllers\Api\AuthController::class, 'me'])->name('api.me');
+//     });
+// });
 
 /*
 |--------------------------------------------------------------------------

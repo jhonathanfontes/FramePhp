@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controllers\Auth;
+namespace App\Controllers\Loja\Auth;
 
 use Core\Controller\BaseController;
 use App\Models\CadUsuarioModel;
@@ -9,7 +9,7 @@ use Core\Http\Response;
 use Core\Session\Session;
 use Core\Validation\Validator; // Importe o Validator
 
-class AuthController extends BaseController
+class AuthLojaController extends BaseController
 {
     // A dependência é declarada como uma propriedade da classe
     private CadUsuarioModel $userModel;
