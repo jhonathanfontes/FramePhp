@@ -6,7 +6,7 @@ use Core\Controller\BaseController;
 
 class DashboardController extends BaseController
 {
-    public function sobre()
+    public function catalogo()
     {
         return $this->render('pages/client/sobre/index');
     }

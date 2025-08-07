@@ -2,51 +2,192 @@
 
 namespace App\Controllers\Loja;
 
-use Core\Controller\BaseController;
-use App\Models\CadProdutoModel;
-use App\Models\CadCategoriaModel;
-use App\Models\EmpresaModel;
+use App\Controllers\BaseController;
 
-class HomeController extends BaseController
+/**
+ * Controlador de Busca e Filtragem de Produtos
+ * Gerencia busca, filtros e autocomplete de produtos
+ */
+class BuscaController extends BaseController
 {
+    /**
+     * Página de busca de produtos
+     */
     public function index()
     {
+        $request = $this->request;
+        $q = $request->get('q', '');
+        $categoria = $request->get('categoria', '');
+        $preco_min = $request->get('preco_min', '');
+        $preco_max = $request->get('preco_max', '');
+        $ordenacao = $request->get('ordenacao', 'relevancia');
+        $pagina = $request->get('pagina', 1);
+        
         // Dados da empresa
         $empresa = $this->getEmpresaData();
         
-        // Categorias
+        // Categorias para filtros
         $categorias = $this->getCategoriasData();
         
-        // Produtos em destaque
-        $produtos_destaque = $this->getProdutosDestaqueData();
+        // Realiza a busca
+        $resultados = $this->buscarProdutos($q, $categoria, $preco_min, $preco_max, $ordenacao, $pagina);
         
-        // Produtos mais vendidos
-        $produtos_mais_vendidos = $this->getProdutosMaisVendidosData();
-        
-        // Banners
-        $banners = $this->getBannersData();
-        
-        // Depoimentos
-        $depoimentos = $this->getDepoimentosData();
-        
-        // Marcas parceiras
-        $marcas_parceiras = $this->getMarcasParceirasData();
-        
-        // Carrinho
-        $carrinho = $this->getCarrinhoData();
-        
-        return $this->view('loja/pages/home', [
+        return $this->view('loja/busca', [
             'empresa' => $empresa,
             'categorias' => $categorias,
-            'produtos_destaque' => $produtos_destaque,
-            'produtos_mais_vendidos' => $produtos_mais_vendidos,
-            'banners' => $banners,
-            'depoimentos' => $depoimentos,
-            'marcas_parceiras' => $marcas_parceiras,
-            'carrinho' => $carrinho
+            'resultados' => $resultados,
+            'filtros' => [
+                'q' => $q,
+                'categoria' => $categoria,
+                'preco_min' => $preco_min,
+                'preco_max' => $preco_max,
+                'ordenacao' => $ordenacao,
+                'pagina' => $pagina
+            ]
         ]);
     }
     
+    /**
+     * Autocomplete para busca
+     */
+    public function autocomplete()
+    {
+        $request = $this->request;
+        $q = $request->get('q', '');
+        
+        if (strlen($q) < 2) {
+            return $this->jsonResponse([]);
+        }
+        
+        $produtos = $this->getProdutosData();
+        $sugestoes = [];
+        
+        foreach ($produtos as $produto) {
+            if (stripos($produto['nome'], $q) !== false || 
+                stripos($produto['descricao'], $q) !== false ||
+                stripos($produto['categoria']['nome'], $q) !== false) {
+                
+                $sugestoes[] = [
+                    'id' => $produto['id'],
+                    'nome' => $produto['nome'],
+                    'categoria' => $produto['categoria']['nome'],
+                    'preco' => $produto['preco'],
+                    'imagem' => $produto['imagem']
+                ];
+                
+                if (count($sugestoes) >= 5) {
+                    break;
+                }
+            }
+        }
+        
+        return $this->jsonResponse($sugestoes);
+    }
+    
+    /**
+     * Busca produtos com filtros
+     */
+    private function buscarProdutos($q, $categoria, $preco_min, $preco_max, $ordenacao, $pagina)
+    {
+        $produtos = $this->getProdutosData();
+        $resultados = [];
+        
+        foreach ($produtos as $produto) {
+            $incluir = true;
+            
+            // Filtro por termo de busca
+            if ($q && stripos($produto['nome'], $q) === false && 
+                stripos($produto['descricao'], $q) === false) {
+                $incluir = false;
+            }
+            
+            // Filtro por categoria
+            if ($categoria && $produto['categoria']['id'] != $categoria) {
+                $incluir = false;
+            }
+            
+            // Filtro por preço mínimo
+            if ($preco_min && $produto['preco'] < $preco_min) {
+                $incluir = false;
+            }
+            
+            // Filtro por preço máximo
+            if ($preco_max && $produto['preco'] > $preco_max) {
+                $incluir = false;
+            }
+            
+            if ($incluir) {
+                $resultados[] = $produto;
+            }
+        }
+        
+        // Ordenação
+        $resultados = $this->ordenarProdutos($resultados, $ordenacao);
+        
+        // Paginação
+        $por_pagina = 12;
+        $total = count($resultados);
+        $total_paginas = ceil($total / $por_pagina);
+        $offset = ($pagina - 1) * $por_pagina;
+        
+        $resultados = array_slice($resultados, $offset, $por_pagina);
+        
+        return [
+            'produtos' => $resultados,
+            'total' => $total,
+            'pagina_atual' => $pagina,
+            'total_paginas' => $total_paginas,
+            'por_pagina' => $por_pagina
+        ];
+    }
+    
+    /**
+     * Ordena produtos
+     */
+    private function ordenarProdutos($produtos, $ordenacao)
+    {
+        switch ($ordenacao) {
+            case 'preco_menor':
+                usort($produtos, function($a, $b) {
+                    return $a['preco'] <=> $b['preco'];
+                });
+                break;
+                
+            case 'preco_maior':
+                usort($produtos, function($a, $b) {
+                    return $b['preco'] <=> $a['preco'];
+                });
+                break;
+                
+            case 'nome':
+                usort($produtos, function($a, $b) {
+                    return strcasecmp($a['nome'], $b['nome']);
+                });
+                break;
+                
+            case 'avaliacao':
+                usort($produtos, function($a, $b) {
+                    return $b['avaliacao'] <=> $a['avaliacao'];
+                });
+                break;
+                
+            case 'mais_vendidos':
+                usort($produtos, function($a, $b) {
+                    return $b['total_vendas'] <=> $a['total_vendas'];
+                });
+                break;
+                
+            default: // relevancia
+                // Mantém ordem original (mais relevantes primeiro)
+                break;
+        }
+        
+        return $produtos;
+    }
+    
+    /**
+     * Dados da empresa
+     */
     private function getEmpresaData()
     {
         return [
@@ -79,6 +220,9 @@ class HomeController extends BaseController
         ];
     }
     
+    /**
+     * Dados das categorias
+     */
     private function getCategoriasData()
     {
         return [
@@ -133,7 +277,10 @@ class HomeController extends BaseController
         ];
     }
     
-    private function getProdutosDestaqueData()
+    /**
+     * Dados dos produtos
+     */
+    private function getProdutosData()
     {
         return [
             [
@@ -148,7 +295,8 @@ class HomeController extends BaseController
                 'total_avaliacoes' => 127,
                 'estoque' => 15,
                 'promocao' => '15% OFF',
-                'parcelas' => 12
+                'parcelas' => 12,
+                'total_vendas' => 234
             ],
             [
                 'id' => 2,
@@ -162,7 +310,8 @@ class HomeController extends BaseController
                 'total_avaliacoes' => 89,
                 'estoque' => 8,
                 'promocao' => null,
-                'parcelas' => 10
+                'parcelas' => 10,
+                'total_vendas' => 156
             ],
             [
                 'id' => 3,
@@ -176,7 +325,8 @@ class HomeController extends BaseController
                 'total_avaliacoes' => 203,
                 'estoque' => 3,
                 'promocao' => '20% OFF',
-                'parcelas' => 8
+                'parcelas' => 8,
+                'total_vendas' => 89
             ],
             [
                 'id' => 4,
@@ -190,7 +340,8 @@ class HomeController extends BaseController
                 'total_avaliacoes' => 156,
                 'estoque' => 22,
                 'promocao' => null,
-                'parcelas' => 6
+                'parcelas' => 6,
+                'total_vendas' => 312
             ],
             [
                 'id' => 5,
@@ -204,7 +355,8 @@ class HomeController extends BaseController
                 'total_avaliacoes' => 78,
                 'estoque' => 5,
                 'promocao' => '15% OFF',
-                'parcelas' => 10
+                'parcelas' => 10,
+                'total_vendas' => 45
             ],
             [
                 'id' => 6,
@@ -218,14 +370,9 @@ class HomeController extends BaseController
                 'total_avaliacoes' => 234,
                 'estoque' => 12,
                 'promocao' => '10% OFF',
-                'parcelas' => 6
-            ]
-        ];
-    }
-    
-    private function getProdutosMaisVendidosData()
-    {
-        return [
+                'parcelas' => 6,
+                'total_vendas' => 567
+            ],
             [
                 'id' => 7,
                 'nome' => 'Mouse Gamer Logitech',
@@ -238,7 +385,8 @@ class HomeController extends BaseController
                 'total_avaliacoes' => 445,
                 'estoque' => 25,
                 'promocao' => null,
-                'parcelas' => 3
+                'parcelas' => 3,
+                'total_vendas' => 789
             ],
             [
                 'id' => 8,
@@ -252,119 +400,19 @@ class HomeController extends BaseController
                 'total_avaliacoes' => 892,
                 'estoque' => 45,
                 'promocao' => '20% OFF',
-                'parcelas' => 2
+                'parcelas' => 2,
+                'total_vendas' => 1234
             ]
         ];
     }
     
-    private function getBannersData()
+    /**
+     * Retorna resposta JSON
+     */
+    private function jsonResponse($data)
     {
-        return [
-            [
-                'id' => 1,
-                'titulo' => 'Mega Promoção',
-                'descricao' => 'Até 50% de desconto em eletrônicos',
-                'imagem' => '/assets/images/banners/banner-1.jpg',
-                'link' => '/produtos?categoria=1&promocao=1',
-                'texto_botao' => 'Ver Ofertas'
-            ],
-            [
-                'id' => 2,
-                'titulo' => 'Frete Grátis',
-                'descricao' => 'Em compras acima de R$ 100',
-                'imagem' => '/assets/images/banners/banner-2.jpg',
-                'link' => '/produtos',
-                'texto_botao' => 'Comprar Agora'
-            ]
-        ];
+        header('Content-Type: application/json');
+        echo json_encode($data);
+        exit;
     }
-    
-    private function getDepoimentosData()
-    {
-        return [
-            [
-                'id' => 1,
-                'nome' => 'Maria Silva',
-                'texto' => 'Excelente atendimento e produtos de qualidade. Recomendo!',
-                'avaliacao' => 5,
-                'cidade' => 'São Paulo, SP'
-            ],
-            [
-                'id' => 2,
-                'nome' => 'João Santos',
-                'texto' => 'Entrega rápida e produtos conforme descrição. Muito satisfeito!',
-                'avaliacao' => 5,
-                'cidade' => 'Rio de Janeiro, RJ'
-            ],
-            [
-                'id' => 3,
-                'nome' => 'Ana Costa',
-                'texto' => 'Preços imbatíveis e qualidade superior. Já sou cliente fiel!',
-                'avaliacao' => 5,
-                'cidade' => 'Belo Horizonte, MG'
-            ]
-        ];
-    }
-    
-    private function getMarcasParceirasData()
-    {
-        return [
-            [
-                'id' => 1,
-                'nome' => 'Samsung',
-                'logo' => '/assets/images/marcas/samsung.png'
-            ],
-            [
-                'id' => 2,
-                'nome' => 'Apple',
-                'logo' => '/assets/images/marcas/apple.png'
-            ],
-            [
-                'id' => 3,
-                'nome' => 'Sony',
-                'logo' => '/assets/images/marcas/sony.png'
-            ],
-            [
-                'id' => 4,
-                'nome' => 'LG',
-                'logo' => '/assets/images/marcas/lg.png'
-            ],
-            [
-                'id' => 5,
-                'nome' => 'Nike',
-                'logo' => '/assets/images/marcas/nike.png'
-            ],
-            [
-                'id' => 6,
-                'nome' => 'Adidas',
-                'logo' => '/assets/images/marcas/adidas.png'
-            ]
-        ];
-    }
-    
-    private function getCarrinhoData()
-    {
-        return [
-            'total_itens' => 3,
-            'total_valor' => 1299.99,
-            'itens' => [
-                [
-                    'id' => 1,
-                    'produto_id' => 1,
-                    'nome' => 'Smartphone Galaxy S21',
-                    'preco' => 999.99,
-                    'quantidade' => 1,
-                    'imagem' => '/assets/images/produtos/smartphone-1.jpg'
-                ],
-                [
-                    'id' => 2,
-                    'produto_id' => 2,
-                    'nome' => 'Notebook Dell Inspiron',
-                    'preco' => 299.99,
-                    'quantidade' => 1,
-                    'imagem' => '/assets/images/produtos/notebook-1.jpg'
-                ]
-            ]
-        ];
-    }
-} 
+}

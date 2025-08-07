@@ -1,0 +1,248 @@
+/* ========================================
+   TEMA ESCURO - LOJA ONLINE
+   ======================================== */
+
+/* Variáveis do Tema Escuro */
+:root {
+    --primary-color: #6366f1;
+    --secondary-color: #64748b;
+    --accent-color: #10b981;
+    --text-color: #e2e8f0;
+    --bg-color: #0f172a;
+    --card-bg: #1e293b;
+    --border-color: #334155;
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Estilos Específicos do Tema Escuro */
+.theme-dark {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+.theme-dark .header {
+    background: linear-gradient(135deg, #1e293b, #334155);
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+
+.theme-dark .logo {
+    color: var(--text-color);
+}
+
+.theme-dark .nav-link {
+    color: var(--text-color);
+    opacity: 0.8;
+}
+
+.theme-dark .nav-link:hover {
+    color: var(--primary-color);
+    opacity: 1;
+}
+
+.theme-dark .btn-primary {
+    background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+    border: none;
+    color: white;
+}
+
+.theme-dark .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+
+.theme-dark .card:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+.theme-dark .footer {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    color: var(--text-color);
+    border-top: 1px solid var(--border-color);
+}
+
+/* Produtos */
+.theme-dark .produto-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.theme-dark .produto-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+    border-color: var(--primary-color);
+}
+
+.theme-dark .produto-imagem {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.theme-dark .produto-info {
+    padding: 1rem;
+    background: var(--card-bg);
+}
+
+.theme-dark .produto-preco {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: var(--accent-color);
+}
+
+.theme-dark .produto-titulo {
+    color: var(--text-color);
+}
+
+.theme-dark .produto-descricao {
+    color: #94a3b8;
+}
+
+/* Carrinho */
+.theme-dark .carrinho-item {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    color: var(--text-color);
+}
+
+.theme-dark .carrinho-total {
+    background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+    color: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+/* Formulários */
+.theme-dark .form-control {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+
+.theme-dark .form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
+    background: var(--card-bg);
+}
+
+.theme-dark .form-label {
+    color: var(--text-color);
+}
+
+/* Botões Específicos */
+.theme-dark .btn-comprar {
+    background: linear-gradient(45deg, var(--accent-color), #059669);
+    color: white;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.theme-dark .btn-comprar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+/* Categorias */
+.theme-dark .categoria-card {
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    color: var(--text-color);
+}
+
+.theme-dark .categoria-card:hover {
+    border-color: var(--primary-color);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+/* Banner */
+.theme-dark .banner {
+    background: linear-gradient(135deg, var(--card-bg), #334155);
+    color: var(--text-color);
+    padding: 3rem 0;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.theme-dark .banner h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Alertas */
+.theme-dark .alert-success {
+    background-color: #065f46;
+    color: #d1fae5;
+    border: 1px solid #047857;
+}
+
+.theme-dark .alert-danger {
+    background-color: #7f1d1d;
+    color: #fecaca;
+    border: 1px solid #dc2626;
+}
+
+.theme-dark .alert-warning {
+    background-color: #78350f;
+    color: #fed7aa;
+    border: 1px solid #d97706;
+}
+
+.theme-dark .alert-info {
+    background-color: #1e3a8a;
+    color: #bfdbfe;
+    border: 1px solid #2563eb;
+}
+
+/* Loading */
+.theme-dark .loading {
+    border: 3px solid var(--border-color);
+    border-top: 3px solid var(--primary-color);
+}
+
+/* Responsividade do Tema Escuro */
+@media (max-width: 768px) {
+    .theme-dark .banner h1 {
+        font-size: 2rem;
+    }
+    
+    .theme-dark .produto-card {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Scrollbar personalizada */
+.theme-dark ::-webkit-scrollbar {
+    width: 8px;
+}
+
+.theme-dark ::-webkit-scrollbar-track {
+    background: var(--bg-color);
+}
+
+.theme-dark ::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+.theme-dark ::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+}

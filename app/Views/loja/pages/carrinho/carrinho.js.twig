@@ -1,0 +1,246 @@
+/**
+ * Carrinho de Compras - JavaScript
+ * Gerencia as funcionalidades do carrinho de compras
+ */
+
+class CarrinhoController {
+    constructor() {
+        this.init();
+    }
+
+    init() {
+        this.bindEvents();
+        this.setupAutoFocus();
+    }
+
+    bindEvents() {
+        // Auto-focus no campo de cupom
+        const cupomInput = document.getElementById('cupom');
+        if (cupomInput) {
+            cupomInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.aplicarCupom();
+                }
+            });
+        }
+    }
+
+    setupAutoFocus() {
+        // Auto-focus no primeiro campo de quantidade
+        const firstQuantityButton = document.querySelector('.quantity-controls button');
+        if (firstQuantityButton) {
+            firstQuantityButton.focus();
+        }
+    }
+
+    /**
+     * Altera a quantidade de um produto no carrinho
+     */
+    alterarQuantidade(produtoId, delta) {
+        const button = event.target;
+        const originalText = button.innerHTML;
+        
+        // Feedback visual
+        button.classList.add('loading');
+        button.innerHTML = '⏳';
+        
+        fetch('/carrinho/atualizar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': this.getCsrfToken()
+            },
+            body: JSON.stringify({
+                produto_id: produtoId,
+                delta: delta
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                throw new Error(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            button.classList.remove('loading');
+            button.innerHTML = originalText;
+            this.mostrarNotificacao('Erro ao atualizar quantidade: ' + error.message, 'error');
+        });
+    }
+
+    /**
+     * Remove um item do carrinho
+     */
+    removerItem(produtoId) {
+        if (confirm('Tem certeza que deseja remover este produto do carrinho?')) {
+            const button = event.target;
+            const originalText = button.innerHTML;
+            
+            button.classList.add('loading');
+            button.innerHTML = '⏳';
+            
+            fetch('/carrinho/remover', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': this.getCsrfToken()
+                },
+                body: JSON.stringify({
+                    produto_id: produtoId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    throw new Error(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                button.classList.remove('loading');
+                button.innerHTML = originalText;
+                this.mostrarNotificacao('Erro ao remover produto: ' + error.message, 'error');
+            });
+        }
+    }
+
+    /**
+     * Limpa todo o carrinho
+     */
+    limparCarrinho() {
+        if (confirm('Tem certeza que deseja limpar todo o carrinho?')) {
+            const button = event.target;
+            const originalText = button.innerHTML;
+            
+            button.classList.add('loading');
+            button.innerHTML = '⏳';
+            
+            fetch('/carrinho/limpar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': this.getCsrfToken()
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    throw new Error(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                button.classList.remove('loading');
+                button.innerHTML = originalText;
+                this.mostrarNotificacao('Erro ao limpar carrinho: ' + error.message, 'error');
+            });
+        }
+    }
+
+    /**
+     * Aplica um cupom de desconto
+     */
+    aplicarCupom() {
+        const cupom = document.getElementById('cupom').value.trim();
+        
+        if (!cupom) {
+            this.mostrarNotificacao('Digite um cupom válido', 'error');
+            return;
+        }
+        
+        const button = event.target;
+        const originalText = button.innerHTML;
+        
+        button.classList.add('loading');
+        button.innerHTML = '⏳';
+        
+        fetch('/carrinho/aplicar-cupom', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': this.getCsrfToken()
+            },
+            body: JSON.stringify({
+                cupom: cupom
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                this.mostrarNotificacao('Cupom aplicado com sucesso!', 'success');
+                location.reload();
+            } else {
+                throw new Error(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            button.classList.remove('loading');
+            button.innerHTML = originalText;
+            this.mostrarNotificacao('Erro ao aplicar cupom: ' + error.message, 'error');
+        });
+    }
+
+    /**
+     * Mostra uma notificação
+     */
+    mostrarNotificacao(mensagem, tipo) {
+        const notificacao = document.createElement('div');
+        notificacao.className = `alert alert-${tipo}`;
+        notificacao.setAttribute('role', 'alert');
+        notificacao.setAttribute('aria-live', 'polite');
+        notificacao.textContent = mensagem;
+        
+        const container = document.querySelector('.container') || document.body;
+        container.insertBefore(notificacao, container.firstChild);
+        
+        // Scroll para a notificação
+        notificacao.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Remove a notificação após 3 segundos
+        setTimeout(() => {
+            notificacao.remove();
+        }, 3000);
+    }
+
+    /**
+     * Obtém o token CSRF
+     */
+    getCsrfToken() {
+        const tokenElement = document.querySelector('meta[name="csrf-token"]');
+        return tokenElement ? tokenElement.getAttribute('content') : '';
+    }
+}
+
+// Inicializa o controlador do carrinho quando o DOM estiver pronto
+document.addEventListener('DOMContentLoaded', () => {
+    window.carrinhoController = new CarrinhoController();
+});
+
+// Funções globais para compatibilidade com onclick
+function alterarQuantidade(produtoId, delta) {
+    window.carrinhoController.alterarQuantidade(produtoId, delta);
+}
+
+function removerItem(produtoId) {
+    window.carrinhoController.removerItem(produtoId);
+}
+
+function limparCarrinho() {
+    window.carrinhoController.limparCarrinho();
+}
+
+function aplicarCupom() {
+    window.carrinhoController.aplicarCupom();
+}
+
+function mostrarNotificacao(mensagem, tipo) {
+    window.carrinhoController.mostrarNotificacao(mensagem, tipo);
+}

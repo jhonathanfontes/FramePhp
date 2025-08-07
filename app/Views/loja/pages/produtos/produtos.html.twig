@@ -1,0 +1,202 @@
+{% extends "loja/layout.html.twig" %}
+
+{% block title %}Produtos - {{ empresa.nome_fantasia }}{% endblock %}
+
+{% block content %}
+    <div class="products-page">
+        <!-- Header da Página -->
+        <header class="page-header">
+            <h1 class="page-title">🛍️ Nossos Produtos</h1>
+            <p class="page-subtitle">Encontre os melhores produtos com qualidade garantida</p>
+        </header>
+
+        <!-- Filtros e Busca -->
+        <section class="filters-section" aria-labelledby="filters-title">
+            <div class="filters-container">
+                <div class="search-box">
+                    <input type="text" 
+                           id="search-input" 
+                           placeholder="Buscar produtos..." 
+                           class="search-input"
+                           aria-label="Buscar produtos">
+                    <button type="button" class="search-btn" aria-label="Buscar">
+                        🔍
+                    </button>
+                </div>
+
+                <div class="filters-row">
+                    <div class="filter-group">
+                        <label for="category-filter" class="filter-label">Categoria</label>
+                        <select id="category-filter" class="filter-select">
+                            <option value="">Todas as Categorias</option>
+                            {% for categoria in categorias %}
+                                <option value="{{ categoria.id }}">{{ categoria.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="sort-filter" class="filter-label">Ordenar por</label>
+                        <select id="sort-filter" class="filter-select">
+                            <option value="recent">Mais Recentes</option>
+                            <option value="name">Nome A-Z</option>
+                            <option value="price-low">Menor Preço</option>
+                            <option value="price-high">Maior Preço</option>
+                            <option value="popular">Mais Populares</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="price-filter" class="filter-label">Faixa de Preço</label>
+                        <select id="price-filter" class="filter-select">
+                            <option value="">Qualquer Preço</option>
+                            <option value="0-50">Até R$ 50</option>
+                            <option value="50-100">R$ 50 - R$ 100</option>
+                            <option value="100-200">R$ 100 - R$ 200</option>
+                            <option value="200+">Acima de R$ 200</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="active-filters">
+                    <span class="filter-tag">
+                        Categoria: Eletrônicos
+                        <button class="remove-filter" aria-label="Remover filtro">×</button>
+                    </span>
+                    <span class="filter-tag">
+                        Preço: R$ 50 - R$ 100
+                        <button class="remove-filter" aria-label="Remover filtro">×</button>
+                    </span>
+                    <button class="clear-filters">Limpar Filtros</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Resultados -->
+        <section class="results-section" aria-labelledby="results-title">
+            <div class="results-header">
+                <h2 id="results-title" class="results-title">
+                    Produtos Encontrados
+                    <span class="results-count">({{ produtos|length }} produtos)</span>
+                </h2>
+                
+                <div class="view-options">
+                    <button class="view-btn active" data-view="grid" aria-label="Visualização em grade">
+                        ⊞
+                    </button>
+                    <button class="view-btn" data-view="list" aria-label="Visualização em lista">
+                        ☰
+                    </button>
+                </div>
+            </div>
+
+            {% if produtos %}
+                <div class="products-grid" id="products-container">
+                    {% for produto in produtos %}
+                        <article class="product-card" data-product-id="{{ produto.id }}">
+                            <div class="product-image">
+                                {% if produto.imagem %}
+                                    <img src="{{ produto.imagem }}" 
+                                         alt="{{ produto.nome }}" 
+                                         loading="lazy"
+                                         class="product-img">
+                                {% else %}
+                                    <div class="product-placeholder">📦</div>
+                                {% endif %}
+                                
+                                {% if produto.preco_promocional %}
+                                    <span class="product-badge">Oferta</span>
+                                {% endif %}
+                                
+                                <div class="product-overlay">
+                                    <button class="quick-view-btn" 
+                                            onclick="verProduto({{ produto.id }})"
+                                            aria-label="Ver detalhes de {{ produto.nome }}">
+                                        👁️ Ver Detalhes
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="product-content">
+                                <div class="product-category">{{ produto.categoria.nome }}</div>
+                                <h3 class="product-title">
+                                    <a href="/produto/{{ produto.id }}">{{ produto.nome }}</a>
+                                </h3>
+                                <p class="product-description">
+                                    {{ produto.descricao|slice(0, 80) }}{% if produto.descricao|length > 80 %}...{% endif %}
+                                </p>
+                                
+                                <div class="product-price">
+                                    <span class="price-current">
+                                        R$ {{ "%.2f"|format(produto.preco) }}
+                                    </span>
+                                    {% if produto.preco_promocional %}
+                                        <span class="price-old">
+                                            R$ {{ "%.2f"|format(produto.preco_promocional) }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="product-actions">
+                                    <button class="btn btn-primary add-to-cart-btn" 
+                                            onclick="adicionarAoCarrinho({{ produto.id }})"
+                                            aria-label="Adicionar {{ produto.nome }} ao carrinho">
+                                        🛒 Adicionar
+                                    </button>
+                                    <button class="btn btn-secondary wishlist-btn" 
+                                            onclick="adicionarAosFavoritos({{ produto.id }})"
+                                            aria-label="Adicionar {{ produto.nome }} aos favoritos">
+                                        ❤️
+                                    </button>
+                                </div>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+
+                <!-- Paginação -->
+                {% if pagination %}
+                    <nav class="pagination" aria-label="Navegação de páginas">
+                        {% if pagination.current_page > 1 %}
+                            <a href="?page={{ pagination.current_page - 1 }}" class="pagination-btn">
+                                ← Anterior
+                            </a>
+                        {% endif %}
+                        
+                        {% for page in range(1, pagination.last_page) %}
+                            {% if page == pagination.current_page %}
+                                <span class="pagination-btn active">{{ page }}</span>
+                            {% else %}
+                                <a href="?page={{ page }}" class="pagination-btn">{{ page }}</a>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if pagination.current_page < pagination.last_page %}
+                            <a href="?page={{ pagination.current_page + 1 }}" class="pagination-btn">
+                                Próxima →
+                            </a>
+                        {% endif %}
+                    </nav>
+                {% endif %}
+            {% else %}
+                <!-- Estado Vazio -->
+                <div class="empty-state">
+                    <div class="empty-icon">🔍</div>
+                    <h3>Nenhum produto encontrado</h3>
+                    <p>Tente ajustar os filtros ou fazer uma nova busca</p>
+                    <button class="btn btn-primary" onclick="limparFiltros()">
+                        Limpar Filtros
+                    </button>
+                </div>
+            {% endif %}
+        </section>
+    </div>
+
+    <style>
+        {% include "loja/pages/produtos/produtos.css.twig" %}
+    </style>
+
+    <script>
+        {% include "loja/pages/produtos/produtos.js.twig" %}
+    </script>
+{% endblock %} 

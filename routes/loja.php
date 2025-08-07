@@ -26,7 +26,7 @@ $router = \Core\Router\Router::getInstance();
 // ===== ROTAS PÚBLICAS =====
 $router->group(['middleware' => ['locale', 'csrf']], function ($router) {
     // Home
-    $router->get('/', [LojaHomeController::class, 'index'])->name('loja.home');
+    $router->get('/loja', [LojaHomeController::class, 'index'])->name('loja.home');
     
     // Produtos
     $router->get('/produtos', [LojaProdutoController::class, 'index'])->name('loja.produtos');

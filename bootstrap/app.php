@@ -15,6 +15,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Carrega as definições de rota
 require_once BASE_PATH . '/routes/router.php';
+require_once BASE_PATH . '/routes/loja.php';
 
 // Obtém a instância do roteador e dispara a rota
 $router = \Core\Router\Router::getInstance();

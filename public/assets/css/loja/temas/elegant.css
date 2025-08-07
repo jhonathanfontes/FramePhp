@@ -1,0 +1,333 @@
+/* ========================================
+   TEMA ELEGANTE - LOJA ONLINE
+   ======================================== */
+
+/* Variáveis do Tema Elegante */
+:root {
+    --primary-color: #8b5cf6;
+    --secondary-color: #a855f7;
+    --accent-color: #ec4899;
+    --text-color: #1f2937;
+    --bg-color: #fafafa;
+    --card-bg: #ffffff;
+    --border-color: #e5e7eb;
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Estilos Específicos do Tema Elegante */
+.theme-elegant {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+.theme-elegant .header {
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    color: white;
+    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.15);
+}
+
+.theme-elegant .logo {
+    color: white;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.theme-elegant .nav-link {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.theme-elegant .nav-link:hover {
+    color: white;
+}
+
+.theme-elegant .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: white;
+    transition: width 0.3s ease;
+}
+
+.theme-elegant .nav-link:hover::after {
+    width: 100%;
+}
+
+.theme-elegant .btn-primary {
+    background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+    border: none;
+    color: white;
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+}
+
+.theme-elegant .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+}
+
+.theme-elegant .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.theme-elegant .card:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.15);
+    transform: translateY(-3px);
+}
+
+.theme-elegant .footer {
+    background: linear-gradient(135deg, #1f2937, #374151);
+    color: white;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Produtos */
+.theme-elegant .produto-card {
+    background: var(--card-bg);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    transition: all 0.4s ease;
+    border: 1px solid var(--border-color);
+}
+
+.theme-elegant .produto-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 15px 35px rgba(139, 92, 246, 0.2);
+    border-color: var(--primary-color);
+}
+
+.theme-elegant .produto-imagem {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.theme-elegant .produto-card:hover .produto-imagem {
+    transform: scale(1.05);
+}
+
+.theme-elegant .produto-info {
+    padding: 1.5rem;
+    background: var(--card-bg);
+}
+
+.theme-elegant .produto-preco {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.theme-elegant .produto-titulo {
+    color: var(--text-color);
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.theme-elegant .produto-descricao {
+    color: #6b7280;
+    line-height: 1.6;
+}
+
+/* Carrinho */
+.theme-elegant .carrinho-item {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.theme-elegant .carrinho-item:hover {
+    box-shadow: 0 6px 15px rgba(139, 92, 246, 0.1);
+    border-color: var(--primary-color);
+}
+
+.theme-elegant .carrinho-total {
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    color: white;
+    padding: 2rem;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
+}
+
+/* Formulários */
+.theme-elegant .form-control {
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: var(--card-bg);
+}
+
+.theme-elegant .form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    outline: none;
+}
+
+.theme-elegant .form-label {
+    color: var(--text-color);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+/* Botões Específicos */
+.theme-elegant .btn-comprar {
+    background: linear-gradient(45deg, var(--accent-color), #be185d);
+    color: white;
+    font-weight: 600;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 6px 20px rgba(236, 72, 153, 0.3);
+    transition: all 0.3s ease;
+}
+
+.theme-elegant .btn-comprar:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(236, 72, 153, 0.4);
+}
+
+/* Categorias */
+.theme-elegant .categoria-card {
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.4s ease;
+    color: var(--text-color);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.theme-elegant .categoria-card:hover {
+    border-color: var(--primary-color);
+    transform: scale(1.08) translateY(-5px);
+    box-shadow: 0 12px 30px rgba(139, 92, 246, 0.2);
+}
+
+/* Banner */
+.theme-elegant .banner {
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    color: white;
+    padding: 4rem 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.theme-elegant .banner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    opacity: 0.3;
+}
+
+.theme-elegant .banner h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 1;
+}
+
+/* Alertas */
+.theme-elegant .alert {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.theme-elegant .alert-success {
+    background: linear-gradient(45deg, #10b981, #059669);
+    color: white;
+}
+
+.theme-elegant .alert-danger {
+    background: linear-gradient(45deg, #ef4444, #dc2626);
+    color: white;
+}
+
+.theme-elegant .alert-warning {
+    background: linear-gradient(45deg, #f59e0b, #d97706);
+    color: white;
+}
+
+.theme-elegant .alert-info {
+    background: linear-gradient(45deg, #3b82f6, #2563eb);
+    color: white;
+}
+
+/* Loading */
+.theme-elegant .loading {
+    border: 3px solid var(--border-color);
+    border-top: 3px solid var(--primary-color);
+    border-radius: 50%;
+}
+
+/* Responsividade do Tema Elegante */
+@media (max-width: 768px) {
+    .theme-elegant .banner h1 {
+        font-size: 2.5rem;
+    }
+    
+    .theme-elegant .produto-card {
+        margin-bottom: 1.5rem;
+    }
+    
+    .theme-elegant .categoria-card {
+        padding: 1.5rem;
+    }
+}
+
+/* Animações especiais */
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+.theme-elegant .floating {
+    animation: float 3s ease-in-out infinite;
+}
+
+/* Efeitos de hover especiais */
+.theme-elegant .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.theme-elegant .card:hover::before {
+    left: 100%;
+}

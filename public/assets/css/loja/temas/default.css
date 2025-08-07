@@ -1,0 +1,164 @@
+/* ========================================
+   TEMA PADRÃO - LOJA ONLINE
+   ======================================== */
+
+/* Variáveis do Tema Padrão */
+:root {
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
+    --accent-color: #28a745;
+    --text-color: #333;
+    --bg-color: #f8f9fa;
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Estilos Específicos do Tema */
+.theme-default {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+.theme-default .header {
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    color: white;
+}
+
+.theme-default .logo {
+    color: white;
+}
+
+.theme-default .nav-link {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.theme-default .nav-link:hover {
+    color: white;
+}
+
+.theme-default .btn-primary {
+    background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+    border: none;
+}
+
+.theme-default .card {
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.theme-default .card:hover {
+    border-color: var(--primary-color);
+}
+
+.theme-default .footer {
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+    color: white;
+}
+
+/* Produtos */
+.theme-default .produto-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.theme-default .produto-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.theme-default .produto-imagem {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.theme-default .produto-info {
+    padding: 1rem;
+}
+
+.theme-default .produto-preco {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: var(--accent-color);
+}
+
+/* Carrinho */
+.theme-default .carrinho-item {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.theme-default .carrinho-total {
+    background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+    color: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+/* Formulários */
+.theme-default .form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Botões Específicos */
+.theme-default .btn-comprar {
+    background: linear-gradient(45deg, var(--accent-color), #20c997);
+    color: white;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.theme-default .btn-comprar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+}
+
+/* Categorias */
+.theme-default .categoria-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.theme-default .categoria-card:hover {
+    border-color: var(--primary-color);
+    transform: scale(1.05);
+}
+
+/* Banner */
+.theme-default .banner {
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    color: white;
+    padding: 3rem 0;
+    text-align: center;
+}
+
+.theme-default .banner h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Responsividade do Tema */
+@media (max-width: 768px) {
+    .theme-default .banner h1 {
+        font-size: 2rem;
+    }
+    
+    .theme-default .produto-card {
+        margin-bottom: 1rem;
+    }
+}
