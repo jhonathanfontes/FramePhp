@@ -1,0 +1,251 @@
+{% extends "admin/layout.html.twig" %}
+
+{% block title %}Relatórios - Admin{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0">Relatórios</h1>
+            <div>
+                <button class="btn btn-primary" onclick="gerarRelatorioGeral()">
+                    <i class="bi bi-download"></i> Relatório Geral
+                </button>
+            </div>
+        </div>
+
+        <!-- Cards de Estatísticas -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="bi bi-cart-check display-4 text-success"></i>
+                        <h5 class="card-title mt-3">Vendas</h5>
+                        <p class="card-text display-6">{{ total_vendas|default(0) }}</p>
+                        <small class="text-muted">Total de vendas</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="bi bi-currency-dollar display-4 text-primary"></i>
+                        <h5 class="card-title mt-3">Receita</h5>
+                        <p class="card-text display-6">R$ {{ total_receita|default(0)|number_format(2, ',', '.') }}</p>
+                        <small class="text-muted">Receita total</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="bi bi-people display-4 text-info"></i>
+                        <h5 class="card-title mt-3">Clientes</h5>
+                        <p class="card-text display-6">{{ total_clientes|default(0) }}</p>
+                        <small class="text-muted">Clientes cadastrados</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="bi bi-box display-4 text-warning"></i>
+                        <h5 class="card-title mt-3">Produtos</h5>
+                        <p class="card-text display-6">{{ total_produtos|default(0) }}</p>
+                        <small class="text-muted">Produtos cadastrados</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Relatórios Disponíveis -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-graph-up"></i> Relatórios de Vendas
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            <a href="{{ url('admin.relatorios.vendas') }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">Relatório de Vendas</h6>
+                                    <small class="text-muted">PDF</small>
+                                </div>
+                                <p class="mb-1">Relatório detalhado de todas as vendas realizadas</p>
+                            </a>
+                            <a href="{{ url('admin.relatorios.vendas.periodo') }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">Vendas por Período</h6>
+                                    <small class="text-muted">PDF</small>
+                                </div>
+                                <p class="mb-1">Vendas filtradas por período específico</p>
+                            </a>
+                            <a href="{{ url('admin.relatorios.vendas.produtos') }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">Produtos Mais Vendidos</h6>
+                                    <small class="text-muted">PDF</small>
+                                </div>
+                                <p class="mb-1">Ranking dos produtos mais vendidos</p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-boxes"></i> Relatórios de Estoque
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            <a href="{{ url('admin.relatorios.estoque') }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">Relatório de Estoque</h6>
+                                    <small class="text-muted">PDF</small>
+                                </div>
+                                <p class="mb-1">Situação atual do estoque de produtos</p>
+                            </a>
+                            <a href="{{ url('admin.relatorios.estoque.baixo') }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">Produtos com Estoque Baixo</h6>
+                                    <small class="text-muted">PDF</small>
+                                </div>
+                                <p class="mb-1">Produtos que precisam de reposição</p>
+                            </a>
+                            <a href="{{ url('admin.relatorios.estoque.movimentacao') }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">Movimentação de Estoque</h6>
+                                    <small class="text-muted">PDF</small>
+                                </div>
+                                <p class="mb-1">Histórico de movimentações do estoque</p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Relatórios de Clientes -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-people"></i> Relatórios de Clientes
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            <a href="{{ url('admin.relatorios.clientes') }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">Relatório de Clientes</h6>
+                                    <small class="text-muted">PDF</small>
+                                </div>
+                                <p class="mb-1">Lista completa de clientes cadastrados</p>
+                            </a>
+                            <a href="{{ url('admin.relatorios.clientes.ativos') }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">Clientes Mais Ativos</h6>
+                                    <small class="text-muted">PDF</small>
+                                </div>
+                                <p class="mb-1">Clientes com maior volume de compras</p>
+                            </a>
+                            <a href="{{ url('admin.relatorios.clientes.novos') }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">Novos Clientes</h6>
+                                    <small class="text-muted">PDF</small>
+                                </div>
+                                <p class="mb-1">Clientes cadastrados no período</p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-gear"></i> Relatórios Especiais
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            <a href="{{ url('admin.relatorios.financeiro') }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">Relatório Financeiro</h6>
+                                    <small class="text-muted">PDF</small>
+                                </div>
+                                <p class="mb-1">Análise financeira detalhada</p>
+                            </a>
+                            <a href="{{ url('admin.relatorios.performance') }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">Performance de Vendas</h6>
+                                    <small class="text-muted">PDF</small>
+                                </div>
+                                <p class="mb-1">Métricas de performance do negócio</p>
+                            </a>
+                            <a href="{{ url('admin.relatorios.tendencias') }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">Análise de Tendências</h6>
+                                    <small class="text-muted">PDF</small>
+                                </div>
+                                <p class="mb-1">Tendências de vendas e comportamento</p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros de Período -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-calendar"></i> Relatórios por Período
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form class="row g-3" id="formPeriodo">
+                            <div class="col-md-3">
+                                <label for="data_inicio" class="form-label">Data Início</label>
+                                <input type="date" class="form-control" id="data_inicio" name="data_inicio" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="data_fim" class="form-label">Data Fim</label>
+                                <input type="date" class="form-control" id="data_fim" name="data_fim" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="tipo_relatorio" class="form-label">Tipo de Relatório</label>
+                                <select class="form-select" id="tipo_relatorio" name="tipo_relatorio" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="vendas">Vendas</option>
+                                    <option value="estoque">Estoque</option>
+                                    <option value="clientes">Clientes</option>
+                                    <option value="financeiro">Financeiro</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">&nbsp;</label>
+                                <div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-download"></i> Gerar Relatório
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

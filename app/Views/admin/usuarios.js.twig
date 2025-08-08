@@ -1,0 +1,426 @@
+// JavaScript específico para a página de usuários
+
+// Variáveis globais
+let usuarios = [];
+let usuarioAtual = null;
+let paginaAtual = 1;
+let filtros = {
+    nome: '',
+    email: '',
+    tipo: '',
+    status: ''
+};
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', function() {
+    carregarUsuarios();
+    inicializarEventos();
+    aplicarFiltros();
+});
+
+// Inicializar eventos
+function inicializarEventos() {
+    // Eventos de filtros
+    document.getElementById('filtroNome').addEventListener('input', debounce(aplicarFiltros, 300));
+    document.getElementById('filtroEmail').addEventListener('input', debounce(aplicarFiltros, 300));
+    document.getElementById('filtroTipo').addEventListener('change', aplicarFiltros);
+    document.getElementById('filtroStatus').addEventListener('change', aplicarFiltros);
+    
+    // Eventos do modal
+    const modalUsuario = document.getElementById('modalUsuario');
+    if (modalUsuario) {
+        modalUsuario.addEventListener('hidden.bs.modal', limparFormulario);
+    }
+    
+    // Eventos de teclado
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'n') {
+            e.preventDefault();
+            novoUsuario();
+        }
+    });
+}
+
+// Carregar usuários
+function carregarUsuarios() {
+    const container = document.getElementById('tabelaUsuarios');
+    if (!container) return;
+    
+    // Simular dados de usuários (em produção, seria uma requisição AJAX)
+    usuarios = [
+        {
+            id: 1,
+            nome: 'João Silva',
+            email: 'joao@exemplo.com',
+            tipoAcesso: 'admin',
+            status: 'ativo',
+            dataCadastro: '2024-01-15'
+        },
+        {
+            id: 2,
+            nome: 'Maria Santos',
+            email: 'maria@exemplo.com',
+            tipoAcesso: 'gerente',
+            status: 'ativo',
+            dataCadastro: '2024-01-20'
+        },
+        {
+            id: 3,
+            nome: 'Pedro Costa',
+            email: 'pedro@exemplo.com',
+            tipoAcesso: 'usuario',
+            status: 'inativo',
+            dataCadastro: '2024-02-01'
+        }
+    ];
+    
+    renderizarTabela();
+}
+
+// Renderizar tabela de usuários
+function renderizarTabela() {
+    const container = document.getElementById('tabelaUsuarios');
+    if (!container) return;
+    
+    if (usuarios.length === 0) {
+        container.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center py-4">
+                    <div class="empty-state">
+                        <i class="bi bi-people"></i>
+                        <h5>Nenhum usuário encontrado</h5>
+                        <p>Não há usuários cadastrados no sistema.</p>
+                    </div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    const html = usuarios.map(usuario => `
+        <tr class="fade-in">
+            <td>${usuario.id}</td>
+            <td>
+                <div class="d-flex align-items-center">
+                    <div class="avatar-sm me-3">
+                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px;">
+                            ${usuario.nome.charAt(0).toUpperCase()}
+                        </div>
+                    </div>
+                    <div>
+                        <strong>${usuario.nome}</strong>
+                    </div>
+                </div>
+            </td>
+            <td>${usuario.email}</td>
+            <td>
+                <span class="badge badge-tipo badge-${usuario.tipoAcesso}">
+                    ${getTipoAcessoLabel(usuario.tipoAcesso)}
+                </span>
+            </td>
+            <td>
+                <span class="badge badge-status badge-${usuario.status}">
+                    ${getStatusLabel(usuario.status)}
+                </span>
+            </td>
+            <td>${formatarData(usuario.dataCadastro)}</td>
+            <td>
+                <div class="btn-acoes">
+                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="editarUsuario(${usuario.id})" title="Editar">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-info" onclick="vincularEmpresas(${usuario.id})" title="Vincular Empresas">
+                        <i class="bi bi-building"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="excluirUsuario(${usuario.id})" title="Excluir">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+    
+    container.innerHTML = html;
+}
+
+// Aplicar filtros
+function aplicarFiltros() {
+    filtros.nome = document.getElementById('filtroNome').value.toLowerCase();
+    filtros.email = document.getElementById('filtroEmail').value.toLowerCase();
+    filtros.tipo = document.getElementById('filtroTipo').value;
+    filtros.status = document.getElementById('filtroStatus').value;
+    
+    // Filtrar usuários
+    const usuariosFiltrados = usuarios.filter(usuario => {
+        const matchNome = !filtros.nome || usuario.nome.toLowerCase().includes(filtros.nome);
+        const matchEmail = !filtros.email || usuario.email.toLowerCase().includes(filtros.email);
+        const matchTipo = !filtros.tipo || usuario.tipoAcesso === filtros.tipo;
+        const matchStatus = !filtros.status || usuario.status === filtros.status;
+        
+        return matchNome && matchEmail && matchTipo && matchStatus;
+    });
+    
+    // Atualizar tabela com dados filtrados
+    const container = document.getElementById('tabelaUsuarios');
+    if (!container) return;
+    
+    if (usuariosFiltrados.length === 0) {
+        container.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center py-4">
+                    <div class="empty-state">
+                        <i class="bi bi-search"></i>
+                        <h5>Nenhum usuário encontrado</h5>
+                        <p>Tente ajustar os filtros de busca.</p>
+                    </div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    const html = usuariosFiltrados.map(usuario => `
+        <tr class="fade-in">
+            <td>${usuario.id}</td>
+            <td>
+                <div class="d-flex align-items-center">
+                    <div class="avatar-sm me-3">
+                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px;">
+                            ${usuario.nome.charAt(0).toUpperCase()}
+                        </div>
+                    </div>
+                    <div>
+                        <strong>${usuario.nome}</strong>
+                    </div>
+                </div>
+            </td>
+            <td>${usuario.email}</td>
+            <td>
+                <span class="badge badge-tipo badge-${usuario.tipoAcesso}">
+                    ${getTipoAcessoLabel(usuario.tipoAcesso)}
+                </span>
+            </td>
+            <td>
+                <span class="badge badge-status badge-${usuario.status}">
+                    ${getStatusLabel(usuario.status)}
+                </span>
+            </td>
+            <td>${formatarData(usuario.dataCadastro)}</td>
+            <td>
+                <div class="btn-acoes">
+                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="editarUsuario(${usuario.id})" title="Editar">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-info" onclick="vincularEmpresas(${usuario.id})" title="Vincular Empresas">
+                        <i class="bi bi-building"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="excluirUsuario(${usuario.id})" title="Excluir">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+    
+    container.innerHTML = html;
+}
+
+// Novo usuário
+function novoUsuario() {
+    usuarioAtual = null;
+    document.getElementById('modalUsuarioLabel').textContent = 'Novo Usuário';
+    document.getElementById('usuarioId').value = '';
+    limparFormulario();
+    
+    const modal = new bootstrap.Modal(document.getElementById('modalUsuario'));
+    modal.show();
+}
+
+// Editar usuário
+function editarUsuario(id) {
+    const usuario = usuarios.find(u => u.id === id);
+    if (!usuario) {
+        showNotification('Usuário não encontrado', 'error');
+        return;
+    }
+    
+    usuarioAtual = usuario;
+    document.getElementById('modalUsuarioLabel').textContent = 'Editar Usuário';
+    document.getElementById('usuarioId').value = usuario.id;
+    document.getElementById('nome').value = usuario.nome;
+    document.getElementById('email').value = usuario.email;
+    document.getElementById('tipoAcesso').value = usuario.tipoAcesso;
+    document.getElementById('status').value = usuario.status;
+    
+    // Limpar campos de senha
+    document.getElementById('senha').value = '';
+    document.getElementById('confirmarSenha').value = '';
+    
+    const modal = new bootstrap.Modal(document.getElementById('modalUsuario'));
+    modal.show();
+}
+
+// Salvar usuário
+function salvarUsuario() {
+    const form = document.getElementById('formUsuario');
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    
+    const dados = {
+        id: document.getElementById('usuarioId').value,
+        nome: document.getElementById('nome').value,
+        email: document.getElementById('email').value,
+        senha: document.getElementById('senha').value,
+        confirmarSenha: document.getElementById('confirmarSenha').value,
+        tipoAcesso: document.getElementById('tipoAcesso').value,
+        status: document.getElementById('status').value
+    };
+    
+    // Validações
+    if (dados.senha && dados.senha !== dados.confirmarSenha) {
+        showNotification('As senhas não coincidem', 'error');
+        return;
+    }
+    
+    if (!usuarioAtual && !dados.senha) {
+        showNotification('A senha é obrigatória para novos usuários', 'error');
+        return;
+    }
+    
+    // Simular salvamento (em produção, seria uma requisição AJAX)
+    if (usuarioAtual) {
+        // Edição
+        const index = usuarios.findIndex(u => u.id === usuarioAtual.id);
+        if (index !== -1) {
+            usuarios[index] = { ...usuarioAtual, ...dados };
+        }
+        showNotification('Usuário atualizado com sucesso', 'success');
+    } else {
+        // Novo usuário
+        const novoUsuario = {
+            id: usuarios.length + 1,
+            nome: dados.nome,
+            email: dados.email,
+            tipoAcesso: dados.tipoAcesso,
+            status: dados.status,
+            dataCadastro: new Date().toISOString().split('T')[0]
+        };
+        usuarios.push(novoUsuario);
+        showNotification('Usuário criado com sucesso', 'success');
+    }
+    
+    renderizarTabela();
+    
+    const modal = bootstrap.Modal.getInstance(document.getElementById('modalUsuario'));
+    modal.hide();
+}
+
+// Excluir usuário
+function excluirUsuario(id) {
+    const usuario = usuarios.find(u => u.id === id);
+    if (!usuario) {
+        showNotification('Usuário não encontrado', 'error');
+        return;
+    }
+    
+    usuarioAtual = usuario;
+    
+    const modal = new bootstrap.Modal(document.getElementById('modalConfirmacao'));
+    modal.show();
+}
+
+// Confirmar exclusão
+function confirmarExclusao() {
+    if (!usuarioAtual) return;
+    
+    const index = usuarios.findIndex(u => u.id === usuarioAtual.id);
+    if (index !== -1) {
+        usuarios.splice(index, 1);
+        showNotification('Usuário excluído com sucesso', 'success');
+        renderizarTabela();
+    }
+    
+    const modal = bootstrap.Modal.getInstance(document.getElementById('modalConfirmacao'));
+    modal.hide();
+}
+
+// Vincular empresas
+function vincularEmpresas(id) {
+    const usuario = usuarios.find(u => u.id === id);
+    if (!usuario) {
+        showNotification('Usuário não encontrado', 'error');
+        return;
+    }
+    
+    // Redirecionar para a página de vinculação
+    window.location.href = `{{ url('admin.vincular_empresas') }}?usuario_id=${id}`;
+}
+
+// Limpar formulário
+function limparFormulario() {
+    document.getElementById('formUsuario').reset();
+    usuarioAtual = null;
+}
+
+// Funções auxiliares
+function getTipoAcessoLabel(tipo) {
+    const labels = {
+        'admin': 'Administrador',
+        'gerente': 'Gerente',
+        'usuario': 'Usuário'
+    };
+    return labels[tipo] || tipo;
+}
+
+function getStatusLabel(status) {
+    const labels = {
+        'ativo': 'Ativo',
+        'inativo': 'Inativo'
+    };
+    return labels[status] || status;
+}
+
+function formatarData(data) {
+    if (!data) return '';
+    const [ano, mes, dia] = data.split('-');
+    return `${dia}/${mes}/${ano}`;
+}
+
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Função global para notificações (se não existir)
+if (typeof showNotification === 'undefined') {
+    function showNotification(message, type = 'info') {
+        const alertClass = type === 'success' ? 'alert-success' : 
+                          type === 'error' ? 'alert-danger' : 
+                          type === 'warning' ? 'alert-warning' : 'alert-info';
+        
+        const alert = document.createElement('div');
+        alert.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+        alert.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        alert.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(alert);
+        
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.remove();
+            }
+        }, 5000);
+    }
+}

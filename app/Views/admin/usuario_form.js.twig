@@ -1,0 +1,472 @@
+// JavaScript específico para o formulário de usuário
+
+// Variáveis globais
+let isEditing = false;
+let originalData = {};
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', function() {
+    inicializarFormulario();
+    aplicarMascaras();
+    inicializarValidacoes();
+    inicializarEventos();
+});
+
+// Inicializar formulário
+function inicializarFormulario() {
+    const form = document.getElementById('formUsuario');
+    if (!form) return;
+    
+    // Verificar se é edição
+    const idField = document.getElementById('usuarioId');
+    isEditing = idField && idField.value;
+    
+    if (isEditing) {
+        // Salvar dados originais para comparação
+        originalData = {
+            nome: document.getElementById('nome').value,
+            email: document.getElementById('email').value,
+            tipoAcesso: document.getElementById('tipoAcesso').value,
+            status: document.getElementById('status').value,
+            telefone: document.getElementById('telefone').value,
+            cpf: document.getElementById('cpf').value,
+            endereco: document.getElementById('endereco').value,
+            observacoes: document.getElementById('observacoes').value
+        };
+    }
+}
+
+// Aplicar máscaras
+function aplicarMascaras() {
+    // Máscara para telefone
+    const telefoneField = document.getElementById('telefone');
+    if (telefoneField) {
+        telefoneField.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length <= 11) {
+                value = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+                e.target.value = value;
+            }
+        });
+    }
+    
+    // Máscara para CPF
+    const cpfField = document.getElementById('cpf');
+    if (cpfField) {
+        cpfField.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length <= 11) {
+                value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+                e.target.value = value;
+            }
+        });
+    }
+}
+
+// Inicializar validações
+function inicializarValidacoes() {
+    // Validação de email
+    const emailField = document.getElementById('email');
+    if (emailField) {
+        emailField.addEventListener('blur', function() {
+            validarEmail(this.value);
+        });
+    }
+    
+    // Validação de senha
+    const senhaField = document.getElementById('senha');
+    if (senhaField) {
+        senhaField.addEventListener('input', function() {
+            validarSenha(this.value);
+        });
+    }
+    
+    // Validação de CPF
+    const cpfField = document.getElementById('cpf');
+    if (cpfField) {
+        cpfField.addEventListener('blur', function() {
+            validarCPF(this.value);
+        });
+    }
+    
+    // Validação de telefone
+    const telefoneField = document.getElementById('telefone');
+    if (telefoneField) {
+        telefoneField.addEventListener('blur', function() {
+            validarTelefone(this.value);
+        });
+    }
+}
+
+// Inicializar eventos
+function inicializarEventos() {
+    const form = document.getElementById('formUsuario');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (validarFormulario()) {
+                salvarUsuario();
+            }
+        });
+    }
+    
+    // Eventos de teclado
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 's') {
+            e.preventDefault();
+            if (validarFormulario()) {
+                salvarUsuario();
+            }
+        }
+    });
+}
+
+// Validar formulário
+function validarFormulario() {
+    const form = document.getElementById('formUsuario');
+    if (!form) return false;
+    
+    // Limpar validações anteriores
+    limparValidacoes();
+    
+    let isValid = true;
+    
+    // Validar campos obrigatórios
+    const camposObrigatorios = ['nome', 'email', 'tipoAcesso', 'status'];
+    camposObrigatorios.forEach(campo => {
+        const field = document.getElementById(campo);
+        if (field && !field.value.trim()) {
+            marcarCampoInvalido(field, 'Este campo é obrigatório');
+            isValid = false;
+        }
+    });
+    
+    // Validar senha para novos usuários
+    if (!isEditing) {
+        const senhaField = document.getElementById('senha');
+        if (senhaField && !senhaField.value.trim()) {
+            marcarCampoInvalido(senhaField, 'A senha é obrigatória para novos usuários');
+            isValid = false;
+        }
+    }
+    
+    // Validar confirmação de senha
+    const senhaField = document.getElementById('senha');
+    const confirmarSenhaField = document.getElementById('confirmarSenha');
+    if (senhaField && confirmarSenhaField && senhaField.value && senhaField.value !== confirmarSenhaField.value) {
+        marcarCampoInvalido(confirmarSenhaField, 'As senhas não coincidem');
+        isValid = false;
+    }
+    
+    // Validar email
+    const emailField = document.getElementById('email');
+    if (emailField && emailField.value && !validarEmail(emailField.value)) {
+        marcarCampoInvalido(emailField, 'Email inválido');
+        isValid = false;
+    }
+    
+    // Validar CPF se preenchido
+    const cpfField = document.getElementById('cpf');
+    if (cpfField && cpfField.value && !validarCPF(cpfField.value)) {
+        marcarCampoInvalido(cpfField, 'CPF inválido');
+        isValid = false;
+    }
+    
+    return isValid;
+}
+
+// Validar email
+function validarEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const isValid = emailRegex.test(email);
+    
+    const emailField = document.getElementById('email');
+    if (emailField) {
+        if (isValid) {
+            marcarCampoValido(emailField);
+        } else {
+            marcarCampoInvalido(emailField, 'Email inválido');
+        }
+    }
+    
+    return isValid;
+}
+
+// Validar senha
+function validarSenha(senha) {
+    const senhaField = document.getElementById('senha');
+    if (!senhaField) return;
+    
+    // Remover indicador de força anterior
+    const strengthIndicator = document.getElementById('passwordStrength');
+    if (strengthIndicator) {
+        strengthIndicator.remove();
+    }
+    
+    if (!senha) {
+        marcarCampoValido(senhaField);
+        return;
+    }
+    
+    let strength = 0;
+    let feedback = '';
+    
+    if (senha.length >= 6) strength++;
+    if (senha.length >= 8) strength++;
+    if (/[a-z]/.test(senha)) strength++;
+    if (/[A-Z]/.test(senha)) strength++;
+    if (/[0-9]/.test(senha)) strength++;
+    if (/[^A-Za-z0-9]/.test(senha)) strength++;
+    
+    let strengthClass = '';
+    let strengthText = '';
+    
+    if (strength <= 2) {
+        strengthClass = 'weak';
+        strengthText = 'Senha fraca';
+        feedback = 'Adicione letras maiúsculas, números e caracteres especiais';
+    } else if (strength <= 4) {
+        strengthClass = 'medium';
+        strengthText = 'Senha média';
+        feedback = 'Adicione mais caracteres para maior segurança';
+    } else {
+        strengthClass = 'strong';
+        strengthText = 'Senha forte';
+        feedback = 'Excelente! Sua senha é segura';
+    }
+    
+    // Criar indicador de força
+    const indicator = document.createElement('div');
+    indicator.id = 'passwordStrength';
+    indicator.className = `password-strength ${strengthClass}`;
+    indicator.innerHTML = `
+        <strong>${strengthText}</strong><br>
+        <small>${feedback}</small>
+    `;
+    
+    senhaField.parentNode.appendChild(indicator);
+    
+    if (strength >= 3) {
+        marcarCampoValido(senhaField);
+    } else {
+        marcarCampoInvalido(senhaField, 'Senha muito fraca');
+    }
+}
+
+// Validar CPF
+function validarCPF(cpf) {
+    // Remover caracteres não numéricos
+    cpf = cpf.replace(/\D/g, '');
+    
+    if (cpf.length !== 11) return false;
+    
+    // Verificar se todos os dígitos são iguais
+    if (/^(\d)\1{10}$/.test(cpf)) return false;
+    
+    // Validar primeiro dígito verificador
+    let soma = 0;
+    for (let i = 0; i < 9; i++) {
+        soma += parseInt(cpf.charAt(i)) * (10 - i);
+    }
+    let resto = 11 - (soma % 11);
+    let digito1 = resto < 2 ? 0 : resto;
+    
+    // Validar segundo dígito verificador
+    soma = 0;
+    for (let i = 0; i < 10; i++) {
+        soma += parseInt(cpf.charAt(i)) * (11 - i);
+    }
+    resto = 11 - (soma % 11);
+    let digito2 = resto < 2 ? 0 : resto;
+    
+    const isValid = parseInt(cpf.charAt(9)) === digito1 && parseInt(cpf.charAt(10)) === digito2;
+    
+    const cpfField = document.getElementById('cpf');
+    if (cpfField) {
+        if (isValid) {
+            marcarCampoValido(cpfField);
+        } else {
+            marcarCampoInvalido(cpfField, 'CPF inválido');
+        }
+    }
+    
+    return isValid;
+}
+
+// Validar telefone
+function validarTelefone(telefone) {
+    const telefoneLimpo = telefone.replace(/\D/g, '');
+    const isValid = telefoneLimpo.length >= 10 && telefoneLimpo.length <= 11;
+    
+    const telefoneField = document.getElementById('telefone');
+    if (telefoneField) {
+        if (isValid || !telefone) {
+            marcarCampoValido(telefoneField);
+        } else {
+            marcarCampoInvalido(telefoneField, 'Telefone inválido');
+        }
+    }
+    
+    return isValid;
+}
+
+// Marcar campo como válido
+function marcarCampoValido(field) {
+    field.classList.remove('is-invalid');
+    field.classList.add('is-valid');
+    
+    const feedback = field.parentNode.querySelector('.invalid-feedback');
+    if (feedback) {
+        feedback.style.display = 'none';
+    }
+}
+
+// Marcar campo como inválido
+function marcarCampoInvalido(field, message) {
+    field.classList.remove('is-valid');
+    field.classList.add('is-invalid');
+    
+    let feedback = field.parentNode.querySelector('.invalid-feedback');
+    if (!feedback) {
+        feedback = document.createElement('div');
+        feedback.className = 'invalid-feedback';
+        field.parentNode.appendChild(feedback);
+    }
+    
+    feedback.textContent = message;
+    feedback.style.display = 'block';
+}
+
+// Limpar validações
+function limparValidacoes() {
+    const fields = document.querySelectorAll('.form-control, .form-select');
+    fields.forEach(field => {
+        field.classList.remove('is-valid', 'is-invalid');
+        const feedback = field.parentNode.querySelector('.invalid-feedback');
+        if (feedback) {
+            feedback.style.display = 'none';
+        }
+    });
+}
+
+// Toggle password visibility
+function togglePassword(fieldId) {
+    const field = document.getElementById(fieldId);
+    const icon = document.getElementById(`icon-${fieldId}`);
+    
+    if (field.type === 'password') {
+        field.type = 'text';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+    } else {
+        field.type = 'password';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+    }
+}
+
+// Salvar usuário
+function salvarUsuario() {
+    const form = document.getElementById('formUsuario');
+    if (!form) return;
+    
+    // Mostrar loading
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Salvando...';
+    submitBtn.disabled = true;
+    
+    // Simular envio (em produção, seria uma requisição AJAX)
+    setTimeout(() => {
+        // Restaurar botão
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        
+        // Mostrar sucesso
+        showNotification(
+            isEditing ? 'Usuário atualizado com sucesso!' : 'Usuário criado com sucesso!',
+            'success'
+        );
+        
+        // Redirecionar após um breve delay
+        setTimeout(() => {
+            window.location.href = '{{ url("admin.usuarios") }}';
+        }, 1500);
+    }, 1000);
+}
+
+// Testar email
+function testarEmail() {
+    const emailField = document.getElementById('email');
+    if (!emailField || !emailField.value) {
+        showNotification('Por favor, informe um email válido', 'warning');
+        return;
+    }
+    
+    if (!validarEmail(emailField.value)) {
+        showNotification('Email inválido', 'error');
+        return;
+    }
+    
+    // Simular teste de email
+    showNotification('Teste de email enviado! Verifique a caixa de entrada.', 'info');
+}
+
+// Verificar mudanças no formulário
+function verificarMudancas() {
+    if (!isEditing) return true;
+    
+    const currentData = {
+        nome: document.getElementById('nome').value,
+        email: document.getElementById('email').value,
+        tipoAcesso: document.getElementById('tipoAcesso').value,
+        status: document.getElementById('status').value,
+        telefone: document.getElementById('telefone').value,
+        cpf: document.getElementById('cpf').value,
+        endereco: document.getElementById('endereco').value,
+        observacoes: document.getElementById('observacoes').value
+    };
+    
+    return JSON.stringify(currentData) !== JSON.stringify(originalData);
+}
+
+// Event listener para mudanças no formulário
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('formUsuario');
+    if (form) {
+        form.addEventListener('input', function() {
+            if (isEditing && verificarMudancas()) {
+                // Adicionar indicador visual de mudanças
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> Salvar *';
+                }
+            }
+        });
+    }
+});
+
+// Função global para notificações (se não existir)
+if (typeof showNotification === 'undefined') {
+    function showNotification(message, type = 'info') {
+        const alertClass = type === 'success' ? 'alert-success' : 
+                          type === 'error' ? 'alert-danger' : 
+                          type === 'warning' ? 'alert-warning' : 'alert-info';
+        
+        const alert = document.createElement('div');
+        alert.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+        alert.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        alert.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(alert);
+        
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.remove();
+            }
+        }, 5000);
+    }
+}

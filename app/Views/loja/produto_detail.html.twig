@@ -1,0 +1,402 @@
+{% extends "loja/layouts/base.html.twig" %}
+
+{% block title %}{{ produto.nome }} - {{ empresa.nome_fantasia|default('Loja Online') }}{% endblock %}
+
+{% block content %}
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{{ url('loja.home') }}" class="text-decoration-none">
+                    <i class="fas fa-home me-1"></i>Home
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{{ url('loja.produtos') }}" class="text-decoration-none">Produtos</a>
+            </li>
+            {% if produto.categoria %}
+                <li class="breadcrumb-item">
+                    <a href="{{ url('loja.categoria', {id: produto.categoria.id}) }}" class="text-decoration-none">
+                        {{ produto.categoria.nome }}
+                    </a>
+                </li>
+            {% endif %}
+            <li class="breadcrumb-item active" aria-current="page">{{ produto.nome }}</li>
+        </ol>
+    </nav>
+
+    <!-- Detalhes do Produto -->
+    <div class="row">
+        <!-- Galeria de Imagens -->
+        <div class="col-lg-6 mb-4">
+            <div class="product-gallery">
+                <!-- Imagem Principal -->
+                <div class="main-image mb-3">
+                    <img id="mainImage" src="{{ produto.imagem|default('/assets/images/placeholder.jpg') }}" 
+                         alt="{{ produto.nome }}" class="img-fluid rounded shadow-sm" style="width: 100%; height: 400px; object-fit: cover;">
+                </div>
+                
+                <!-- Miniaturas -->
+                {% if produto.imagens %}
+                    <div class="thumbnails d-flex gap-2">
+                        <img src="{{ produto.imagem }}" alt="{{ produto.nome }}" 
+                             class="thumbnail active" onclick="changeImage(this.src)" 
+                             style="width: 80px; height: 80px; object-fit: cover; cursor: pointer; border: 2px solid #007bff;">
+                        
+                        {% for imagem in produto.imagens %}
+                            <img src="{{ imagem }}" alt="{{ produto.nome }}" 
+                                 class="thumbnail" onclick="changeImage(this.src)" 
+                                 style="width: 80px; height: 80px; object-fit: cover; cursor: pointer; border: 2px solid #dee2e6;">
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Informações do Produto -->
+        <div class="col-lg-6">
+            <div class="product-info">
+                <!-- Título e Badges -->
+                <div class="mb-3">
+                    <h1 class="h2 text-primary mb-2">{{ produto.nome }}</h1>
+                    <div class="d-flex gap-2 mb-3">
+                        {% if produto.preco_promocional %}
+                            <span class="badge bg-danger">
+                                <i class="fas fa-percentage me-1"></i>Promoção
+                            </span>
+                        {% endif %}
+                        {% if produto.novo %}
+                            <span class="badge bg-success">
+                                <i class="fas fa-star me-1"></i>Novo
+                            </span>
+                        {% endif %}
+                        {% if produto.esgotado %}
+                            <span class="badge bg-warning">
+                                <i class="fas fa-exclamation-triangle me-1"></i>Esgotado
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Avaliação -->
+                {% if produto.avaliacao %}
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="text-warning">
+                                {% for i in 1..5 %}
+                                    <i class="fas fa-star{{ i <= produto.avaliacao ? '' : '-o' }}"></i>
+                                {% endfor %}
+                            </div>
+                            <span class="text-muted">{{ produto.avaliacao|number_format(1) }}</span>
+                            <span class="text-muted">({{ produto.total_avaliacoes|default(0) }} avaliações)</span>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Preços -->
+                <div class="mb-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="h3 text-primary fw-bold">R$ {{ "%.2f"|format(produto.preco) }}</span>
+                        {% if produto.preco_promocional %}
+                            <span class="h5 text-muted text-decoration-line-through">
+                                R$ {{ "%.2f"|format(produto.preco_promocional) }}
+                            </span>
+                            <span class="badge bg-success">
+                                {{ (((produto.preco_promocional - produto.preco) / produto.preco_promocional) * 100)|round }}% OFF
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Descrição Curta -->
+                {% if produto.descricao_curta %}
+                    <div class="mb-4">
+                        <p class="text-muted">{{ produto.descricao_curta }}</p>
+                    </div>
+                {% endif %}
+
+                <!-- Variações (Tamanho, Cor, etc.) -->
+                {% if produto.variacoes %}
+                    <div class="mb-4">
+                        {% for variacao in produto.variacoes %}
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">{{ variacao.nome }}</label>
+                                <div class="d-flex gap-2">
+                                    {% for opcao in variacao.opcoes %}
+                                        <input type="radio" class="btn-check" name="{{ variacao.nome }}" 
+                                               id="{{ variacao.nome }}_{{ opcao.id }}" value="{{ opcao.id }}"
+                                               {{ loop.first ? 'checked' : '' }}>
+                                        <label class="btn btn-outline-primary" for="{{ variacao.nome }}_{{ opcao.id }}">
+                                            {{ opcao.valor }}
+                                        </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Quantidade e Botões -->
+                <div class="mb-4">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Quantidade</label>
+                            <div class="input-group">
+                                <button class="btn btn-outline-secondary" type="button" onclick="changeQuantity(-1)">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <input type="number" class="form-control text-center" id="quantidade" value="1" min="1" max="99">
+                                <button class="btn btn-outline-secondary" type="button" onclick="changeQuantity(1)">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold">Ações</label>
+                            <div class="d-flex gap-2">
+                                <button onclick="adicionarAoCarrinho({{ produto.id }})" class="btn btn-primary flex-fill">
+                                    <i class="fas fa-shopping-cart me-2"></i>Adicionar ao Carrinho
+                                </button>
+                                <button onclick="toggleFavorito({{ produto.id }})" class="btn btn-outline-danger">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informações Adicionais -->
+                <div class="mb-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fas fa-shipping-fast text-primary"></i>
+                                <small class="text-muted">Entrega em 24h</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fas fa-shield-alt text-primary"></i>
+                                <small class="text-muted">Compra Segura</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fas fa-undo text-primary"></i>
+                                <small class="text-muted">30 dias para troca</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fas fa-headset text-primary"></i>
+                                <small class="text-muted">Suporte 24h</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Abas de Informações -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <ul class="nav nav-tabs" id="productTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="descricao-tab" data-bs-toggle="tab" data-bs-target="#descricao" type="button" role="tab">
+                        <i class="fas fa-info-circle me-2"></i>Descrição
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="especificacoes-tab" data-bs-toggle="tab" data-bs-target="#especificacoes" type="button" role="tab">
+                        <i class="fas fa-list me-2"></i>Especificações
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="avaliacoes-tab" data-bs-toggle="tab" data-bs-target="#avaliacoes" type="button" role="tab">
+                        <i class="fas fa-star me-2"></i>Avaliações
+                    </button>
+                </li>
+            </ul>
+            
+            <div class="tab-content" id="productTabsContent">
+                <!-- Descrição -->
+                <div class="tab-pane fade show active" id="descricao" role="tabpanel">
+                    <div class="p-4">
+                        <h4>Descrição do Produto</h4>
+                        <div class="text-muted">
+                            {{ produto.descricao|raw }}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Especificações -->
+                <div class="tab-pane fade" id="especificacoes" role="tabpanel">
+                    <div class="p-4">
+                        <h4>Especificações Técnicas</h4>
+                        {% if produto.especificacoes %}
+                            <div class="row">
+                                {% for espec in produto.especificacoes %}
+                                    <div class="col-md-6 mb-3">
+                                        <div class="d-flex justify-content-between">
+                                            <strong>{{ espec.nome }}:</strong>
+                                            <span class="text-muted">{{ espec.valor }}</span>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted">Nenhuma especificação disponível.</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Avaliações -->
+                <div class="tab-pane fade" id="avaliacoes" role="tabpanel">
+                    <div class="p-4">
+                        <h4>Avaliações dos Clientes</h4>
+                        {% if produto.avaliacoes %}
+                            {% for avaliacao in produto.avaliacoes %}
+                                <div class="border-bottom pb-3 mb-3">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <strong>{{ avaliacao.cliente }}</strong>
+                                            <div class="text-warning">
+                                                {% for i in 1..5 %}
+                                                    <i class="fas fa-star{{ i <= avaliacao.nota ? '' : '-o' }}"></i>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <small class="text-muted">{{ avaliacao.data|date('d/m/Y') }}</small>
+                                    </div>
+                                    <p class="mb-0">{{ avaliacao.comentario }}</p>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted">Nenhuma avaliação disponível.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Produtos Relacionados -->
+    {% if produtos_relacionados %}
+        <section class="mt-5">
+            <h3 class="h4 text-primary mb-4">
+                <i class="fas fa-thumbs-up me-2"></i>Produtos Relacionados
+            </h3>
+            <div class="row g-4">
+                {% for produto_rel in produtos_relacionados|slice(0, 4) %}
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card h-100 border-0 shadow-sm hover-lift">
+                            <div class="position-relative">
+                                {% if produto_rel.imagem %}
+                                    <img src="{{ produto_rel.imagem }}" class="card-img-top" alt="{{ produto_rel.nome }}" 
+                                         style="height: 200px; object-fit: cover;">
+                                {% else %}
+                                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                                         style="height: 200px;">
+                                        <i class="fas fa-image fa-3x text-muted"></i>
+                                    </div>
+                                {% endif %}
+                                
+                                {% if produto_rel.preco_promocional %}
+                                    <span class="position-absolute top-0 start-0 badge bg-danger m-2">
+                                        <i class="fas fa-percentage me-1"></i>Promoção
+                                    </span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="card-body d-flex flex-column">
+                                <h6 class="card-title">{{ produto_rel.nome }}</h6>
+                                <p class="card-text text-muted small flex-grow-1">
+                                    {{ produto_rel.descricao|slice(0, 80) }}{% if produto_rel.descricao|length > 80 %}...{% endif %}
+                                </p>
+                                
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="h6 text-primary fw-bold">R$ {{ "%.2f"|format(produto_rel.preco) }}</span>
+                                    {% if produto_rel.avaliacao %}
+                                        <div class="text-warning">
+                                            <i class="fas fa-star"></i>
+                                            <small>{{ produto_rel.avaliacao|number_format(1) }}</small>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="d-flex gap-2">
+                                    <a href="{{ url('loja.produto', {id: produto_rel.id}) }}" class="btn btn-outline-primary flex-fill">
+                                        <i class="fas fa-eye me-1"></i>Ver
+                                    </a>
+                                    <button onclick="adicionarAoCarrinho({{ produto_rel.id }})" class="btn btn-primary">
+                                        <i class="fas fa-shopping-cart"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+{% endblock %}
+
+{% block page_js %}
+<script>
+function changeImage(src) {
+    document.getElementById('mainImage').src = src;
+    
+    // Atualizar classe ativa nas miniaturas
+    document.querySelectorAll('.thumbnail').forEach(thumb => {
+        thumb.style.border = '2px solid #dee2e6';
+    });
+    event.target.style.border = '2px solid #007bff';
+}
+
+function changeQuantity(delta) {
+    const input = document.getElementById('quantidade');
+    const newValue = parseInt(input.value) + delta;
+    if (newValue >= 1 && newValue <= 99) {
+        input.value = newValue;
+    }
+}
+
+function adicionarAoCarrinho(produtoId) {
+    const quantidade = document.getElementById('quantidade').value;
+    
+    fetch('/loja/carrinho/adicionar', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': window.APP_CONFIG.csrf_token
+        },
+        body: JSON.stringify({
+            produto_id: produtoId,
+            quantidade: parseInt(quantidade)
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('cart-count').textContent = data.total_itens;
+            
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-success alert-dismissible fade show';
+            alert.innerHTML = `
+                <i class="fas fa-check me-2"></i>Produto adicionado ao carrinho!
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.querySelector('main').insertBefore(alert, document.querySelector('main').firstChild);
+        }
+    })
+    .catch(error => {
+        console.error('Erro ao adicionar ao carrinho:', error);
+    });
+}
+
+function toggleFavorito(produtoId) {
+    console.log('Toggle favorito:', produtoId);
+}
+</script>
+{% endblock %}
