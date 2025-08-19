@@ -1,0 +1,99 @@
+{% extends 'layouts/painel.html.twig' %}
+
+{% block title %}Cadastrar Usuário{% endblock %}
+{% block page_title %}Novo Usuário{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Cadastro de Usuário</h2>
+    </div>
+    <div class="card-body">
+        <form action="/painel/usuarios/store" method="POST" autocomplete="off">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="nome" class="form-label">Nome Completo</label>
+                    <input type="text" class="form-control" id="nome" name="nome" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="email" class="form-label">E-mail</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="telefone" class="form-label">Telefone</label>
+                    <input type="text" class="form-control" id="telefone" name="telefone" maxlength="20" placeholder="(99) 99999-9999">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="tipo" class="form-label">Tipo de Usuário</label>
+                    <select class="form-select" id="tipo" name="tipo" required>
+                        <option value="">Selecione...</option>
+                        <option value="admin">Administrador</option>
+                        <option value="gerente">Gerente</option>
+                        <option value="operador">Operador</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="senha" class="form-label">Senha</label>
+                    <input type="password" class="form-control" id="senha" name="senha" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="confirmar_senha" class="form-label">Confirmar Senha</label>
+                    <input type="password" class="form-control" id="confirmar_senha" name="confirmar_senha" required>
+                </div>
+            </div>
+            <hr class="my-4">
+            <h5 class="mb-3">Empresas e Permissões de Acesso</h5>
+            <div class="mb-3">
+                <label class="form-label">Empresas que o usuário pode acessar</label>
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle">
+                        <thead>
+                            <tr>
+                                <th>Selecionar</th>
+                                <th>Empresa</th>
+                                <th>CNPJ</th>
+                                <th>Tipo de Acesso</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for empresa in empresas %}
+                            <tr>
+                                <td>
+                                    <input type="checkbox" name="empresas_acesso[{{ empresa.id }}][permitido]" value="1">
+                                </td>
+                                <td>{{ empresa.nome_fantasia }}</td>
+                                <td>{{ empresa.cnpj_raiz }}</td>
+                                <td>
+                                    <select name="empresas_acesso[{{ empresa.id }}][nivel]" class="form-select form-select-sm">
+                                        <option value="visualizar">Visualizar</option>
+                                        <option value="editar">Editar</option>
+                                        <option value="administrar">Administrar</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">Nenhuma empresa cadastrada.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <small class="text-muted">Selecione as empresas e o nível de acesso para este usuário.</small>
+            </div>
+            <div class="mt-4 d-flex justify-content-end gap-2">
+                <button type="submit" class="btn btn-success">Salvar Usuário</button>
+                <a href="/painel/usuarios" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+    <div class="card-footer">
+        <p class="text-muted">Preencha todos os campos obrigatórios para cadastrar um novo usuário.</p>
+    </div>
+</div>
+{% endblock %}
+

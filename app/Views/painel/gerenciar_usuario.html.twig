@@ -1,0 +1,88 @@
+{% extends 'layouts/painel.html.twig' %}
+
+{% block title %}Gerenciar Usuário{% endblock %}
+{% block page_title %}Administração de Usuário{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Administração de Usuário</h2>
+    </div>
+    <div class="card-body">
+        <form action="/painel/usuarios/{{ usuario.id }}/update" method="POST" autocomplete="off">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="nome" class="form-label">Nome Completo</label>
+                    <input type="text" class="form-control" id="nome" name="nome" value="{{ usuario.nome }}" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="email" class="form-label">E-mail</label>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ usuario.email }}" required>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="telefone" class="form-label">Telefone</label>
+                    <input type="text" class="form-control" id="telefone" name="telefone" value="{{ usuario.telefone }}" maxlength="20">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="tipo" class="form-label">Tipo de Usuário</label>
+                    <select class="form-select" id="tipo" name="tipo" required>
+                        <option value="admin" {% if usuario.tipo == 'admin' %}selected{% endif %}>Administrador</option>
+                        <option value="gerente" {% if usuario.tipo == 'gerente' %}selected{% endif %}>Gerente</option>
+                        <option value="operador" {% if usuario.tipo == 'operador' %}selected{% endif %}>Operador</option>
+                    </select>
+                </div>
+            </div>
+            <hr class="my-4">
+            <h5 class="mb-3">Empresas e Permissões de Acesso</h5>
+            <div class="mb-3">
+                <label class="form-label">Empresas vinculadas ao usuário</label>
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle">
+                        <thead>
+                            <tr>
+                                <th>Selecionar</th>
+                                <th>Empresa</th>
+                                <th>CNPJ</th>
+                                <th>Tipo de Acesso</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for empresa in empresas %}
+                            <tr>
+                                <td>
+                                    <input type="checkbox" name="empresas_acesso[{{ empresa.id }}][permitido]" value="1"
+                                        {% if empresa.id in usuario.empresas_ids %}checked{% endif %}>
+                                </td>
+                                <td>{{ empresa.nome_fantasia }}</td>
+                                <td>{{ empresa.cnpj_raiz }}</td>
+                                <td>
+                                    <select name="empresas_acesso[{{ empresa.id }}][nivel]" class="form-select form-select-sm">
+                                        <option value="visualizar" {% if usuario.empresas_niveis[empresa.id] == 'visualizar' %}selected{% endif %}>Visualizar</option>
+                                        <option value="editar" {% if usuario.empresas_niveis[empresa.id] == 'editar' %}selected{% endif %}>Editar</option>
+                                        <option value="administrar" {% if usuario.empresas_niveis[empresa.id] == 'administrar' %}selected{% endif %}>Administrar</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">Nenhuma empresa cadastrada.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <small class="text-muted">Altere os vínculos e permissões conforme necessário.</small>
+            </div>
+            <div class="mt-4 d-flex justify-content-end gap-2">
+                <button type="submit" class="btn btn-success">Salvar Alterações</button>
+                <a href="/painel/usuarios" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+    <div class="card-footer">
+        <p class="text-muted">Edite os dados do usuário e gerencie o acesso às empresas.</p>
+    </div>
+</div>
+{% endblock %}

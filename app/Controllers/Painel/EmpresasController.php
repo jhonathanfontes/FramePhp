@@ -92,4 +92,31 @@ class EmpresasController extends BaseController
             'receitaTotal' => $receitaTotal
         ]);
     }
+
+    public function create()
+    {
+        // Renderiza a view de criação de empresa
+        return $this->render('painel/cadastrar_empresa', [
+            'title' => 'Criar Nova Empresa',
+            'action' => '/painel/empresas/store'
+        ]);
+    }
+
+    public function gerenciar($id){
+
+        // Simula busca da empresa pelo ID
+        $empresa = (object) [
+            'id' => $id,
+            'nome_fantasia' => "Empresa {$id}",
+            'razao_social' => "Razão Social {$id} Ltda",
+            'cnpj' => sprintf('%02d.%03d.%03d/0001-%02d', rand(10, 99), rand(100, 999), rand(100, 999), rand(10, 99)),
+            'email' => "contato{$id}@empresa{$id}.com",
+            'telefone' => sprintf('(1%u) 9%05u-%04u', rand(1, 9), rand(10000, 99999), rand(1000, 9999)),
+            'data_cadastro' => date('Y-m-d', strtotime("-{$id} days"))
+        ];
+
+        return $this->render('painel/gerenciar_empresa', [
+            'empresa' => $empresa
+        ]);
+    }
 }

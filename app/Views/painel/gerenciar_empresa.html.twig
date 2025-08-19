@@ -1,0 +1,211 @@
+{% extends 'layouts/painel.html.twig' %}
+
+{% block title %}Gerenciar Empresa{% endblock %}
+{% block page_title %}Administração de Empresa{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Administração de Empresa</h2>
+    </div>
+    <div class="card-body">
+        <form action="/painel/empresas/{{ empresa.id }}/update" method="POST" autocomplete="off">
+            <h5 class="mb-3 mt-2">Dados Básicos</h5>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="cnpj_raiz" class="form-label">CNPJ Raiz</label>
+                    <input type="text" class="form-control" id="cnpj_raiz" name="cnpj_raiz" value="{{ empresa.cnpj_raiz }}" required maxlength="14">
+                </div>
+                <div class="col-md-8 mb-3">
+                    <label for="razao_social" class="form-label">Razão Social</label>
+                    <input type="text" class="form-control" id="razao_social" name="razao_social" value="{{ empresa.razao_social }}" required>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="capital_social" class="form-label">Capital Social</label>
+                    <input type="number" step="0.01" class="form-control" id="capital_social" name="capital_social" value="{{ empresa.capital_social }}">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="responsavel_federativo" class="form-label">Responsável Federativo</label>
+                    <input type="text" class="form-control" id="responsavel_federativo" name="responsavel_federativo" value="{{ empresa.responsavel_federativo }}">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="atualizado_em" class="form-label">Atualizado em</label>
+                    <input type="date" class="form-control" id="atualizado_em" name="atualizado_em" value="{{ empresa.atualizado_em|date('Y-m-d') }}">
+                </div>
+            </div>
+            <h5 class="mb-3 mt-4">Porte e Natureza</h5>
+            <div class="row">
+                <div class="col-md-2 mb-3">
+                    <label for="porte_id" class="form-label">Porte ID</label>
+                    <input type="text" class="form-control" id="porte_id" name="porte_id" value="{{ empresa.porte_id }}">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="porte_desc" class="form-label">Descrição do Porte</label>
+                    <input type="text" class="form-control" id="porte_desc" name="porte_desc" value="{{ empresa.porte_desc }}">
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label for="natureza_id" class="form-label">Natureza ID</label>
+                    <input type="text" class="form-control" id="natureza_id" name="natureza_id" value="{{ empresa.natureza_id }}">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="natureza_desc" class="form-label">Descrição da Natureza</label>
+                    <input type="text" class="form-control" id="natureza_desc" name="natureza_desc" value="{{ empresa.natureza_desc }}">
+                </div>
+            </div>
+            <h5 class="mb-3 mt-4">Qualificação</h5>
+            <div class="row">
+                <div class="col-md-2 mb-3">
+                    <label for="qualificacao_id" class="form-label">Qualificação ID</label>
+                    <input type="number" class="form-control" id="qualificacao_id" name="qualificacao_id" value="{{ empresa.qualificacao_id }}">
+                </div>
+                <div class="col-md-10 mb-3">
+                    <label for="qualificacao_desc" class="form-label">Descrição da Qualificação</label>
+                    <input type="text" class="form-control" id="qualificacao_desc" name="qualificacao_desc" value="{{ empresa.qualificacao_desc }}">
+                </div>
+            </div>
+            <h5 class="mb-3 mt-4">Estabelecimentos</h5>
+            <div class="table-responsive mb-4">
+                <table class="table table-bordered align-middle">
+                    <thead>
+                        <tr>
+                            <th>CNPJ</th>
+                            <th>Tipo</th>
+                            <th>Nome Fantasia</th>
+                            <th>Situação</th>
+                            <th>Telefone</th>
+                            <th>Email</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for est in estabelecimentos %}
+                        <tr>
+                            <td>{{ est.cnpj }}</td>
+                            <td>{{ est.tipo }}</td>
+                            <td>{{ est.nome_fantasia }}</td>
+                            <td>{{ est.situacao_cadastral }}</td>
+                            <td>{{ est.telefone1 }}</td>
+                            <td>{{ est.email }}</td>
+                            <td>
+                                <a href="/painel/estabelecimentos/{{ est.id }}/edit" class="btn btn-sm btn-info" title="Editar">✏️</a>
+                                <button type="button" class="btn btn-sm btn-danger remove-estab" data-id="{{ est.id }}" title="Remover">🗑️</button>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">Nenhum estabelecimento cadastrado.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-outline-primary btn-sm mt-2" data-bs-toggle="modal" data-bs-target="#modalAdicionarEstab">
+                    Adicionar Estabelecimento
+                </button>
+            </div>
+            <div class="mt-4 d-flex justify-content-end gap-2">
+                <button type="submit" class="btn btn-success">Salvar Alterações</button>
+                <a href="/painel/empresas" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+    <div class="card-footer">
+        <p class="text-muted">Edite os dados da empresa e gerencie seus estabelecimentos.</p>
+    </div>
+</div>
+
+<!-- Modal para adicionar estabelecimento -->
+<div class="modal fade" id="modalAdicionarEstab" tabindex="-1" aria-labelledby="modalAdicionarEstabLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="formAdicionarEstab" autocomplete="off">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalAdicionarEstabLabel">Adicionar Estabelecimento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="cnpjEstab" class="form-label">CNPJ</label>
+                        <input type="text" class="form-control" id="cnpjEstab" name="cnpj" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tipoEstab" class="form-label">Tipo</label>
+                        <select class="form-select" id="tipoEstab" name="tipo">
+                            <option value="Matriz">Matriz</option>
+                            <option value="Filial">Filial</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="nomeFantasiaEstab" class="form-label">Nome Fantasia</label>
+                        <input type="text" class="form-control" id="nomeFantasiaEstab" name="nome_fantasia">
+                    </div>
+                    <div class="mb-3">
+                        <label for="situacaoEstab" class="form-label">Situação Cadastral</label>
+                        <input type="text" class="form-control" id="situacaoEstab" name="situacao_cadastral">
+                    </div>
+                    <div class="mb-3">
+                        <label for="telefoneEstab" class="form-label">Telefone</label>
+                        <input type="text" class="form-control" id="telefoneEstab" name="telefone1">
+                    </div>
+                    <div class="mb-3">
+                        <label for="emailEstab" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="emailEstab" name="email">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnAdicionarEstab">Adicionar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.querySelectorAll('.remove-estab').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        const tr = btn.closest('tr');
+        tr.remove();
+    });
+});
+
+document.getElementById('btnAdicionarEstab').addEventListener('click', function() {
+    const cnpj = document.getElementById('cnpjEstab').value;
+    const tipo = document.getElementById('tipoEstab').value;
+    const nomeFantasia = document.getElementById('nomeFantasiaEstab').value;
+    const situacao = document.getElementById('situacaoEstab').value;
+    const telefone = document.getElementById('telefoneEstab').value;
+    const email = document.getElementById('emailEstab').value;
+
+    if (!cnpj || !nomeFantasia) {
+        alert('Preencha os campos obrigatórios!');
+        return;
+    }
+
+    const tbody = document.querySelector('.table tbody');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td>${cnpj}</td>
+        <td>${tipo}</td>
+        <td>${nomeFantasia}</td>
+        <td>${situacao}</td>
+        <td>${telefone}</td>
+        <td>${email}</td>
+        <td>
+            <a href="#" class="btn btn-sm btn-info" title="Editar">✏️</a>
+            <button type="button" class="btn btn-sm btn-danger remove-estab" title="Remover">🗑️</button>
+        </td>
+    `;
+    tbody.appendChild(tr);
+
+    tr.querySelector('.remove-estab').addEventListener('click', function() {
+        tr.remove();
+    });
+
+    var modal = bootstrap.Modal.getInstance(document.getElementById('modalAdicionarEstab'));
+    modal.hide();
+    document.getElementById('formAdicionarEstab').reset();
+});
+</script>
+{% endblock %}

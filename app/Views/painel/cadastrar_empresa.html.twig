@@ -1,0 +1,176 @@
+{% extends 'layouts/painel.html.twig' %}
+
+{% block title %}Cadastrar Empresa{% endblock %}
+{% block page_title %}Nova Empresa{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Cadastro de Empresa</h2>
+    </div>
+    <div class="card-body">
+        <form action="/painel/empresas/store" method="POST" autocomplete="off">
+            <h5 class="mb-3 mt-2">Dados Básicos</h5>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="cnpj_raiz" class="form-label">CNPJ Raiz</label>
+                    <input type="text" class="form-control" id="cnpj_raiz" name="cnpj_raiz" required maxlength="14" placeholder="Somente números">
+                </div>
+                <div class="col-md-8 mb-3">
+                    <label for="razao_social" class="form-label">Razão Social</label>
+                    <input type="text" class="form-control" id="razao_social" name="razao_social" required>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="capital_social" class="form-label">Capital Social</label>
+                    <input type="number" step="0.01" class="form-control" id="capital_social" name="capital_social">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="responsavel_federativo" class="form-label">Responsável Federativo</label>
+                    <input type="text" class="form-control" id="responsavel_federativo" name="responsavel_federativo">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="atualizado_em" class="form-label">Atualizado em</label>
+                    <input type="date" class="form-control" id="atualizado_em" name="atualizado_em">
+                </div>
+            </div>
+            <h5 class="mb-3 mt-4">Porte e Natureza</h5>
+            <div class="row">
+                <div class="col-md-2 mb-3">
+                    <label for="porte_id" class="form-label">Porte ID</label>
+                    <input type="text" class="form-control" id="porte_id" name="porte_id">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="porte_desc" class="form-label">Descrição do Porte</label>
+                    <input type="text" class="form-control" id="porte_desc" name="porte_desc">
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label for="natureza_id" class="form-label">Natureza ID</label>
+                    <input type="text" class="form-control" id="natureza_id" name="natureza_id">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="natureza_desc" class="form-label">Descrição da Natureza</label>
+                    <input type="text" class="form-control" id="natureza_desc" name="natureza_desc">
+                </div>
+            </div>
+            <h5 class="mb-3 mt-4">Qualificação</h5>
+            <div class="row">
+                <div class="col-md-2 mb-3">
+                    <label for="qualificacao_id" class="form-label">Qualificação ID</label>
+                    <input type="number" class="form-control" id="qualificacao_id" name="qualificacao_id">
+                </div>
+                <div class="col-md-10 mb-3">
+                    <label for="qualificacao_desc" class="form-label">Descrição da Qualificação</label>
+                    <input type="text" class="form-control" id="qualificacao_desc" name="qualificacao_desc">
+                </div>
+            </div>
+            <h5 class="mb-3 mt-4">Endereço do Estabelecimento Principal</h5>
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <label for="logradouro" class="form-label">Logradouro</label>
+                    <input type="text" class="form-control" id="logradouro" name="logradouro">
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label for="numero" class="form-label">Número</label>
+                    <input type="text" class="form-control" id="numero" name="numero">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="complemento" class="form-label">Complemento</label>
+                    <input type="text" class="form-control" id="complemento" name="complemento">
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label for="bairro" class="form-label">Bairro</label>
+                    <input type="text" class="form-control" id="bairro" name="bairro">
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label for="cep" class="form-label">CEP</label>
+                    <input type="text" class="form-control" id="cep" name="cep">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <label for="estado_nome" class="form-label">Estado</label>
+                    <input type="text" class="form-control" id="estado_nome" name="estado_nome">
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label for="estado_sigla" class="form-label">UF</label>
+                    <input type="text" class="form-control" id="estado_sigla" name="estado_sigla">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="cidade_nome" class="form-label">Cidade</label>
+                    <input type="text" class="form-control" id="cidade_nome" name="cidade_nome">
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label for="cidade_ibge_id" class="form-label">IBGE</label>
+                    <input type="text" class="form-control" id="cidade_ibge_id" name="cidade_ibge_id">
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label for="pais_nome" class="form-label">País</label>
+                    <input type="text" class="form-control" id="pais_nome" name="pais_nome">
+                </div>
+            </div>
+            <h5 class="mb-3 mt-4">Contatos</h5>
+            <div id="contatos-list">
+                <div class="row mb-2 contato-item">
+                    <div class="col-md-5">
+                        <input type="email" class="form-control" name="contatos[0][email]" placeholder="E-mail" required>
+                    </div>
+                    <div class="col-md-5">
+                        <input type="text" class="form-control" name="contatos[0][telefone]" placeholder="Telefone" required maxlength="20">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-center">
+                        <button type="button" class="btn btn-danger btn-sm remove-contato" title="Remover contato" style="display:none;">🗑️</button>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="add-contato">Adicionar contato</button>
+            <div class="mt-4 d-flex justify-content-end gap-2">
+                <button type="submit" class="btn btn-success">Salvar Empresa</button>
+                <a href="/painel/empresas" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+    <div class="card-footer">
+        <p class="text-muted">Preencha todos os campos conforme o cadastro da Receita Federal.</p>
+    </div>
+</div>
+
+<script>
+    let contatoIndex = 1;
+    document.getElementById('add-contato').addEventListener('click', function() {
+        const contatosList = document.getElementById('contatos-list');
+        const contatoItem = document.createElement('div');
+        contatoItem.className = 'row mb-2 contato-item';
+        contatoItem.innerHTML = `
+            <div class="col-md-5">
+                <input type="email" class="form-control" name="contatos[${contatoIndex}][email]" placeholder="E-mail" required>
+            </div>
+            <div class="col-md-5">
+                <input type="text" class="form-control" name="contatos[${contatoIndex}][telefone]" placeholder="Telefone" required maxlength="20">
+            </div>
+            <div class="col-md-2 d-flex align-items-center">
+                <button type="button" class="btn btn-danger btn-sm remove-contato" title="Remover contato">🗑️</button>
+            </div>
+        `;
+        contatosList.appendChild(contatoItem);
+        contatoIndex++;
+        updateRemoveButtons();
+    });
+
+    function updateRemoveButtons() {
+        const buttons = document.querySelectorAll('.remove-contato');
+        buttons.forEach(btn => btn.style.display = 'inline-block');
+        if (buttons.length === 1) {
+            buttons[0].style.display = 'none';
+        }
+        buttons.forEach(btn => {
+            btn.onclick = function() {
+                btn.closest('.contato-item').remove();
+                updateRemoveButtons();
+            }
+        });
+    }
+    updateRemoveButtons();
+</script>
+{% endblock %}
