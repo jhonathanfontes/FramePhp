@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Painel Superadmin{% endblock %} - FramePhp</title>
+    
+    {# CSS Global #}
+    {% include 'painel/components/painel.css.twig' %}
+    
+    {# CSS Específico da Página #}
+    {% block page_css %}{% endblock %}
+</head>
+<body>
+    <div class="wrapper">
+        {# Sidebar #}
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h3>Painel Superadmin</h3>
+            </div>
+            
+            <ul class="list-unstyled components">
+                <li {% if active_menu == 'dashboard' %}class="active"{% endif %}>
+                    <a href="{{ url('painel.dashboard') }}">Dashboard</a>
+                </li>
+                <li {% if active_menu == 'empresas' %}class="active"{% endif %}>
+                    <a href="{{ url('painel.empresas') }}">Empresas</a>
+                </li>
+                <li {% if active_menu == 'usuarios' %}class="active"{% endif %}>
+                    <a href="{{ url('painel.usuarios') }}">Usuários</a>
+                </li>
+                <li {% if active_menu == 'relatorios' %}class="active"{% endif %}>
+                    <a href="{{ url('painel.relatorios') }}">Relatórios</a>
+                </li>
+            </ul>
+        </nav>
+        
+        {# Conteúdo Principal #}
+        <div class="content">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <div class="container-fluid">
+                    <button type="button" id="sidebarCollapse" class="btn btn-info">
+                        <i class="fas fa-align-left"></i>
+                    </button>
+                    
+                    <div class="ml-auto">
+                        <a href="{{ url('painel.logout') }}" class="btn btn-outline-danger">
+                            <i class="fas fa-sign-out-alt"></i> Sair
+                        </a>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class="container-fluid">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+    
+    {# JS Global #}
+    {% include 'painel/components/painel.js.twig' %}
+    
+    {# JS Específico da Página #}
+    {% block page_js %}{% endblock %}
+</body>
+</html>

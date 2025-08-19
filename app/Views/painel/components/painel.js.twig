@@ -1,0 +1,77 @@
+<script>
+// Funções globais do painel
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle sidebar
+    const sidebarCollapse = document.getElementById('sidebarCollapse');
+    const sidebar = document.querySelector('.sidebar');
+    
+    if (sidebarCollapse) {
+        sidebarCollapse.addEventListener('click', function() {
+            sidebar.classList.toggle('active');
+        });
+    }
+    
+    // Inicialização de tooltips
+    const tooltips = document.querySelectorAll('[data-tooltip]');
+    tooltips.forEach(tooltip => {
+        new bootstrap.Tooltip(tooltip);
+    });
+    
+    // Confirmação de exclusão
+    const deleteButtons = document.querySelectorAll('.btn-delete');
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            if (!confirm('Tem certeza que deseja excluir este item?')) {
+                e.preventDefault();
+            }
+        });
+    });
+    
+    // Máscaras de input
+    const cnpjInputs = document.querySelectorAll('.cnpj-mask');
+    cnpjInputs.forEach(input => {
+        input.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/^(\d{2})(\d)/, '$1.$2');
+            value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+            value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
+            value = value.replace(/(\d{4})(\d)/, '$1-$2');
+            e.target.value = value;
+        });
+    });
+});
+
+// Função para exibir mensagens de alerta
+function showAlert(message, type = 'success') {
+    const alertContainer = document.createElement('div');
+    alertContainer.className = `alert alert-${type} alert-dismissible fade show`;
+    alertContainer.role = 'alert';
+    alertContainer.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    document.querySelector('.content').insertAdjacentElement('afterbegin', alertContainer);
+    
+    setTimeout(() => {
+        alertContainer.remove();
+    }, 5000);
+}
+
+// Função para validação de formulários
+function validateForm(form) {
+    const requiredFields = form.querySelectorAll('[required]');
+    let isValid = true;
+    
+    requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+            field.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            field.classList.remove('is-invalid');
+        }
+    });
+    
+    return isValid;
+}
+</script>

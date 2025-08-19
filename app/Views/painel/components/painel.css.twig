@@ -1,0 +1,74 @@
+<style>
+/* Estilos globais do painel */
+:root {
+    --sidebar-width: 250px;
+    --header-height: 60px;
+    --primary-color: #3498db;
+    --secondary-color: #2c3e50;
+}
+
+.wrapper {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: var(--sidebar-width);
+    background: var(--secondary-color);
+    color: #fff;
+    transition: all 0.3s;
+}
+
+.sidebar .sidebar-header {
+    padding: 20px;
+    background: var(--primary-color);
+}
+
+.sidebar ul.components {
+    padding: 20px 0;
+}
+
+.sidebar ul li a {
+    padding: 10px 20px;
+    display: block;
+    color: #fff;
+    text-decoration: none;
+}
+
+.sidebar ul li a:hover,
+.sidebar ul li.active > a {
+    background: var(--primary-color);
+}
+
+.content {
+    flex: 1;
+    padding: 20px;
+    background: #f8f9fa;
+}
+
+/* Estilos para cards do dashboard */
+.dashboard-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Estilos para tabelas */
+.table-container {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Estilos para formulários */
+.form-container {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+</style>

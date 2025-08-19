@@ -15,6 +15,7 @@ return [
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
     'key' => env('APP_KEY', 'base64:'.base64_encode(random_bytes(32))),
     'cipher' => 'AES-256-CBC',
+    'version' => env('APP_VERSION', '1.0.0'),
 
     /*
     |--------------------------------------------------------------------------

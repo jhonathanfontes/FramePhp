@@ -2,178 +2,109 @@
 
 namespace App\Controllers\Painel;
 
-use App\Controllers\Controller;
-use App\Models\Empresa;
-use App\Models\Usuario;
+use Core\Controller\BaseController;
+use App\Models\EmpresaModel;
 use Core\Http\Request;
-use Core\Http\Response;
-use Core\Auth\Auth;
 
-class EmpresasController extends Controller
+class EmpresasController extends BaseController
 {
+    private $empresaModel;
+
     public function __construct()
     {
-        $this->middleware('auth:painel');
+        $this->empresaModel = new EmpresaModel();
     }
 
-    public function index(Request $request): Response
+    public function index()
     {
-        $busca = $request->get('busca');
-        $status = $request->get('status');
-
-        $query = Empresa::query();
-
-        if ($busca) {
-            $query->where(function($q) use ($busca) {
-                $q->where('nome_fantasia', 'like', "%{$busca}%")
-                  ->orWhere('razao_social', 'like', "%{$busca}%")
-                  ->orWhere('cnpj', 'like', "%{$busca}%")
-                  ->orWhere('email', 'like', "%{$busca}%");
-            });
-        }
-
-        if ($status) {
-            $query->where('ativo', $status === 'ativo');
-        }
-
-        $empresas = $query->orderBy('nome_fantasia')->paginate(20);
-
-        return $this->view('painel.empresas.index', [
-            'empresas' => $empresas,
-            'busca' => $busca,
-            'status' => $status
+        $empresas = $this->empresaModel->orderBy('created_at', 'DESC')->get();
+        
+        return $this->render('painel/empresas/empresas.html.twig', [
+            'active_menu' => 'empresas',
+            'empresas' => $empresas
         ]);
     }
 
-    public function create(Request $request): Response
+    public function create()
     {
-        if ($request->isPost()) {
-            $dados = $request->all();
-            
-            $this->validate($dados, [
-                'nome_fantasia' => 'required|max:100',
-                'razao_social' => 'required|max:150',
-                'cnpj' => 'required|unique:empresas,cnpj',
-                'email' => 'required|email|unique:empresas,email',
-                'telefone' => 'required',
-                'endereco' => 'required',
-                'cidade' => 'required',
-                'estado' => 'required|size:2',
-                'cep' => 'required'
-            ]);
-
-            $empresa = Empresa::create($dados);
-
-            // Criar usuário admin padrão
-            $usuario = new Usuario();
-            $usuario->empresa_id = $empresa->id;
-            $usuario->nome = 'Administrador';
-            $usuario->email = $empresa->email;
-            $usuario->setSenha('123456'); // Senha padrão
-            $usuario->tipo = 'admin_empresa';
-            $usuario->status = 'ativo';
-            $usuario->save();
-
-            return $this->redirect('/painel/empresas')
-                ->with('success', 'Empresa criada com sucesso!');
-        }
-
-        return $this->view('painel.empresas.create');
+        return $this->render('painel/empresas/form.html.twig', [
+            'active_menu' => 'empresas',
+            'action' => 'criar'
+        ]);
     }
 
-    public function edit(Request $request, $id): Response
+    public function store(Request $request)
     {
-        $empresa = Empresa::find($id);
+        $data = $request->all();
         
-        if (!$empresa) {
-            return $this->redirect('/painel/empresas')
-                ->with('error', 'Empresa não encontrada');
+        // Validação
+        if (empty($data['nome']) || empty($data['cnpj'])) {
+            return $this->json([
+                'error' => 'Nome e CNPJ são obrigatórios'
+            ], 422);
         }
 
-        if ($request->isPost()) {
-            $dados = $request->all();
-            
-            $this->validate($dados, [
-                'nome_fantasia' => 'required|max:100',
-                'razao_social' => 'required|max:150',
-                'cnpj' => "required|unique:empresas,cnpj,{$id}",
-                'email' => "required|email|unique:empresas,email,{$id}",
-                'telefone' => 'required',
-                'endereco' => 'required',
-                'cidade' => 'required',
-                'estado' => 'required|size:2',
-                'cep' => 'required'
-            ]);
-
-            $empresa->update($dados);
-
-            return $this->redirect('/painel/empresas')
-                ->with('success', 'Empresa atualizada com sucesso!');
+        // Sanitização
+        $data['cnpj'] = preg_replace('/[^0-9]/', '', $data['cnpj']);
+        
+        try {
+            $this->empresaModel->create($data);
+            return $this->json(['message' => 'Empresa criada com sucesso']);
+        } catch (\Exception $e) {
+            return $this->json(['error' => 'Erro ao criar empresa'], 500);
         }
-
-        return $this->view('painel.empresas.edit', ['empresa' => $empresa]);
     }
 
-    public function show(Request $request, $id): Response
+    public function edit($id)
     {
-        $empresa = Empresa::with(['usuarios', 'produtos', 'vendas'])->find($id);
+        $empresa = $this->empresaModel->find($id);
         
         if (!$empresa) {
-            return $this->redirect('/painel/empresas')
-                ->with('error', 'Empresa não encontrada');
+            return $this->json(['error' => 'Empresa não encontrada'], 404);
         }
 
-        // Estatísticas da empresa
-        $totalVendas = $empresa->vendas()->count();
-        $totalProdutos = $empresa->produtos()->count();
-        $totalUsuarios = $empresa->usuarios()->count();
-        $receitaTotal = $empresa->vendas()->sum('total');
-
-        return $this->view('painel.empresas.show', [
+        return $this->render('painel/empresas/form.html.twig', [
+            'active_menu' => 'empresas',
             'empresa' => $empresa,
-            'totalVendas' => $totalVendas,
-            'totalProdutos' => $totalProdutos,
-            'totalUsuarios' => $totalUsuarios,
-            'receitaTotal' => $receitaTotal
+            'action' => 'editar'
         ]);
     }
 
-    public function toggleStatus(Request $request, $id): Response
+    public function update(Request $request, $id)
     {
-        $empresa = Empresa::find($id);
+        $empresa = $this->empresaModel->find($id);
         
         if (!$empresa) {
-            return $this->redirect('/painel/empresas')
-                ->with('error', 'Empresa não encontrada');
+            return $this->json(['error' => 'Empresa não encontrada'], 404);
         }
 
-        $empresa->ativo = !$empresa->ativo;
-        $empresa->save();
-
-        $status = $empresa->ativo ? 'ativada' : 'desativada';
+        $data = $request->all();
         
-        return $this->redirect('/painel/empresas')
-            ->with('success', "Empresa {$status} com sucesso!");
+        // Validação
+        if (empty($data['nome']) || empty($data['cnpj'])) {
+            return $this->json([
+                'error' => 'Nome e CNPJ são obrigatórios'
+            ], 422);
+        }
+
+        // Sanitização
+        $data['cnpj'] = preg_replace('/[^0-9]/', '', $data['cnpj']);
+        
+        try {
+            $this->empresaModel->update($id, $data);
+            return $this->json(['message' => 'Empresa atualizada com sucesso']);
+        } catch (\Exception $e) {
+            return $this->json(['error' => 'Erro ao atualizar empresa'], 500);
+        }
     }
 
-    public function delete(Request $request, $id): Response
+    public function destroy($id)
     {
-        $empresa = Empresa::find($id);
-        
-        if (!$empresa) {
-            return $this->redirect('/painel/empresas')
-                ->with('error', 'Empresa não encontrada');
+        try {
+            $this->empresaModel->delete($id);
+            return $this->json(['message' => 'Empresa excluída com sucesso']);
+        } catch (\Exception $e) {
+            return $this->json(['error' => 'Erro ao excluir empresa'], 500);
         }
-
-        // Verificar se há vendas
-        if ($empresa->vendas()->count() > 0) {
-            return $this->redirect('/painel/empresas')
-                ->with('error', 'Não é possível excluir uma empresa que possui vendas');
-        }
-
-        $empresa->delete();
-
-        return $this->redirect('/painel/empresas')
-            ->with('success', 'Empresa excluída com sucesso!');
     }
-} 
+}
