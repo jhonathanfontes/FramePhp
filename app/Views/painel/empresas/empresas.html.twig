@@ -1,0 +1,170 @@
+{% extends "layouts/painel.html.twig" %}
+
+{% block title %}Gestão de Empresas - Sistema de Vendas{% endblock %}
+{% block page_title %}Gestão de Empresas{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="/painel/empresas/empresas.css">
+
+<!-- Filtros -->
+<div class="dashboard-grid">
+    <div class="card">
+        <div class="card-title">Filtros</div>
+        <form method="GET" class="filtros-form" style="margin-top:1rem;">
+            <div>
+                <label for="status">Status</label>
+                <select name="status" id="status">
+                    <option value="">Todos os Status</option>
+                    <option value="ativo" {% if request.get('status') == 'ativo' %}selected{% endif %}>Ativas</option>
+                    <option value="inativo" {% if request.get('status') == 'inativo' %}selected{% endif %}>Inativas</option>
+                </select>
+            </div>
+            <div>
+                <label for="busca">Buscar</label>
+                <input type="text" name="busca" id="busca" value="{{ request.get('busca') }}" placeholder="Nome, CNPJ ou email">
+            </div>
+            <div class="filtros-actions">
+                <button type="submit" class="btn btn-primary">🔍 Filtrar</button>
+                <a href="/painel/empresas" class="btn btn-secondary">Limpar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Estatísticas -->
+<div class="dashboard-grid">
+    <div class="card">
+        <div class="stats">
+            <span class="stats-icon">🏢</span>
+            <div>
+                <div class="stats-value">{{ empresas.total }}</div>
+                <div class="stats-label">Total de Empresas</div>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="stats">
+            <span class="stats-icon">✅</span>
+            <div>
+                <div class="stats-value">{{ empresasAtivas }}</div>
+                <div class="stats-label">Empresas Ativas</div>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="stats">
+            <span class="stats-icon">💰</span>
+            <div>
+                <div class="stats-value">{{ totalVendas }}</div>
+                <div class="stats-label">Vendas Totais</div>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="stats">
+            <span class="stats-icon">💵</span>
+            <div>
+                <div class="stats-value">R$ {{ "%.2f"|format(receitaTotal) }}</div>
+                <div class="stats-label">Receita Total</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de Empresas -->
+<div class="card">
+    <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+        <h2 class="card-title">Empresas</h2>
+        <a href="/painel/empresas/create" class="btn btn-primary">➕ Nova Empresa</a>
+    </div>
+    {% if empresas.data %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Empresa</th>
+                        <th>CNPJ</th>
+                        <th>Contato</th>
+                        <th>Vendas</th>
+                        <th>Receita</th>
+                        <th>Status</th>
+                        <th>Cadastro</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for empresa in empresas.data %}
+                        <tr>
+                            <td>
+                                <a href="/painel/empresas/{{ empresa.id }}" class="empresa-link">
+                                    {{ empresa.nome_fantasia }}
+                                </a>
+                                <br>
+                                <small style="color:#888;">{{ empresa.razao_social }}</small>
+                            </td>
+                            <td><span style="font-size:0.95em;">{{ empresa.cnpj }}</span></td>
+                            <td>
+                                <div>{{ empresa.email }}</div>
+                                <small style="color:#888;">{{ empresa.telefone }}</small>
+                            </td>
+                            <td class="text-blue">{{ empresa.total_vendas }}</td>
+                            <td class="text-green">R$ {{ "%.2f"|format(empresa.receita_total) }}</td>
+                            <td>
+                                <span class="badge {% if empresa.ativo %}badge-success{% else %}badge-danger{% endif %}">
+                                    {{ empresa.ativo ? 'Ativa' : 'Inativa' }}
+                                </span>
+                            </td>
+                            <td><small>{{ empresa.data_cadastro|date('d/m/Y') }}</small></td>
+                            <td>
+                                <div class="acoes">
+                                    <a href="/painel/empresas/{{ empresa.id }}" class="btn btn-view" title="Visualizar"><span>👁️</span></a>
+                                    <a href="/painel/empresas/{{ empresa.id }}/edit" class="btn btn-edit" title="Editar"><span>✏️</span></a>
+                                    <button onclick="toggleStatus({{ empresa.id }})" class="btn btn-status" title="Alterar Status">
+                                        {{ empresa.ativo ? '❌' : '✅' }}
+                                    </button>
+                                    {% if empresa.total_vendas == 0 %}
+                                        <button onclick="deletarEmpresa({{ empresa.id }})" class="btn btn-delete" title="Excluir">🗑️</button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <!-- Paginação -->
+        {% if empresas.last_page > 1 %}
+            <nav class="pagination">
+                {% if empresas.current_page > 1 %}
+                    <a href="?page={{ empresas.current_page - 1 }}{% if request.get('status') %}&status={{ request.get('status') }}{% endif %}{% if request.get('busca') %}&busca={{ request.get('busca') }}{% endif %}" class="btn btn-secondary">← Anterior</a>
+                {% endif %}
+                {% for page in range(1, empresas.last_page) %}
+                    {% if page == empresas.current_page %}
+                        <span class="btn btn-primary">{{ page }}</span>
+                    {% else %}
+                        <a href="?page={{ page }}{% if request.get('status') %}&status={{ request.get('status') }}{% endif %}{% if request.get('busca') %}&busca={{ request.get('busca') }}{% endif %}" class="btn btn-secondary">{{ page }}</a>
+                    {% endif %}
+                {% endfor %}
+                {% if empresas.current_page < empresas.last_page %}
+                    <a href="?page={{ empresas.current_page + 1 }}{% if request.get('status') %}&status={{ request.get('status') }}{% endif %}{% if request.get('busca') %}&busca={{ request.get('busca') }}{% endif %}" class="btn btn-secondary">Próximo →</a>
+                {% endif %}
+            </nav>
+        {% endif %}
+    {% else %}
+        <p style="color: #888;">Nenhuma empresa encontrada</p>
+    {% endif %}
+</div>
+
+<!-- Ações em Lote -->
+<div class="dashboard-grid">
+    <div class="card">
+        <div class="card-title">Ações em Lote</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 0.7rem;">
+            <button onclick="exportarEmpresas()" class="btn btn-primary">📊 Exportar Relatório</button>
+            <button onclick="enviarEmails()" class="btn btn-primary">📧 Enviar Emails</button>
+            <button onclick="gerarBackup()" class="btn btn-primary">💾 Gerar Backup</button>
+        </div>
+    </div>
+</div>
+<script src="/painel/empresas/empresas.js"></script>
+{% endblock %}

@@ -1,0 +1,105 @@
+function toggleStatus(empresaId) {
+    if (confirm('Deseja alterar o status desta empresa?')) {
+        fetch(`/painel/empresas/${empresaId}/toggle-status`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Status alterado com sucesso!');
+                location.reload();
+            } else {
+                alert('Erro ao alterar status: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao alterar status');
+        });
+    }
+}
+
+function deletarEmpresa(empresaId) {
+    if (confirm('Tem certeza que deseja excluir esta empresa? Esta ação não pode ser desfeita.')) {
+        fetch(`/painel/empresas/${empresaId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Empresa excluída com sucesso!');
+                location.reload();
+            } else {
+                alert('Erro ao excluir empresa: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao excluir empresa');
+        });
+    }
+}
+
+function exportarEmpresas() {
+    const params = new URLSearchParams(window.location.search);
+    window.open(`/painel/empresas/exportar?${params.toString()}`, '_blank');
+}
+
+function enviarEmails() {
+    if (confirm('Deseja enviar emails para todas as empresas ativas?')) {
+        fetch('/painel/empresas/enviar-emails', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Emails enviados com sucesso!');
+            } else {
+                alert('Erro ao enviar emails: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao enviar emails');
+        });
+    }
+}
+
+function gerarBackup() {
+    if (confirm('Deseja gerar um backup completo do sistema?')) {
+        fetch('/painel/backup/gerar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Backup gerado com sucesso!');
+                if (data.download_url) {
+                    window.open(data.download_url, '_blank');
+                }
+            } else {
+                alert('Erro ao gerar backup: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao gerar backup');
+        });
+    }
+}

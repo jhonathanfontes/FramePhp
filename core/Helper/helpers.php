@@ -1,36 +1,38 @@
 <?php
 
-/**
- * Obtém o valor de uma variável de ambiente
- *
- * @param string $key Nome da variável
- * @param mixed $default Valor padrão caso a variável não exista
- * @return mixed
- */
-function env(string $key, $default = null)
-{
-    $value = $_ENV[$key] ?? $_SERVER[$key] ?? getenv($key);
-    
-    if ($value === false) {
-        return $default;
+if (!function_exists('env')) {
+    /**
+     * Obtém o valor de uma variável de ambiente
+     *
+     * @param string $key Nome da variável
+     * @param mixed $default Valor padrão caso a variável não exista
+     * @return mixed
+     */
+    function env(string $key, $default = null)
+    {
+        $value = $_ENV[$key] ?? $_SERVER[$key] ?? getenv($key);
+        
+        if ($value === false) {
+            return $default;
+        }
+        
+        switch (strtolower($value)) {
+            case 'true':
+            case '(true)':
+                return true;
+            case 'false':
+            case '(false)':
+                return false;
+            case 'empty':
+            case '(empty)':
+                return '';
+            case 'null':
+            case '(null)':
+                return null;
+        }
+        
+        return $value;
     }
-    
-    switch (strtolower($value)) {
-        case 'true':
-        case '(true)':
-            return true;
-        case 'false':
-        case '(false)':
-            return false;
-        case 'empty':
-        case '(empty)':
-            return '';
-        case 'null':
-        case '(null)':
-            return null;
-    }
-    
-    return $value;
 }
 
 /**

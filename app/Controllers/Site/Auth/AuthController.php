@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controllers\Site;
+namespace App\Controllers\Site\Auth;
 
 use Core\Controller\BaseController;
 use Core\Security\JWT;
