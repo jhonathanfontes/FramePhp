@@ -1,11 +1,11 @@
 <?php
 
-if (! function_exists('env')) {
+if (!function_exists('env')) {
     /**
-     * Gets the value of an environment variable.
+     * Obtém o valor de uma variável de ambiente
      *
-     * @param string $key
-     * @param mixed $default
+     * @param string $key Nome da variável
+     * @param mixed $default Valor padrão caso a variável não exista
      * @return mixed
      */
     function env(string $key, $default = null)

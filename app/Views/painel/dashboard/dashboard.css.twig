@@ -1,0 +1,68 @@
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stats-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    transition: box-shadow 0.2s;
+}
+
+.stats-card:hover {
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+}
+
+.stats-card .icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.85;
+}
+
+.stats-card .number {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.stats-card h3 {
+    font-size: 1rem;
+    opacity: 0.9;
+    margin-bottom: 0.5rem;
+}
+
+.card {
+    margin-bottom: 2rem;
+}
+
+.card-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+@media (max-width: 700px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    .stats-card {
+        padding: 1rem;
+    }
+    .stats-card .number {
+        font-size: 1.3rem;
+    }
+    .card-title {
+        font-size: 1rem;
+    }
+}

@@ -1,0 +1,235 @@
+{% extends "layouts/painel.html.twig" %}
+
+{% block title %}Dashboard - Sistema de Vendas{% endblock %}
+{% block page_title %}Dashboard Geral{% endblock %}
+
+{% block content %}
+    <style>
+        body { background: #f6f8fa; }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            padding: 1.5rem;
+            transition: box-shadow 0.2s;
+        }
+        .card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.10); }
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        .stats {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .stats-icon {
+            font-size: 2.5rem;
+            color: #007bff;
+            background: #e9f5ff;
+            border-radius: 50%;
+            padding: 0.5rem;
+        }
+        .stats-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #222;
+        }
+        .stats-label {
+            font-size: 1rem;
+            color: #666;
+        }
+        .btn {
+            background: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 0.7rem 1.2rem;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.2s;
+        }
+        .btn:hover { background: #0056b3; }
+        .table-responsive { overflow-x: auto; }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            font-size: 0.98rem;
+        }
+        .table th, .table td {
+            padding: 0.7rem;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+        }
+        .badge {
+            padding: 0.3em 0.8em;
+            border-radius: 12px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        .badge-success { background: #d4edda; color: #155724; }
+        .badge-danger { background: #f8d7da; color: #721c24; }
+        .badge-info { background: #d1ecf1; color: #0c5460; }
+        .badge-warning { background: #fff3cd; color: #856404; }
+        @media (max-width: 700px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .card { padding: 1rem; }
+            .stats-value { font-size: 1.5rem; }
+        }
+    </style>
+
+    <div class="dashboard-grid">
+        <div class="card">
+            <div class="stats">
+                <span class="stats-icon">🏢</span>
+                <div>
+                    <div class="stats-value">{{ totalEmpresas }}</div>
+                    <div class="stats-label">Empresas Ativas</div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="stats">
+                <span class="stats-icon">👥</span>
+                <div>
+                    <div class="stats-value">{{ totalUsuarios }}</div>
+                    <div class="stats-label">Usuários</div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="stats">
+                <span class="stats-icon">💰</span>
+                <div>
+                    <div class="stats-value">{{ totalVendas }}</div>
+                    <div class="stats-label">Vendas Totais</div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="stats">
+                <span class="stats-icon">💵</span>
+                <div>
+                    <div class="stats-value">R$ {{ "%.2f"|format(receitaTotal) }}</div>
+                    <div class="stats-label">Receita Total</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="card">
+            <div class="card-title">Empresas Mais Ativas</div>
+            {% if empresasAtivas %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Empresa</th>
+                                <th>Vendas</th>
+                                <th>Receita</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for empresa in empresasAtivas %}
+                            <tr>
+                                <td>{{ empresa.nome_fantasia }}</td>
+                                <td>{{ empresa.total_vendas }}</td>
+                                <td>R$ {{ "%.2f"|format(empresa.receita_total) }}</td>
+                                <td>
+                                    <span class="badge {% if empresa.ativo %}badge-success{% else %}badge-danger{% endif %}">
+                                        {{ empresa.ativo ? 'Ativa' : 'Inativa' }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p style="color: #888;">Nenhuma empresa encontrada</p>
+            {% endif %}
+        </div>
+        <div class="card">
+            <div class="card-title">Vendas Recentes</div>
+            {% if vendasRecentes %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Empresa</th>
+                                <th>Pedido</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for venda in vendasRecentes %}
+                            <tr>
+                                <td>{{ venda.empresa.nome_fantasia }}</td>
+                                <td>#{{ venda.numero_pedido }}</td>
+                                <td>R$ {{ "%.2f"|format(venda.total) }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if venda.status == 'pendente' %}badge-warning{% endif %}
+                                        {% if venda.status == 'aprovado' %}badge-info{% endif %}
+                                        {% if venda.status == 'entregue' %}badge-success{% endif %}
+                                        {% if venda.status == 'cancelado' %}badge-danger{% endif %}
+                                    ">
+                                        {{ venda.status|title }}
+                                    </span>
+                                </td>
+                                <td>{{ venda.data_venda|date('d/m/Y H:i') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p style="color: #888;">Nenhuma venda encontrada</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="card">
+            <div class="card-title">Ações Rápidas</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.7rem;">
+                <a href="/painel/empresas/create" class="btn">➕ Nova Empresa</a>
+                <a href="/painel/usuarios/create" class="btn">👥 Novo Usuário</a>
+                <a href="/painel/relatorios" class="btn">📈 Relatórios</a>
+                <a href="/painel/backup" class="btn">💾 Backup</a>
+                <a href="/painel/configuracoes" class="btn">⚙️ Configurações</a>
+                <a href="/painel/logs" class="btn">📋 Logs</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-title">Alertas do Sistema</div>
+            {% if alertas %}
+                {% for alerta in alertas %}
+                    <div style="margin-bottom: 1rem;">
+                        <span class="badge badge-warning">{{ alerta.titulo }}</span>
+                        <span>{{ alerta.mensagem }}</span>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p style="color: #888;">Nenhum alerta no momento</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

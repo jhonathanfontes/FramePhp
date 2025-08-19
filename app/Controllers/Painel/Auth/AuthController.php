@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controllers\Auth;
+namespace App\Controllers\Painel\Auth;
 
 use App\Models\Usuario;
 use App\Models\Empresa;

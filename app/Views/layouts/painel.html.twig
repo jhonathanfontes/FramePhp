@@ -4,27 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Painel Geral - Sistema de Vendas{% endblock %}</title>
-    
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
             color: #333;
             background-color: #f8f9fa;
         }
-        
-        /* Layout */
         .painel-layout {
             display: flex;
             min-height: 100vh;
         }
-        
         /* Sidebar */
         .sidebar {
             width: 280px;
@@ -34,33 +29,29 @@
             position: fixed;
             height: 100vh;
             overflow-y: auto;
+            z-index: 1000;
+            transition: transform 0.3s;
         }
-        
         .sidebar-header {
             padding: 1rem 1.5rem;
             border-bottom: 1px solid rgba(255,255,255,0.1);
             margin-bottom: 1rem;
         }
-        
         .sidebar-header h2 {
             font-size: 1.3rem;
             margin-bottom: 0.5rem;
             color: #00d4ff;
         }
-        
         .sidebar-header p {
             font-size: 0.9rem;
             opacity: 0.8;
         }
-        
         .nav-menu {
             list-style: none;
         }
-        
         .nav-item {
             margin-bottom: 0.5rem;
         }
-        
         .nav-link {
             display: flex;
             align-items: center;
@@ -70,29 +61,22 @@
             transition: all 0.3s;
             border-left: 3px solid transparent;
         }
-        
-        .nav-link:hover {
-            background-color: rgba(255,255,255,0.1);
-            border-left-color: #00d4ff;
-        }
-        
+        .nav-link:hover,
         .nav-link.active {
             background-color: rgba(255,255,255,0.1);
             border-left-color: #00d4ff;
         }
-        
         .nav-icon {
             margin-right: 1rem;
             font-size: 1.2rem;
         }
-        
         /* Main Content */
         .main-content {
             flex: 1;
             margin-left: 280px;
             padding: 2rem;
+            transition: margin-left 0.3s;
         }
-        
         .header {
             background: white;
             padding: 1.5rem 2rem;
@@ -102,18 +86,15 @@
             justify-content: space-between;
             align-items: center;
         }
-        
         .header h1 {
             color: #1a1a2e;
             font-size: 2rem;
         }
-        
         .user-menu {
             display: flex;
             align-items: center;
             gap: 1rem;
         }
-        
         .btn {
             padding: 0.5rem 1rem;
             border: none;
@@ -123,34 +104,27 @@
             display: inline-block;
             transition: all 0.3s;
         }
-        
         .btn-primary {
             background-color: #00d4ff;
             color: white;
         }
-        
         .btn-primary:hover {
             background-color: #0099cc;
         }
-        
         .btn-danger {
             background-color: #e74c3c;
             color: white;
         }
-        
         .btn-danger:hover {
             background-color: #c0392b;
         }
-        
         .btn-success {
             background-color: #27ae60;
             color: white;
         }
-        
         .btn-success:hover {
             background-color: #229954;
         }
-        
         /* Cards */
         .card {
             background: white;
@@ -159,59 +133,95 @@
             padding: 2rem;
             margin-bottom: 2rem;
         }
-        
         .card-header {
             border-bottom: 2px solid #f0f0f0;
             padding-bottom: 1rem;
             margin-bottom: 1.5rem;
         }
-        
         .card-title {
             font-size: 1.5rem;
             color: #1a1a2e;
             margin: 0;
         }
-        
         /* Grid System */
         .grid {
             display: grid;
             gap: 1.5rem;
         }
-        
         .grid-2 { grid-template-columns: repeat(2, 1fr); }
         .grid-3 { grid-template-columns: repeat(3, 1fr); }
         .grid-4 { grid-template-columns: repeat(4, 1fr); }
-        
+        @media (max-width: 1024px) {
+            .main-content {
+                padding: 1rem;
+            }
+            .header {
+                padding: 1rem;
+            }
+        }
         @media (max-width: 768px) {
             .grid-2, .grid-3, .grid-4 {
                 grid-template-columns: 1fr;
             }
+            .sidebar {
+                transform: translateX(-100%);
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100vh;
+                width: 220px;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .header {
+                padding: 1rem;
+                margin: -1rem -1rem 1rem -1rem;
+            }
+            .menu-toggle {
+                display: inline-block;
+                background: none;
+                border: none;
+                font-size: 2rem;
+                color: #1a1a2e;
+                margin-right: 1rem;
+                cursor: pointer;
+            }
         }
-        
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 0.5rem;
+            }
+            .header h1 {
+                font-size: 1.2rem;
+            }
+            .user-menu span {
+                display: none;
+            }
+        }
         /* Tables */
         .table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 1rem;
         }
-        
         .table th,
         .table td {
             padding: 1rem;
             text-align: left;
             border-bottom: 1px solid #eee;
         }
-        
         .table th {
             background-color: #f8f9fa;
             font-weight: 600;
             color: #1a1a2e;
         }
-        
         .table tr:hover {
             background-color: #f8f9fa;
         }
-        
         /* Status Badges */
         .badge {
             padding: 0.4rem 1rem;
@@ -219,32 +229,27 @@
             font-size: 0.85rem;
             font-weight: 500;
         }
-        
         .badge-success { background: #d4edda; color: #155724; }
         .badge-warning { background: #fff3cd; color: #856404; }
         .badge-danger { background: #f8d7da; color: #721c24; }
         .badge-info { background: #d1ecf1; color: #0c5460; }
         .badge-primary { background: #cce5ff; color: #004085; }
-        
         /* Messages */
         .alert {
             padding: 1rem 1.5rem;
             margin: 1rem 0;
             border-radius: 10px;
         }
-        
         .alert-success {
             background-color: #d4edda;
             color: #155724;
             border: 1px solid #c3e6cb;
         }
-        
         .alert-error {
             background-color: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
-        
         /* Stats Cards */
         .stats-card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -253,55 +258,30 @@
             padding: 2rem;
             text-align: center;
         }
-        
         .stats-card h3 {
             font-size: 0.9rem;
             opacity: 0.9;
             margin-bottom: 0.5rem;
         }
-        
         .stats-card .number {
             font-size: 2.5rem;
             font-weight: bold;
             margin-bottom: 0.5rem;
         }
-        
         .stats-card .icon {
             font-size: 3rem;
             opacity: 0.8;
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-                transition: transform 0.3s;
-            }
-            
-            .sidebar.open {
-                transform: translateX(0);
-            }
-            
-            .main-content {
-                margin-left: 0;
-            }
-            
-            .header {
-                padding: 1rem;
-                margin: -2rem -2rem 2rem -2rem;
-            }
         }
     </style>
 </head>
 <body>
     <div class="painel-layout">
         <!-- Sidebar -->
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <h2>🏢 Painel Geral</h2>
                 <p>Sistema de Vendas Multiempresa</p>
             </div>
-            
             <nav>
                 <ul class="nav-menu">
                     <li class="nav-item">
@@ -349,47 +329,55 @@
                 </ul>
             </nav>
         </aside>
-
         <!-- Main Content -->
         <main class="main-content">
             <!-- Header -->
             <header class="header">
+                <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Abrir menu" style="display:none;">
+                    ☰
+                </button>
                 <div>
                     <h1>{% block page_title %}Painel Geral{% endblock %}</h1>
                     <p style="color: #666; margin: 0;">Administrador: {{ auth.user().nome }}</p>
                 </div>
-                
                 <div class="user-menu">
                     <span style="color: #1a1a2e; font-weight: 500;">Sistema de Vendas</span>
                     <a href="/painel/configuracoes" class="btn btn-primary">⚙️</a>
                     <a href="/painel/logout" class="btn btn-danger">Sair</a>
                 </div>
             </header>
-
             <!-- Messages -->
             {% if session.has('success') %}
                 <div class="alert alert-success">
                     {{ session.get('success') }}
                 </div>
             {% endif %}
-            
             {% if session.has('error') %}
                 <div class="alert alert-error">
                     {{ session.get('error') }}
                 </div>
             {% endif %}
-
             <!-- Page Content -->
             {% block content %}{% endblock %}
         </main>
     </div>
-
     <script>
         // Mobile menu toggle
         function toggleSidebar() {
-            document.querySelector('.sidebar').classList.toggle('open');
+            document.getElementById('sidebar').classList.toggle('open');
         }
-        
+        // Exibe botão do menu no mobile
+        function showMenuToggle() {
+            if(window.innerWidth <= 768){
+                document.querySelector('.menu-toggle').style.display = 'inline-block';
+            } else {
+                document.querySelector('.menu-toggle').style.display = 'none';
+                document.getElementById('sidebar').classList.remove('open');
+            }
+        }
+        window.addEventListener('resize', showMenuToggle);
+        window.addEventListener('DOMContentLoaded', showMenuToggle);
+
         // Auto-hide alerts after 5 seconds
         setTimeout(function() {
             const alerts = document.querySelectorAll('.alert');
@@ -399,4 +387,4 @@
         }, 5000);
     </script>
 </body>
-</html> 
+</html>
