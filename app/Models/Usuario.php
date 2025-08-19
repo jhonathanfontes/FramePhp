@@ -3,12 +3,11 @@
 namespace App\Models;
 
 use Core\Database\Model;
-use Core\Auth\Authenticatable;
 
-class Usuario extends Model implements Authenticatable
+class Usuario extends Model
 {
-    protected $table = 'usuarios';
-    protected $fillable = [
+    protected string $table = 'usuarios';
+    protected array $fillable = [
         'empresa_id',
         'nome',
         'email',
@@ -17,15 +16,7 @@ class Usuario extends Model implements Authenticatable
         'status'
     ];
 
-    protected $hidden = ['senha'];
-
-    protected $casts = [
-        'ultimo_acesso' => 'datetime',
-        'data_cadastro' => 'datetime',
-        'data_atualizacao' => 'datetime'
-    ];
-
-    // Relacionamentos
+     // Relacionamentos
     public function empresa()
     {
         return $this->belongsTo(Empresa::class);

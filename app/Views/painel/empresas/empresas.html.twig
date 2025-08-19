@@ -1,170 +1,201 @@
 {% extends "layouts/painel.html.twig" %}
 
-{% block title %}Gestão de Empresas - Sistema de Vendas{% endblock %}
-{% block page_title %}Gestão de Empresas{% endblock %}
+{% block title %}Gestão de Empresas - Sistema de Vendas
+{% endblock %}
+{% block page_title %}Gestão de Empresas
+{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="/painel/empresas/empresas.css">
+	<!-- Filtros e Busca -->
+	<div class="card">
+		<div class="card-header">
+			<h2 class="card-title">Filtros</h2>
+		</div>
+		<form method="GET" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: end;">
+			<div>
+				<label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Status</label>
+				<select name="status" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px; min-width: 150px;">
+					<option value="">Todos os Status</option>
+					<option value="ativo" {% if request.get('status') == 'ativo' %} selected {% endif %}>Ativas</option>
+					<option value="inativo" {% if request.get('status') == 'inativo' %} selected {% endif %}>Inativas</option>
+				</select>
+			</div>
+			<div>
+				<label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Buscar</label>
+				<input type="text" name="busca" value="{{ request.get('busca') }}" placeholder="Nome, CNPJ ou email" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px; min-width: 200px;">
+			</div>
+			<div>
+				<button type="submit" class="btn btn-primary">🔍 Filtrar</button>
+				<a href="/painel/empresas" class="btn" style="background: #6c757d; color: white; margin-left: 0.5rem;">Limpar</a>
+			</div>
+		</form>
+	</div>
 
-<!-- Filtros -->
-<div class="dashboard-grid">
-    <div class="card">
-        <div class="card-title">Filtros</div>
-        <form method="GET" class="filtros-form" style="margin-top:1rem;">
-            <div>
-                <label for="status">Status</label>
-                <select name="status" id="status">
-                    <option value="">Todos os Status</option>
-                    <option value="ativo" {% if request.get('status') == 'ativo' %}selected{% endif %}>Ativas</option>
-                    <option value="inativo" {% if request.get('status') == 'inativo' %}selected{% endif %}>Inativas</option>
-                </select>
-            </div>
-            <div>
-                <label for="busca">Buscar</label>
-                <input type="text" name="busca" id="busca" value="{{ request.get('busca') }}" placeholder="Nome, CNPJ ou email">
-            </div>
-            <div class="filtros-actions">
-                <button type="submit" class="btn btn-primary">🔍 Filtrar</button>
-                <a href="/painel/empresas" class="btn btn-secondary">Limpar</a>
-            </div>
-        </form>
-    </div>
-</div>
+	<!-- Estatísticas Rápidas -->
+	<div class="grid grid-4">
+		<div class="card">
+			<div style="text-align: center;">
+				<span style="font-size: 2rem;">🏢</span>
+				<h3 style="color: #666; font-size: 0.9rem; margin-bottom: 0.5rem;">Total de Empresas</h3>
+				<p style="font-size: 2rem; font-weight: bold; color: #00d4ff; margin: 0;">{{ empresas.total }}</p>
+			</div>
+		</div>
+		<div class="card">
+			<div style="text-align: center;">
+				<span style="font-size: 2rem;">✅</span>
+				<h3 style="color: #666; font-size: 0.9rem; margin-bottom: 0.5rem;">Empresas Ativas</h3>
+				<p style="font-size: 2rem; font-weight: bold; color: #27ae60; margin: 0;">{{ empresasAtivas }}</p>
+			</div>
+		</div>
+		<div class="card">
+			<div style="text-align: center;">
+				<span style="font-size: 2rem;">📈</span>
+				<h3 style="color: #666; font-size: 0.9rem; margin-bottom: 0.5rem;">Vendas Totais</h3>
+				<p style="font-size: 2rem; font-weight: bold; color: #e74c3c; margin: 0;">{{ totalVendas }}</p>
+			</div>
+		</div>
+		<div class="card">
+			<div style="text-align: center;">
+				<span style="font-size: 2rem;">💰</span>
+				<h3 style="color: #666; font-size: 0.9rem; margin-bottom: 0.5rem;">Receita Total</h3>
+				<p style="font-size: 2rem; font-weight: bold; color: #f39c12; margin: 0;">R$
+					{{ "%.2f"|format(receitaTotal) }}</p>
+			</div>
+		</div>
+	</div>
 
-<!-- Estatísticas -->
-<div class="dashboard-grid">
-    <div class="card">
-        <div class="stats">
-            <span class="stats-icon">🏢</span>
-            <div>
-                <div class="stats-value">{{ empresas.total }}</div>
-                <div class="stats-label">Total de Empresas</div>
-            </div>
-        </div>
-    </div>
-    <div class="card">
-        <div class="stats">
-            <span class="stats-icon">✅</span>
-            <div>
-                <div class="stats-value">{{ empresasAtivas }}</div>
-                <div class="stats-label">Empresas Ativas</div>
-            </div>
-        </div>
-    </div>
-    <div class="card">
-        <div class="stats">
-            <span class="stats-icon">💰</span>
-            <div>
-                <div class="stats-value">{{ totalVendas }}</div>
-                <div class="stats-label">Vendas Totais</div>
-            </div>
-        </div>
-    </div>
-    <div class="card">
-        <div class="stats">
-            <span class="stats-icon">💵</span>
-            <div>
-                <div class="stats-value">R$ {{ "%.2f"|format(receitaTotal) }}</div>
-                <div class="stats-label">Receita Total</div>
-            </div>
-        </div>
-    </div>
-</div>
+	<!-- Lista de Empresas -->
+	<div class="card">
+		<div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+			<h2 class="card-title">Empresas</h2>
+			<a href="/painel/empresas/create" class="btn btn-primary">➕ Nova Empresa</a>
+		</div>
+		<!-- Tabela de empresas -->
+			
+				{% if empresasTableHtml is defined %}
+					{{ empresasTableHtml | raw }}
+				{% else %}
+					<div class="notification is-warning">
+						A tabela de produtos não foi gerada ou não há dados.
+					</div>
+				{% endif %}
+	
+	</div>
 
-<!-- Lista de Empresas -->
-<div class="card">
-    <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
-        <h2 class="card-title">Empresas</h2>
-        <a href="/painel/empresas/create" class="btn btn-primary">➕ Nova Empresa</a>
-    </div>
-    {% if empresas.data %}
-        <div class="table-responsive">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Empresa</th>
-                        <th>CNPJ</th>
-                        <th>Contato</th>
-                        <th>Vendas</th>
-                        <th>Receita</th>
-                        <th>Status</th>
-                        <th>Cadastro</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for empresa in empresas.data %}
-                        <tr>
-                            <td>
-                                <a href="/painel/empresas/{{ empresa.id }}" class="empresa-link">
-                                    {{ empresa.nome_fantasia }}
-                                </a>
-                                <br>
-                                <small style="color:#888;">{{ empresa.razao_social }}</small>
-                            </td>
-                            <td><span style="font-size:0.95em;">{{ empresa.cnpj }}</span></td>
-                            <td>
-                                <div>{{ empresa.email }}</div>
-                                <small style="color:#888;">{{ empresa.telefone }}</small>
-                            </td>
-                            <td class="text-blue">{{ empresa.total_vendas }}</td>
-                            <td class="text-green">R$ {{ "%.2f"|format(empresa.receita_total) }}</td>
-                            <td>
-                                <span class="badge {% if empresa.ativo %}badge-success{% else %}badge-danger{% endif %}">
-                                    {{ empresa.ativo ? 'Ativa' : 'Inativa' }}
-                                </span>
-                            </td>
-                            <td><small>{{ empresa.data_cadastro|date('d/m/Y') }}</small></td>
-                            <td>
-                                <div class="acoes">
-                                    <a href="/painel/empresas/{{ empresa.id }}" class="btn btn-view" title="Visualizar"><span>👁️</span></a>
-                                    <a href="/painel/empresas/{{ empresa.id }}/edit" class="btn btn-edit" title="Editar"><span>✏️</span></a>
-                                    <button onclick="toggleStatus({{ empresa.id }})" class="btn btn-status" title="Alterar Status">
-                                        {{ empresa.ativo ? '❌' : '✅' }}
-                                    </button>
-                                    {% if empresa.total_vendas == 0 %}
-                                        <button onclick="deletarEmpresa({{ empresa.id }})" class="btn btn-delete" title="Excluir">🗑️</button>
-                                    {% endif %}
-                                </div>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <!-- Paginação -->
-        {% if empresas.last_page > 1 %}
-            <nav class="pagination">
-                {% if empresas.current_page > 1 %}
-                    <a href="?page={{ empresas.current_page - 1 }}{% if request.get('status') %}&status={{ request.get('status') }}{% endif %}{% if request.get('busca') %}&busca={{ request.get('busca') }}{% endif %}" class="btn btn-secondary">← Anterior</a>
-                {% endif %}
-                {% for page in range(1, empresas.last_page) %}
-                    {% if page == empresas.current_page %}
-                        <span class="btn btn-primary">{{ page }}</span>
-                    {% else %}
-                        <a href="?page={{ page }}{% if request.get('status') %}&status={{ request.get('status') }}{% endif %}{% if request.get('busca') %}&busca={{ request.get('busca') }}{% endif %}" class="btn btn-secondary">{{ page }}</a>
-                    {% endif %}
-                {% endfor %}
-                {% if empresas.current_page < empresas.last_page %}
-                    <a href="?page={{ empresas.current_page + 1 }}{% if request.get('status') %}&status={{ request.get('status') }}{% endif %}{% if request.get('busca') %}&busca={{ request.get('busca') }}{% endif %}" class="btn btn-secondary">Próximo →</a>
-                {% endif %}
-            </nav>
-        {% endif %}
-    {% else %}
-        <p style="color: #888;">Nenhuma empresa encontrada</p>
-    {% endif %}
-</div>
+	<!-- Ações em Lote -->
+	<div class="card">
+		<div class="card-header">
+			<h2 class="card-title">Ações em Lote</h2>
+		</div>
+		<div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+			<button onclick="exportarEmpresas()" class="btn btn-primary">📊 Exportar Relatório</button>
+			<button onclick="enviarEmails()" class="btn btn-primary">📧 Enviar Emails</button>
+			<button onclick="gerarBackup()" class="btn btn-primary">💾 Gerar Backup</button>
+		</div>
+	</div>
 
-<!-- Ações em Lote -->
-<div class="dashboard-grid">
-    <div class="card">
-        <div class="card-title">Ações em Lote</div>
-        <div style="display: flex; flex-wrap: wrap; gap: 0.7rem;">
-            <button onclick="exportarEmpresas()" class="btn btn-primary">📊 Exportar Relatório</button>
-            <button onclick="enviarEmails()" class="btn btn-primary">📧 Enviar Emails</button>
-            <button onclick="gerarBackup()" class="btn btn-primary">💾 Gerar Backup</button>
-        </div>
-    </div>
-</div>
-<script src="/painel/empresas/empresas.js"></script>
+	 <script>
+	        function toggleStatus(empresaId) {
+	            if (confirm('Deseja alterar o status desta empresa?')) {
+	                fetch(`/painel/empresas/${empresaId}/toggle-status`, {
+	                    method: 'POST',
+	                    headers: {
+	                        'Content-Type': 'application/json',
+	                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+	                    }
+	                })
+	                .then(response => response.json())
+	                .then(data => {
+	                    if (data.success) {
+	                        alert('Status alterado com sucesso!');
+	                        location.reload();
+	                    } else {
+	                        alert('Erro ao alterar status: ' + data.message);
+	                    }
+	                })
+	                .catch(error => {
+	                    console.error('Erro:', error);
+	                    alert('Erro ao alterar status');
+	                });
+	            }
+	        }
+	
+	        function deletarEmpresa(empresaId) {
+	            if (confirm('Tem certeza que deseja excluir esta empresa? Esta ação não pode ser desfeita.')) {
+	                fetch(`/painel/empresas/${empresaId}`, {
+	                    method: 'DELETE',
+	                    headers: {
+	                        'Content-Type': 'application/json',
+	                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+	                    }
+	                })
+	                .then(response => response.json())
+	                .then(data => {
+	                    if (data.success) {
+	                        alert('Empresa excluída com sucesso!');
+	                        location.reload();
+	                    } else {
+	                        alert('Erro ao excluir empresa: ' + data.message);
+	                    }
+	                })
+	                .catch(error => {
+	                    console.error('Erro:', error);
+	                    alert('Erro ao excluir empresa');
+	                });
+	            }
+	        }
+	
+	        function exportarEmpresas() {
+	            const params = new URLSearchParams(window.location.search);
+	            window.open(`/painel/empresas/exportar?${params.toString()}`, '_blank');
+	        }
+	
+	        function enviarEmails() {
+	            if (confirm('Deseja enviar emails para todas as empresas ativas?')) {
+	                fetch('/painel/empresas/enviar-emails', {
+	                    method: 'POST',
+	                    headers: {
+	                        'Content-Type': 'application/json',
+	                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+	                    }
+	                })
+	                .then(response => response.json())
+	                .then(data => {
+	                    if (data.success) {
+	                        alert('Emails enviados com sucesso!');
+	                    } else {
+	                        alert('Erro ao enviar emails: ' + data.message);
+	                    }
+	                })
+	                .catch(error => {
+	                    console.error('Erro:', error);
+	                    alert('Erro ao enviar emails');
+	                });
+	            }
+	        }
+	
+	        function gerarBackup() {
+	            if (confirm('Deseja gerar backup dos dados das empresas?')) {
+	                fetch('/painel/empresas/gerar-backup', {
+	                    method: 'POST',
+	                    headers: {
+	                        'Content-Type': 'application/json',
+	                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+	                    }
+	                })
+	                .then(response => response.json())
+	                .then(data => {
+	                    if (data.success) {
+	                        alert('Backup gerado com sucesso!');
+	                    } else {
+	                        alert('Erro ao gerar backup: ' + data.message);
+	                    }
+	                })
+	                .catch(error => {
+	                    console.error('Erro:', error);
+	                    alert('Erro ao gerar backup');
+	                });
+	            }
+	        }
+	    </script>
 {% endblock %}

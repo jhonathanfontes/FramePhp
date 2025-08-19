@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Models;
@@ -7,20 +6,15 @@ use Core\Database\Model;
 
 class EmpresaModel extends Model
 {
-    protected $table = 'empresas';
+    protected string $table = 'empresas';
     
-    protected $fillable = [
+    protected array $fillable = [
         'nome',
         'cnpj',
         'status',
         'created_at',
         'updated_at'
     ];
-
-    public function usuarios()
-    {
-        return $this->hasMany(Usuario::class, 'empresa_id');
-    }
 
     public function beforeCreate(array &$data)
     {

@@ -105,13 +105,14 @@ class BaseController extends Controller
     protected function render(string $view, array $data = []): string
     {
         $twig = TwigManager::getInstance();
-        
-        // Adiciona alertas automaticamente
-        $alert = $this->alertManager->checkAlert();
+
+        // Inicializa AlertManager localmente para evitar erro de acesso antes da inicialização
+        $alertManager = $this->alertManager ?? new AlertManager();
+        $alert = $alertManager->checkAlert();
         if ($alert) {
             $data['alert'] = $alert;
         }
-        
+
         return $twig->render($view, $data);
     }
 

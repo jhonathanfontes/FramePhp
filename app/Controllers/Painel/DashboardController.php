@@ -19,11 +19,11 @@ class DashboardController extends BaseController
 
     public function index()
     {
-        $totalEmpresas = $this->empresaModel->count();
-        $empresasAtivas = $this->empresaModel->where('status', 'ativo')->count();
-        $totalUsuarios = $this->usuarioModel->count();
+        $totalEmpresas  = 0;
+        $empresasAtivas = 0;
+        $totalUsuarios  = 0;
         
-        return $this->render('painel/dashboard/dashboard.html.twig', [
+        return $this->render('painel/dashboard', [
             'active_menu' => 'dashboard',
             'total_empresas' => $totalEmpresas,
             'empresas_ativas' => $empresasAtivas,

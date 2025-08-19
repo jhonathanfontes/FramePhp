@@ -18,7 +18,7 @@ $router->group([
 //    'middleware' => ['auth', 'permission:painel'] // Usa o alias 'permission' com o parâmetro 'painel'
 ], function ($router) {
     // $router->get('/', $router->redirect('dashboard'));
-    $router->get('/dashboard', [PainelDashboardController::class, 'dashboard'])->name('painel.dashboard');
+    $router->get('/dashboard', [PainelDashboardController::class, 'index'])->name('painel.dashboard');
     $router->get('/produtos', [PainelProdutoController::class, 'index'])->name('painel.produtos');
     $router->get('/empresas', [PainelEmpresasController::class, 'index'])->name('painel.empresas');
     $router->get('/usuarios', [PainelUsuariosController::class, 'index'])->name('painel.usuarios');
