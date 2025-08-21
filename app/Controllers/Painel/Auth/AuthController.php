@@ -187,4 +187,92 @@ class AuthController extends BaseController
 
         return $this->view('auth.reset-senha', ['token' => $token]);
     }
+
+    // Métodos específicos para o painel administrativo
+    public function loginPainelForm()
+    {
+        return $this->view('painel/login');
+    }
+
+    public function esqueciSenhaPainel(Request $request): Response
+    {
+        if ($request->isPost()) {
+            $email = $request->get('email');
+
+            $usuario = Usuario::where('email', $email)
+                ->where('tipo', 'admin_geral')
+                ->where('status', 'ativo')
+                ->first();
+
+            if ($usuario) {
+                // Gerar token de reset
+                $token = bin2hex(random_bytes(32));
+                $usuario->reset_token = $token;
+                $usuario->reset_token_expires = now()->addHours(1); // 1 hora para painel
+                $usuario->save();
+
+                // Enviar email (implementar)
+                // Mail::send('emails.reset-password-painel', ['usuario' => $usuario, 'token' => $token]);
+
+                return $this->redirect('/painel/auth/forgot-password')
+                    ->with('success', 'Email de recuperação enviado! Verifique sua caixa de entrada.');
+            }
+
+            return $this->redirect('/painel/auth/forgot-password')
+                ->with('error', 'Email não encontrado ou usuário sem permissão para acessar o painel');
+        }
+
+        return $this->view('painel/esqueci_senha');
+    }
+
+    public function resetSenhaPainel(Request $request, $token): Response
+    {
+        $usuario = Usuario::where('reset_token', $token)
+            ->where('reset_token_expires', '>', now())
+            ->where('tipo', 'admin_geral')
+            ->where('status', 'ativo')
+            ->first();
+
+        if (!$usuario) {
+            return $this->redirect('/painel/auth/login')
+                ->with('error', 'Token inválido, expirado ou usuário sem permissão');
+        }
+
+        if ($request->isPost()) {
+            $senha = $request->get('password');
+            $confirmarSenha = $request->get('password_confirmation');
+            
+            // Validar senha
+            if ($senha !== $confirmarSenha) {
+                return $this->redirect()->back()
+                    ->with('error', 'As senhas não coincidem');
+            }
+
+            if (strlen($senha) < 8) {
+                return $this->redirect()->back()
+                    ->with('error', 'A senha deve ter pelo menos 8 caracteres');
+            }
+
+            // Atualizar senha
+            $usuario->senha = password_hash($senha, PASSWORD_DEFAULT);
+            $usuario->reset_token = null;
+            $usuario->reset_token_expires = null;
+            $usuario->save();
+
+            return $this->redirect('/painel/auth/login')
+                ->with('success', 'Senha alterada com sucesso! Faça login com sua nova senha.');
+        }
+
+        return $this->view('painel/redefinir_senha', [
+            'token' => $token,
+            'email' => $usuario->email
+        ]);
+    }
+
+    public function logoutPainel()
+    {
+        Session::destroy();
+        return $this->redirect('/painel/auth/login')
+            ->with('success', 'Logout realizado com sucesso!');
+    }
 }

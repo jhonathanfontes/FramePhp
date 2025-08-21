@@ -1,0 +1,154 @@
+{% extends 'layouts/auth.twig' %}
+
+{% block title %}Recuperar Senha - Painel Administrativo{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center align-items-center min-vh-100">
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-warning text-white text-center py-4">
+                    <h2 class="mb-0">
+                        <i class="fas fa-key me-2"></i>
+                        Recuperar Senha
+                    </h2>
+                    <p class="mb-0 mt-2 opacity-75">Informe seu e-mail</p>
+                </div>
+                <div class="card-body p-4">
+                    {% if error %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        {{ error }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endif %}
+                    
+                    {% if success %}
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>
+                        {{ success }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endif %}
+
+                    {% if not success %}
+                    <form action="/painel/auth/forgot-password" method="POST" autocomplete="off">
+                        <div class="mb-4">
+                            <p class="text-muted">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Digite seu endereço de e-mail cadastrado no sistema. 
+                                Enviaremos um link para redefinir sua senha.
+                            </p>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="email" class="form-label">
+                                <i class="fas fa-envelope me-2"></i>E-mail
+                            </label>
+                            <input type="email" 
+                                   class="form-control form-control-lg" 
+                                   id="email" 
+                                   name="email" 
+                                   required 
+                                   placeholder="seu@email.com"
+                                   value="{{ old.email ?? '' }}">
+                        </div>
+                        
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-warning btn-lg">
+                                <i class="fas fa-paper-plane me-2"></i>
+                                Enviar Link de Recuperação
+                            </button>
+                        </div>
+                    </form>
+                    {% else %}
+                    <div class="text-center">
+                        <div class="mb-4">
+                            <i class="fas fa-envelope-open fa-3x text-success"></i>
+                        </div>
+                        <h5 class="text-success">E-mail Enviado!</h5>
+                        <p class="text-muted">
+                            Verifique sua caixa de entrada e siga as instruções para redefinir sua senha.
+                        </p>
+                        <div class="alert alert-info">
+                            <small>
+                                <i class="fas fa-clock me-1"></i>
+                                O link expira em 1 hora por questões de segurança.
+                            </small>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <hr class="my-4">
+                    
+                    <div class="text-center">
+                        <a href="/painel/auth/login" class="text-decoration-none">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            Voltar para o Login
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-3">
+                <small class="text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Sistema de Gestão Empresarial
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.card-header {
+    background: linear-gradient(135deg, #ffc107, #e0a800) !important;
+}
+
+.form-control {
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #ffc107;
+    box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #ffc107, #e0a800);
+    border: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    color: #212529;
+    font-weight: 600;
+}
+
+.btn-warning:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+    color: #212529;
+}
+
+.alert {
+    border-radius: 8px;
+    border: none;
+}
+
+.fa-3x {
+    font-size: 3em;
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+</style>
+{% endblock %} 

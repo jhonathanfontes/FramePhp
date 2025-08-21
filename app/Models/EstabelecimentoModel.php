@@ -4,21 +4,23 @@ namespace App\Models;
 
 use Core\Database\Model;
 
-class EmpresaModel extends Model
+class EstabelecimentoModel extends Model
 {
-    protected string $table = 'empresas';
+    protected string $table = 'estabelecimentos';
     
     protected array $fillable = [
+        'empresa_id',
         'nome',
         'cnpj',
-        'status',
-        'porte',
-        'estado',
-        'cidade',
         'endereco',
+        'cidade',
+        'estado',
+        'cep',
         'telefone',
         'email',
         'responsavel',
+        'status',
+        'tipo_estabelecimento',
         'data_abertura',
         'created_at',
         'updated_at'
@@ -48,7 +50,7 @@ class EmpresaModel extends Model
         return $this->query()->count();
     }
 
-    public function countAtivas(): int
+    public function countAtivos(): int
     {
         return $this->query()->where('status', 'ativo')->count();
     }
@@ -61,25 +63,17 @@ class EmpresaModel extends Model
             ->get();
     }
 
-    public function getAll(): array
-    {
-        return $this->query()
-            ->where('status', 'ativo')
-            ->orderBy('nome', 'ASC')
-            ->get();
-    }
-
     public function getPaginated(int $page = 1, int $perPage = 15, array $filters = []): array
     {
         $query = $this->query();
         
         // Aplicar filtros
-        if (!empty($filters['status'])) {
-            $query->where('status', $filters['status']);
+        if (!empty($filters['empresa_id'])) {
+            $query->where('empresa_id', $filters['empresa_id']);
         }
         
-        if (!empty($filters['porte'])) {
-            $query->where('porte', $filters['porte']);
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
         }
         
         if (!empty($filters['estado'])) {
@@ -113,18 +107,10 @@ class EmpresaModel extends Model
         ];
     }
 
-    public function getByStatus(string $status): array
+    public function getByEmpresa(int $empresaId): array
     {
         return $this->query()
-            ->where('status', $status)
-            ->orderBy('nome', 'ASC')
-            ->get();
-    }
-
-    public function getByPorte(string $porte): array
-    {
-        return $this->query()
-            ->where('porte', $porte)
+            ->where('empresa_id', $empresaId)
             ->where('status', 'ativo')
             ->orderBy('nome', 'ASC')
             ->get();
@@ -135,7 +121,6 @@ class EmpresaModel extends Model
         return $this->query()
             ->where('estado', $estado)
             ->where('status', 'ativo')
-            ->orderBy('nome', 'ASC')
             ->get();
     }
 
@@ -144,7 +129,6 @@ class EmpresaModel extends Model
         return $this->query()
             ->where('cidade', 'LIKE', '%' . $cidade . '%')
             ->where('status', 'ativo')
-            ->orderBy('nome', 'ASC')
             ->get();
     }
 
@@ -161,14 +145,12 @@ class EmpresaModel extends Model
             ->get();
     }
 
-    public function getCountByPorte(): array
+    public function getCountByEmpresa(int $empresaId): int
     {
         return $this->query()
-            ->select('porte, COUNT(*) as total')
+            ->where('empresa_id', $empresaId)
             ->where('status', 'ativo')
-            ->groupBy('porte')
-            ->orderBy('total', 'DESC')
-            ->get();
+            ->count();
     }
 
     public function getCountByEstado(): array
@@ -181,18 +163,17 @@ class EmpresaModel extends Model
             ->get();
     }
 
-    public function getCountByCidade(): array
+    public function getCountByTipo(): array
     {
         return $this->query()
-            ->select('cidade, COUNT(*) as total')
+            ->select('tipo_estabelecimento, COUNT(*) as total')
             ->where('status', 'ativo')
-            ->groupBy('cidade')
+            ->groupBy('tipo_estabelecimento')
             ->orderBy('total', 'DESC')
-            ->limit(10)
             ->get();
     }
 
-    public function getEmpresasAtivas(): array
+    public function getEstabelecimentosAtivos(): array
     {
         return $this->query()
             ->where('status', 'ativo')
@@ -200,7 +181,7 @@ class EmpresaModel extends Model
             ->get();
     }
 
-    public function getEmpresasInativas(): array
+    public function getEstabelecimentosInativos(): array
     {
         return $this->query()
             ->where('status', 'inativo')
@@ -210,8 +191,8 @@ class EmpresaModel extends Model
 
     public function ativar(int $id): bool
     {
-        $empresa = $this->find($id);
-        if ($empresa) {
+        $estabelecimento = $this->find($id);
+        if ($estabelecimento) {
             return $this->query()
                 ->where('id', $id)
                 ->update(['status' => 'ativo', 'updated_at' => date('Y-m-d H:i:s')]);
@@ -221,8 +202,8 @@ class EmpresaModel extends Model
 
     public function inativar(int $id): bool
     {
-        $empresa = $this->find($id);
-        if ($empresa) {
+        $estabelecimento = $this->find($id);
+        if ($estabelecimento) {
             return $this->query()
                 ->where('id', $id)
                 ->update(['status' => 'inativo', 'updated_at' => date('Y-m-d H:i:s')]);
@@ -230,7 +211,7 @@ class EmpresaModel extends Model
         return false;
     }
 
-    public function getEmpresasRecentes(int $dias = 30): array
+    public function getEstabelecimentosRecentes(int $dias = 30): array
     {
         $dataLimite = date('Y-m-d H:i:s', strtotime("-{$dias} days"));
         
@@ -240,122 +221,21 @@ class EmpresaModel extends Model
             ->get();
     }
 
-    public function getCrescimentoMensal(): array
-    {
-        $meses = [];
-        for ($i = 11; $i >= 0; $i--) {
-            $data = date('Y-m', strtotime("-{$i} months"));
-            $meses[$data] = 0;
-        }
-        
-        $empresas = $this->query()
-            ->select('DATE_FORMAT(created_at, "%Y-%m") as mes, COUNT(*) as total')
-            ->where('created_at', '>=', date('Y-m-d H:i:s', strtotime('-12 months')))
-            ->groupBy('mes')
-            ->orderBy('mes', 'ASC')
-            ->get();
-        
-        foreach ($empresas as $empresa) {
-            if (isset($meses[$empresa['mes']])) {
-                $meses[$empresa['mes']] = (int)$empresa['total'];
-            }
-        }
-        
-        return $meses;
-    }
-
-    public function getDistribuicaoEstados(): array
-    {
-        return $this->query()
-            ->select('estado, COUNT(*) as total')
-            ->where('status', 'ativo')
-            ->whereNotNull('estado')
-            ->groupBy('estado')
-            ->orderBy('total', 'DESC')
-            ->limit(10)
-            ->get();
-    }
-
     public function getEstatisticas(): array
     {
         $total = $this->count();
-        $ativas = $this->countAtivas();
-        $inativas = $total - $ativas;
+        $ativos = $this->countAtivos();
+        $inativos = $total - $ativos;
         
-        $porPorte = $this->getCountByPorte();
         $porEstado = $this->getCountByEstado();
-        $porCidade = $this->getCountByCidade();
+        $porTipo = $this->getCountByTipo();
         
         return [
             'total' => $total,
-            'ativas' => $ativas,
-            'inativas' => $inativas,
-            'por_porte' => $porPorte,
+            'ativos' => $ativos,
+            'inativos' => $inativos,
             'por_estado' => $porEstado,
-            'por_cidade' => $porCidade
+            'por_tipo' => $porTipo
         ];
     }
-
-    public function validarCNPJ(string $cnpj): bool
-    {
-        // Remove caracteres não numéricos
-        $cnpj = preg_replace('/[^0-9]/', '', $cnpj);
-        
-        // Verifica se tem 14 dígitos
-        if (strlen($cnpj) != 14) {
-            return false;
-        }
-        
-        // Verifica se todos os dígitos são iguais
-        if (preg_match('/^(\d)\1+$/', $cnpj)) {
-            return false;
-        }
-        
-        // Validação do primeiro dígito verificador
-        $soma = 0;
-        $peso = 5;
-        for ($i = 0; $i < 12; $i++) {
-            $soma += $cnpj[$i] * $peso;
-            $peso = $peso == 2 ? 9 : $peso - 1;
-        }
-        $resto = $soma % 11;
-        $dv1 = $resto < 2 ? 0 : 11 - $resto;
-        
-        // Validação do segundo dígito verificador
-        $soma = 0;
-        $peso = 6;
-        for ($i = 0; $i < 13; $i++) {
-            $soma += $cnpj[$i] * $peso;
-            $peso = $peso == 2 ? 9 : $peso - 1;
-        }
-        $resto = $soma % 11;
-        $dv2 = $resto < 2 ? 0 : 11 - $resto;
-        
-        return $cnpj[12] == $dv1 && $cnpj[13] == $dv2;
-    }
-
-    public function consultarReceitaFederal(string $cnpj): array
-    {
-        // Placeholder para integração com Receita Federal
-        // Em produção, implementar chamada real à API
-        return [
-            'cnpj' => $cnpj,
-            'razao_social' => 'Empresa Exemplo LTDA',
-            'nome_fantasia' => 'Empresa Exemplo',
-            'situacao' => 'ATIVA',
-            'data_abertura' => '2020-01-01',
-            'porte' => 'MÉDIA',
-            'capital_social' => '100000.00',
-            'natureza_juridica' => '213-5 - Empresário Individual',
-            'endereco' => [
-                'logradouro' => 'Rua Exemplo',
-                'numero' => '123',
-                'complemento' => 'Sala 1',
-                'bairro' => 'Centro',
-                'cidade' => 'São Paulo',
-                'estado' => 'SP',
-                'cep' => '01234-567'
-            ]
-        ];
-    }
-}
+} 

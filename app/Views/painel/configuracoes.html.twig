@@ -1,0 +1,598 @@
+{% extends 'layouts/painel.html.twig' %}
+
+{% block title %}Configurações - Painel Administrativo{% endblock %}
+{% block page_title %}Configurações do Sistema{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Menu de Navegação das Configurações -->
+    <div class="col-md-3 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-cogs me-2"></i>Seções
+                </h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush" id="configTabs" role="tablist">
+                    <a class="list-group-item list-group-item-action active" 
+                       id="geral-tab" 
+                       data-bs-toggle="list" 
+                       href="#geral" 
+                       role="tab">
+                        <i class="fas fa-sliders-h me-2"></i>Geral
+                    </a>
+                    <a class="list-group-item list-group-item-action" 
+                       id="usuarios-tab" 
+                       data-bs-toggle="list" 
+                       href="#usuarios" 
+                       role="tab">
+                        <i class="fas fa-users me-2"></i>Usuários
+                    </a>
+                    <a class="list-group-item list-group-item-action" 
+                       id="empresas-tab" 
+                       data-bs-toggle="list" 
+                       href="#empresas" 
+                       role="tab">
+                        <i class="fas fa-building me-2"></i>Empresas
+                    </a>
+                    <a class="list-group-item list-group-item-action" 
+                       id="seguranca-tab" 
+                       data-bs-toggle="list" 
+                       href="#seguranca" 
+                       role="tab">
+                        <i class="fas fa-shield-alt me-2"></i>Segurança
+                    </a>
+                    <a class="list-group-item list-group-item-action" 
+                       id="notificacoes-tab" 
+                       data-bs-toggle="list" 
+                       href="#notificacoes" 
+                       role="tab">
+                        <i class="fas fa-bell me-2"></i>Notificações
+                    </a>
+                    <a class="list-group-item list-group-item-action" 
+                       id="backup-tab" 
+                       data-bs-toggle="list" 
+                       href="#backup" 
+                       role="tab">
+                        <i class="fas fa-database me-2"></i>Backup
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conteúdo das Configurações -->
+    <div class="col-md-9">
+        <div class="tab-content" id="configTabContent">
+            <!-- Configurações Gerais -->
+            <div class="tab-pane fade show active" id="geral" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-sliders-h me-2"></i>Configurações Gerais
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="/painel/configuracoes/geral" method="POST">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="nome_sistema" class="form-label">Nome do Sistema</label>
+                                    <input type="text" class="form-control" id="nome_sistema" name="nome_sistema" 
+                                           value="{{ config.geral.nome_sistema ?? 'Sistema de Gestão Empresarial' }}" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="versao_sistema" class="form-label">Versão</label>
+                                    <input type="text" class="form-control" id="versao_sistema" name="versao_sistema" 
+                                           value="{{ config.geral.versao_sistema ?? '1.0.0' }}" readonly>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="timezone" class="form-label">Fuso Horário</label>
+                                    <select class="form-select" id="timezone" name="timezone">
+                                        <option value="America/Sao_Paulo" {{ config.geral.timezone == 'America/Sao_Paulo' ? 'selected' : '' }}>São Paulo (GMT-3)</option>
+                                        <option value="America/Manaus" {{ config.geral.timezone == 'America/Manaus' ? 'selected' : '' }}>Manaus (GMT-4)</option>
+                                        <option value="America/Belem" {{ config.geral.timezone == 'America/Belem' ? 'selected' : '' }}>Belém (GMT-3)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="idioma" class="form-label">Idioma</label>
+                                    <select class="form-select" id="idioma" name="idioma">
+                                        <option value="pt_BR" {{ config.geral.idioma == 'pt_BR' ? 'selected' : '' }}>Português (Brasil)</option>
+                                        <option value="en_US" {{ config.geral.idioma == 'en_US' ? 'selected' : '' }}>English (US)</option>
+                                        <option value="es_ES" {{ config.geral.idioma == 'es_ES' ? 'selected' : '' }}>Español</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="registros_por_pagina" class="form-label">Registros por Página</label>
+                                    <select class="form-select" id="registros_por_pagina" name="registros_por_pagina">
+                                        <option value="10" {{ config.geral.registros_por_pagina == '10' ? 'selected' : '' }}>10</option>
+                                        <option value="25" {{ config.geral.registros_por_pagina == '25' ? 'selected' : '' }}>25</option>
+                                        <option value="50" {{ config.geral.registros_por_pagina == '50' ? 'selected' : '' }}>50</option>
+                                        <option value="100" {{ config.geral.registros_por_pagina == '100' ? 'selected' : '' }}>100</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="manutencao" class="form-label">Modo Manutenção</label>
+                                    <div class="form-check form-switch mt-2">
+                                        <input class="form-check-input" type="checkbox" id="manutencao" name="manutencao" 
+                                               {{ config.geral.modo_manutencao ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="manutencao">
+                                            Ativar modo manutenção
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Salvar Configurações
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configurações de Usuários -->
+            <div class="tab-pane fade" id="usuarios" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-users me-2"></i>Configurações de Usuários
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="/painel/configuracoes/usuarios" method="POST">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="min_senha" class="form-label">Tamanho Mínimo da Senha</label>
+                                    <input type="number" class="form-control" id="min_senha" name="min_senha" 
+                                           value="{{ config.usuarios.min_senha ?? 8 }}" min="6" max="20">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="expiracao_senha" class="form-label">Expiração da Senha (dias)</label>
+                                    <input type="number" class="form-control" id="expiracao_senha" name="expiracao_senha" 
+                                           value="{{ config.usuarios.expiracao_senha ?? 90 }}" min="0">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="tentativas_login" class="form-label">Tentativas de Login</label>
+                                    <input type="number" class="form-control" id="tentativas_login" name="tentativas_login" 
+                                           value="{{ config.usuarios.tentativas_login ?? 5 }}" min="3" max="10">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="bloqueio_temporario" class="form-label">Bloqueio Temporário (minutos)</label>
+                                    <input type="number" class="form-control" id="bloqueio_temporario" name="bloqueio_temporario" 
+                                           value="{{ config.usuarios.bloqueio_temporario ?? 30 }}" min="5">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Requisitos de Senha</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="maiuscula" name="maiuscula" 
+                                           {{ config.usuarios.requer_maiuscula ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="maiuscula">
+                                        Requer letra maiúscula
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="minuscula" name="minuscula" 
+                                           {{ config.usuarios.requer_minuscula ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="minuscula">
+                                        Requer letra minúscula
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="numero" name="numero" 
+                                           {{ config.usuarios.requer_numero ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="numero">
+                                        Requer número
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="caractere_especial" name="caractere_especial" 
+                                           {{ config.usuarios.requer_caractere_especial ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="caractere_especial">
+                                        Requer caractere especial
+                                    </label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Salvar Configurações
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configurações de Empresas -->
+            <div class="tab-pane fade" id="empresas" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-building me-2"></i>Configurações de Empresas
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="/painel/configuracoes/empresas" method="POST">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="max_empresas" class="form-label">Máximo de Empresas por Usuário</label>
+                                    <input type="number" class="form-control" id="max_empresas" name="max_empresas" 
+                                           value="{{ config.empresas.max_empresas ?? 10 }}" min="1" max="100">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="max_estabelecimentos" class="form-label">Máximo de Estabelecimentos</label>
+                                    <input type="number" class="form-control" id="max_estabelecimentos" name="max_estabelecimentos" 
+                                           value="{{ config.empresas.max_estabelecimentos ?? 50 }}" min="1" max="1000">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="validacao_cnpj" class="form-label">Validação de CNPJ</label>
+                                    <div class="form-check form-switch mt-2">
+                                        <input class="form-check-input" type="checkbox" id="validacao_cnpj" name="validacao_cnpj" 
+                                               {{ config.empresas.validacao_cnpj ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="validacao_cnpj">
+                                            Validar CNPJ automaticamente
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="consulta_receita" class="form-label">Consulta Receita Federal</label>
+                                    <div class="form-check form-switch mt-2">
+                                        <input class="form-check-input" type="checkbox" id="consulta_receita" name="consulta_receita" 
+                                               {{ config.empresas.consulta_receita ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="consulta_receita">
+                                            Consultar dados da Receita
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Salvar Configurações
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configurações de Segurança -->
+            <div class="tab-pane fade" id="seguranca" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-shield-alt me-2"></i>Configurações de Segurança
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="/painel/configuracoes/seguranca" method="POST">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="sessao_timeout" class="form-label">Timeout da Sessão (minutos)</label>
+                                    <input type="number" class="form-control" id="sessao_timeout" name="sessao_timeout" 
+                                           value="{{ config.seguranca.sessao_timeout ?? 30 }}" min="5" max="480">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="max_sessoes" class="form-label">Máximo de Sessões Simultâneas</label>
+                                    <input type="number" class="form-control" id="max_sessoes" name="max_sessoes" 
+                                           value="{{ config.seguranca.max_sessoes ?? 3 }}" min="1" max="10">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="log_acesso" class="form-label">Log de Acesso</label>
+                                    <div class="form-check form-switch mt-2">
+                                        <input class="form-check-input" type="checkbox" id="log_acesso" name="log_acesso" 
+                                               {{ config.seguranca.log_acesso ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="log_acesso">
+                                            Registrar todos os acessos
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="log_alteracoes" class="form-label">Log de Alterações</label>
+                                    <div class="form-check form-switch mt-2">
+                                        <input class="form-check-input" type="checkbox" id="log_alteracoes" name="log_alteracoes" 
+                                               {{ config.seguranca.log_alteracoes ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="log_alteracoes">
+                                            Registrar alterações críticas
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="ips_permitidos" class="form-label">IPs Permitidos (um por linha)</label>
+                                <textarea class="form-control" id="ips_permitidos" name="ips_permitidos" rows="3" 
+                                          placeholder="192.168.1.1&#10;10.0.0.0/8&#10;Deixe vazio para permitir todos">{{ config.seguranca.ips_permitidos ?? '' }}</textarea>
+                                <small class="form-text text-muted">Deixe vazio para permitir acesso de qualquer IP</small>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Salvar Configurações
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configurações de Notificações -->
+            <div class="tab-pane fade" id="notificacoes" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-bell me-2"></i>Configurações de Notificações
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="/painel/configuracoes/notificacoes" method="POST">
+                            <div class="mb-3">
+                                <label class="form-label">Tipos de Notificação</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="email_novo_usuario" name="email_novo_usuario" 
+                                           {{ config.notificacoes.email_novo_usuario ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="email_novo_usuario">
+                                        E-mail para novos usuários
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="email_nova_empresa" name="email_nova_empresa" 
+                                           {{ config.notificacoes.email_nova_empresa ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="email_nova_empresa">
+                                        E-mail para novas empresas
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="notif_sistema" name="notif_sistema" 
+                                           {{ config.notificacoes.notif_sistema ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="notif_sistema">
+                                        Notificações do sistema
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="email_remetente" class="form-label">E-mail Remetente</label>
+                                    <input type="email" class="form-control" id="email_remetente" name="email_remetente" 
+                                           value="{{ config.notificacoes.email_remetente ?? 'noreply@sistema.com' }}">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="nome_remetente" class="form-label">Nome do Remetente</label>
+                                    <input type="text" class="form-control" id="nome_remetente" name="nome_remetente" 
+                                           value="{{ config.notificacoes.nome_remetente ?? 'Sistema' }}">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Salvar Configurações
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configurações de Backup -->
+            <div class="tab-pane fade" id="backup" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-database me-2"></i>Configurações de Backup
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="/painel/configuracoes/backup" method="POST">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="backup_automatico" class="form-label">Backup Automático</label>
+                                    <div class="form-check form-switch mt-2">
+                                        <input class="form-check-input" type="checkbox" id="backup_automatico" name="backup_automatico" 
+                                               {{ config.backup.backup_automatico ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="backup_automatico">
+                                            Ativar backup automático
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="frequencia_backup" class="form-label">Frequência do Backup</label>
+                                    <select class="form-select" id="frequencia_backup" name="frequencia_backup">
+                                        <option value="diario" {{ config.backup.frequencia == 'diario' ? 'selected' : '' }}>Diário</option>
+                                        <option value="semanal" {{ config.backup.frequencia == 'semanal' ? 'selected' : '' }}>Semanal</option>
+                                        <option value="mensal" {{ config.backup.frequencia == 'mensal' ? 'selected' : '' }}>Mensal</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="retencao_backup" class="form-label">Retenção de Backups (dias)</label>
+                                    <input type="number" class="form-control" id="retencao_backup" name="retencao_backup" 
+                                           value="{{ config.backup.retencao ?? 30 }}" min="7" max="365">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="compressao_backup" class="form-label">Compressão</label>
+                                    <div class="form-check form-switch mt-2">
+                                        <input class="form-check-input" type="checkbox" id="compressao_backup" name="compressao_backup" 
+                                               {{ config.backup.compressao ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="compressao_backup">
+                                            Comprimir arquivos de backup
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="caminho_backup" class="form-label">Caminho do Backup</label>
+                                <input type="text" class="form-control" id="caminho_backup" name="caminho_backup" 
+                                       value="{{ config.backup.caminho ?? '/backups' }}" placeholder="/caminho/para/backups">
+                                <small class="form-text text-muted">Caminho absoluto onde os backups serão armazenados</small>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Salvar Configurações
+                                </button>
+                                <button type="button" class="btn btn-success" onclick="executarBackupManual()">
+                                    <i class="fas fa-download me-2"></i>Executar Backup Manual
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Ativar tooltips do Bootstrap
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Salvar configurações via AJAX
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            salvarConfiguracoes(form);
+        });
+    });
+});
+
+function salvarConfiguracoes(form) {
+    const formData = new FormData(form);
+    const action = form.action;
+    
+    // Mostrar loading
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Salvando...';
+    submitBtn.disabled = true;
+    
+    fetch(action, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            mostrarAlerta('Configurações salvas com sucesso!', 'success');
+        } else {
+            mostrarAlerta('Erro ao salvar configurações: ' + data.message, 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        mostrarAlerta('Erro ao salvar configurações. Tente novamente.', 'danger');
+    })
+    .finally(() => {
+        // Restaurar botão
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+}
+
+function mostrarAlerta(mensagem, tipo) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${tipo} alert-dismissible fade show position-fixed`;
+    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    alertDiv.innerHTML = `
+        ${mensagem}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(alertDiv);
+    
+    // Auto-remover após 5 segundos
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+function executarBackupManual() {
+    if (confirm('Deseja executar um backup manual agora? Esta operação pode demorar alguns minutos.')) {
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Executando...';
+        btn.disabled = true;
+        
+        fetch('/painel/backup/executar', {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                mostrarAlerta('Backup executado com sucesso!', 'success');
+            } else {
+                mostrarAlerta('Erro ao executar backup: ' + data.message, 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            mostrarAlerta('Erro ao executar backup. Tente novamente.', 'danger');
+        })
+        .finally(() => {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        });
+    }
+}
+</script>
+
+<style>
+.list-group-item {
+    border: none;
+    border-radius: 0;
+    border-left: 3px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+    border-left-color: #007bff;
+}
+
+.list-group-item.active {
+    background-color: #007bff;
+    border-left-color: #0056b3;
+}
+
+.tab-content {
+    min-height: 400px;
+}
+
+.form-check-input:checked {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.form-switch .form-check-input {
+    width: 3em;
+    height: 1.5em;
+}
+
+.alert {
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border-radius: 0.5rem;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    border-radius: 0.5rem 0.5rem 0 0 !important;
+}
+</style>
+{% endblock %} 

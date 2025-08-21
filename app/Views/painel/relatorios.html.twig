@@ -1,0 +1,401 @@
+{% extends 'layouts/painel.html.twig' %}
+
+{% block title %}Relatórios - Painel Administrativo{% endblock %}
+{% block page_title %}Relatórios e Análises{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Filtros Gerais -->
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-filter me-2"></i>Filtros
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="filtrosForm" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="data_inicio" class="form-label">Data Início</label>
+                        <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ filtros.data_inicio ?? '' }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="data_fim" class="form-label">Data Fim</label>
+                        <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ filtros.data_fim ?? '' }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="empresa_id" class="form-label">Empresa</label>
+                        <select class="form-select" id="empresa_id" name="empresa_id">
+                            <option value="">Todas as Empresas</option>
+                            {% for empresa in empresas %}
+                            <option value="{{ empresa.id }}" {{ filtros.empresa_id == empresa.id ? 'selected' : '' }}>
+                                {{ empresa.razao_social }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="tipo_relatorio" class="form-label">Tipo de Relatório</label>
+                        <select class="form-select" id="tipo_relatorio" name="tipo_relatorio">
+                            <option value="empresas">Empresas</option>
+                            <option value="usuarios">Usuários</option>
+                            <option value="estabelecimentos">Estabelecimentos</option>
+                            <option value="atividades">Atividades</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-2"></i>Gerar Relatório
+                        </button>
+                        <button type="button" class="btn btn-secondary ms-2" id="exportarExcel">
+                            <i class="fas fa-file-excel me-2"></i>Exportar Excel
+                        </button>
+                        <button type="button" class="btn btn-info ms-2" id="exportarPDF">
+                            <i class="fas fa-file-pdf me-2"></i>Exportar PDF
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards de Resumo -->
+    <div class="col-12 mb-4">
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Total Empresas</h6>
+                                <h3 class="mb-0">{{ resumo.total_empresas ?? 0 }}</h3>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-building fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Total Usuários</h6>
+                                <h3 class="mb-0">{{ resumo.total_usuarios ?? 0 }}</h3>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-users fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Estabelecimentos</h6>
+                                <h3 class="mb-0">{{ resumo.total_estabelecimentos ?? 0 }}</h3>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-store fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Atividades Hoje</h6>
+                                <h3 class="mb-0">{{ resumo.atividades_hoje ?? 0 }}</h3>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-chart-line fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="col-12 mb-4">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-chart-pie me-2"></i>Empresas por Porte
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="porteChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>Empresas por Estado
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="estadoChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela de Dados -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-table me-2"></i>Dados do Relatório
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover" id="tabelaRelatorio">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nome/Razão Social</th>
+                                <th>Tipo</th>
+                                <th>Status</th>
+                                <th>Data Criação</th>
+                                <th>Última Atualização</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if dados_relatorio %}
+                                {% for item in dados_relatorio %}
+                                <tr>
+                                    <td>{{ item.id }}</td>
+                                    <td>{{ item.nome ?? item.razao_social }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ item.tipo == 'empresa' ? 'primary' : (item.tipo == 'usuario' ? 'success' : 'info') }}">
+                                            {{ item.tipo|title }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ item.status == 'ativo' ? 'success' : 'danger' }}">
+                                            {{ item.status|title }}
+                                        </span>
+                                    </td>
+                                    <td>{{ item.created_at|date('d/m/Y H:i') }}</td>
+                                    <td>{{ item.updated_at|date('d/m/Y H:i') }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="visualizarDetalhes({{ item.id }})">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Nenhum dado encontrado. Aplique os filtros para gerar o relatório.
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Detalhes -->
+<div class="modal fade" id="modalDetalhes" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalhes do Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalDetalhesBody">
+                <!-- Conteúdo será carregado via AJAX -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Configuração dos gráficos
+    const porteCtx = document.getElementById('porteChart').getContext('2d');
+    const estadoCtx = document.getElementById('estadoChart').getContext('2d');
+    
+    // Dados dos gráficos (serão populados via backend)
+    const porteData = {
+        labels: ['Micro', 'Pequena', 'Média', 'Grande'],
+        datasets: [{
+            data: [12, 19, 8, 5],
+            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0']
+        }]
+    };
+    
+    const estadoData = {
+        labels: ['SP', 'RJ', 'MG', 'RS', 'PR'],
+        datasets: [{
+            label: 'Quantidade de Empresas',
+            data: [65, 59, 80, 81, 56],
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+        }]
+    };
+    
+    // Criar gráficos
+    new Chart(porteCtx, {
+        type: 'pie',
+        data: porteData,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+    
+    new Chart(estadoCtx, {
+        type: 'bar',
+        data: estadoData,
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    // Exportar Excel
+    document.getElementById('exportarExcel').addEventListener('click', function() {
+        exportarRelatorio('excel');
+    });
+    
+    // Exportar PDF
+    document.getElementById('exportarPDF').addEventListener('click', function() {
+        exportarRelatorio('pdf');
+    });
+});
+
+function visualizarDetalhes(id) {
+    // Aqui você pode fazer uma requisição AJAX para buscar os detalhes
+    // Por enquanto, vamos apenas abrir o modal com um exemplo
+    const modalBody = document.getElementById('modalDetalhesBody');
+    modalBody.innerHTML = `
+        <div class="text-center">
+            <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+            <p class="mt-2">Carregando detalhes...</p>
+        </div>
+    `;
+    
+    const modal = new bootstrap.Modal(document.getElementById('modalDetalhes'));
+    modal.show();
+    
+    // Simular carregamento de dados
+    setTimeout(() => {
+        modalBody.innerHTML = `
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Informações Básicas</h6>
+                    <p><strong>ID:</strong> ${id}</p>
+                    <p><strong>Nome:</strong> Exemplo de Empresa</p>
+                    <p><strong>Status:</strong> Ativo</p>
+                </div>
+                <div class="col-md-6">
+                    <h6>Estatísticas</h6>
+                    <p><strong>Criado em:</strong> 01/01/2024</p>
+                    <p><strong>Última atualização:</strong> 15/01/2024</p>
+                    <p><strong>Total de registros:</strong> 150</p>
+                </div>
+            </div>
+        `;
+    }, 1000);
+}
+
+function exportarRelatorio(tipo) {
+    const form = document.getElementById('filtrosForm');
+    const formData = new FormData(form);
+    
+    // Adicionar o tipo de exportação
+    formData.append('exportar', tipo);
+    
+    // Criar uma requisição para download
+    fetch('/painel/relatorios/exportar', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.blob())
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `relatorio_${tipo}_${new Date().toISOString().split('T')[0]}.${tipo === 'excel' ? 'xlsx' : 'pdf'}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+    })
+    .catch(error => {
+        console.error('Erro ao exportar:', error);
+        alert('Erro ao exportar o relatório. Tente novamente.');
+    });
+}
+</script>
+
+<style>
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border-radius: 0.5rem;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    border-radius: 0.5rem 0.5rem 0 0 !important;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+}
+
+.badge {
+    font-size: 0.75em;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.modal-lg {
+    max-width: 800px;
+}
+</style>
+{% endblock %} 
