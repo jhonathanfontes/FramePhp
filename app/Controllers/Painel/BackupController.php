@@ -5,7 +5,6 @@ namespace App\Controllers\Painel;
 use Core\Controller\BaseController;
 use Core\Http\Request;
 use Core\Http\Response;
-use Core\Config\Config;
 
 class BackupController extends BaseController
 {
@@ -13,7 +12,17 @@ class BackupController extends BaseController
 
     public function __construct()
     {
-        $this->config = new Config();
+        $this->config = [];
+    }
+
+    public function index(): string
+    {
+        $backups = $this->listarBackups();
+
+        return $this->render('painel/backup/index', [
+            'active_menu' => 'backup',
+            'backups' => $backups
+        ]);
     }
 
     public function executar(Request $request): Response
@@ -142,11 +151,11 @@ class BackupController extends BaseController
             $caminhoCompleto = $caminhoBackup . '/' . $nomeArquivo;
 
             // Configurações do banco
-            $host = $this->config->get('database.host', 'localhost');
-            $porta = $this->config->get('database.port', '3306');
-            $usuario = $this->config->get('database.username', 'root');
-            $senha = $this->config->get('database.password', '');
-            $banco = $this->config->get('database.database', 'framephp');
+            $host = config('database.host', 'localhost');
+            $porta = config('database.port', '3306');
+            $usuario = config('database.username', 'root');
+            $senha = config('database.password', '');
+            $banco = config('database.database', 'framephp');
 
             // Comando mysqldump
             $comando = sprintf(
@@ -180,7 +189,7 @@ class BackupController extends BaseController
             }
 
             // Comprimir se configurado
-            if ($this->config->get('backup.compressao', true)) {
+            if (config('backup.compressao', true)) {
                 $arquivoComprimido = $this->comprimirArquivo($caminhoCompleto);
                 if ($arquivoComprimido) {
                     unlink($caminhoCompleto); // Remove arquivo original
@@ -218,11 +227,11 @@ class BackupController extends BaseController
             }
 
             // Configurações do banco
-            $host = $this->config->get('database.host', 'localhost');
-            $porta = $this->config->get('database.port', '3306');
-            $usuario = $this->config->get('database.username', 'root');
-            $senha = $this->config->get('database.password', '');
-            $banco = $this->config->get('database.database', 'framephp');
+            $host = config('database.host', 'localhost');
+            $porta = config('database.port', '3306');
+            $usuario = config('database.username', 'root');
+            $senha = config('database.password', '');
+            $banco = config('database.database', 'framephp');
 
             // Comando mysql para restaurar
             $comando = sprintf(
@@ -370,10 +379,8 @@ class BackupController extends BaseController
         return round($bytes, 2) . ' ' . $unidades[$pow];
     }
 
-    private function jsonResponse($dados): Response
+    protected function jsonResponse(array $dados, int $statusCode = 200): void  
     {
-        return new Response(json_encode($dados), 200, [
-            'Content-Type' => 'application/json'
-        ]);
+        parent::jsonResponse($dados, $statusCode);
     }
 } 

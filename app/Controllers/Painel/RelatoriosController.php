@@ -22,36 +22,32 @@ class RelatoriosController extends BaseController
         $this->estabelecimentoModel = new EstabelecimentoModel();
     }
 
-    public function index(Request $request)
+    public function index()
     {
         // Obter filtros da requisição
-        $filtros = [
-            'data_inicio' => $request->get('data_inicio'),
-            'data_fim' => $request->get('data_fim'),
-            'empresa_id' => $request->get('empresa_id'),
-            'tipo_relatorio' => $request->get('tipo_relatorio', 'empresas')
-        ];
+        // $filtros = [
+        //     'data_inicio' => $request->get('data_inicio'),
+        //     'data_fim' => $request->get('data_fim'),
+        //     'empresa_id' => $request->get('empresa_id'),
+        //     'tipo_relatorio' => $request->get('tipo_relatorio', 'empresas')
+        // ];
 
-        // Resumo geral
-        $resumo = [
-            'total_empresas' => $this->empresaModel->count(),
-            'total_usuarios' => $this->usuarioModel->count(),
-            'total_estabelecimentos' => $this->estabelecimentoModel->count(),
-            'atividades_hoje' => 0 // Placeholder
-        ];
+        // // Resumo geral
+        // $resumo = [
+        //     'total_empresas' => $this->empresaModel->count(),
+        //     'total_usuarios' => $this->usuarioModel->count(),
+        //     'total_estabelecimentos' => $this->estabelecimentoModel->count(),
+        //     'atividades_hoje' => 0 // Placeholder
+        // ];
 
-        // Lista de empresas para filtro
-        $empresas = $this->empresaModel->getAll();
+        // // Lista de empresas para filtro
+        // $empresas = $this->empresaModel->getAll();
 
         // Dados do relatório baseado no tipo
-        $dados_relatorio = $this->gerarRelatorio($filtros);
+       // $dados_relatorio = $this->gerarRelatorio($filtros);
 
         return $this->render('painel/relatorios', [
-            'active_menu' => 'relatorios',
-            'filtros' => $filtros,
-            'resumo' => $resumo,
-            'empresas' => $empresas,
-            'dados_relatorio' => $dados_relatorio
+            'active_menu' => 'relatorios'
         ]);
     }
 

@@ -39,11 +39,14 @@ class Request
         $uri = $this->getUri();
         $position = strpos($uri, '?');
 
-        if ($position === false) {
-            return $uri;
+        $path = ($position === false) ? $uri : substr($uri, 0, $position);
+
+        // Remove a barra final, a menos que seja a raiz
+        if (strlen($path) > 1 && substr($path, -1) === '/') {
+            $path = rtrim($path, '/');
         }
 
-        return substr($uri, 0, $position);
+        return $path;
     }
 
     public function getQuery(): array

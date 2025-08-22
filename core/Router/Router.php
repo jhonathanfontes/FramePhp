@@ -62,6 +62,16 @@ class Router
         return $this->addRoute('DELETE', $uri, $callback);
     }
 
+    /**
+     * Define uma rota de redirecionamento de uma URI para outra.
+     */
+    public function redirect(string $from, string $to, int $statusCode = 302): RouteDefinition
+    {
+        return $this->addRoute('GET', $from, function () use ($to, $statusCode) {
+            Response::redirectResponse($to, $statusCode)->send();
+        })->name('redirect.' . md5($from)); // Gera um nome único para a rota de redirecionamento
+    }
+
     private function addRoute(string $method, string $uri, $callback): RouteDefinition
     {
         // Constrói a URI completa de forma mais robusta

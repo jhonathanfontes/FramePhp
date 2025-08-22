@@ -5,7 +5,6 @@ namespace App\Controllers\Painel;
 use Core\Controller\BaseController;
 use Core\Http\Request;
 use Core\Http\Response;
-use Core\Config\Config;
 
 class ConfiguracoesController extends BaseController
 {
@@ -13,7 +12,16 @@ class ConfiguracoesController extends BaseController
 
     public function __construct()
     {
-        $this->config = new Config();
+        $this->config = [
+            'geral' => [
+                'nome_sistema' => 'Sistema de Gestão Empresarial',
+                'versao_sistema' => '1.0.0',
+                'timezone' => 'America/Sao_Paulo',
+                'idioma' => 'pt_BR',
+                'registros_por_pagina' => '25',
+                'modo_manutencao' => false
+            ]
+        ];
     }
 
     public function index()
@@ -21,11 +29,11 @@ class ConfiguracoesController extends BaseController
         // Carregar configurações atuais
         $config = [
             'geral' => $this->carregarConfiguracoesGerais(),
-            'usuarios' => $this->carregarConfiguracoesUsuarios(),
-            'empresas' => $this->carregarConfiguracoesEmpresas(),
-            'seguranca' => $this->carregarConfiguracoesSeguranca(),
-            'notificacoes' => $this->carregarConfiguracoesNotificacoes(),
-            'backup' => $this->carregarConfiguracoesBackup()
+            // 'usuarios' => $this->carregarConfiguracoesUsuarios(),
+            // 'empresas' => $this->carregarConfiguracoesEmpresas(),
+            // 'seguranca' => $this->carregarConfiguracoesSeguranca(),
+            // 'notificacoes' => $this->carregarConfiguracoesNotificacoes(),
+            // 'backup' => $this->carregarConfiguracoesBackup()
         ];
 
         return $this->render('painel/configuracoes', [
@@ -166,12 +174,12 @@ class ConfiguracoesController extends BaseController
     private function carregarConfiguracoesGerais()
     {
         return [
-            'nome_sistema' => $this->config->get('app.nome', 'Sistema de Gestão Empresarial'),
-            'versao_sistema' => $this->config->get('app.versao', '1.0.0'),
-            'timezone' => $this->config->get('app.timezone', 'America/Sao_Paulo'),
-            'idioma' => $this->config->get('app.idioma', 'pt_BR'),
-            'registros_por_pagina' => $this->config->get('app.registros_por_pagina', '25'),
-            'modo_manutencao' => $this->config->get('app.modo_manutencao', false)
+            'nome_sistema' => config('app.name', 'Sistema de Gestão Empresarial'),
+            'versao_sistema' =>config('app.version', '1.0.0'),
+            'timezone' => config('app.timezone', 'America/Sao_Paulo'),
+            'idioma' => config('app.locale', 'pt_BR'),
+            'registros_por_pagina' => config('app.registros_por_pagina', '25'),
+            'modo_manutencao' => config('app.modo_manutencao', false)
         ];
     }
 

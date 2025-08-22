@@ -1,0 +1,59 @@
+{% extends "layouts/painel.html.twig" %}
+
+{% block title %}Gerenciamento de Logs{% endblock %}
+{% block page_title %}Logs do Sistema{% endblock %}
+
+{% block content %}
+    <section class="section">
+        <div class="section-header">
+            <h2 class="section-title">Registros de Logs</h2>
+        </div>
+        
+        {% if logs is not empty %}
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nível</th>
+                            <th>Mensagem</th>
+                            <th>Contexto</th>
+                            <th>Data</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs %}
+                            <tr>
+                                <td>{{ log.id }}</td>
+                                <td>
+                                    <span class="status-badge status-{{ log.level|lower }}">
+                                        {{ log.level|title }}
+                                    </span>
+                                </td>
+                                <td>{{ log.message }}</td>
+                                <td>{{ log.context|json_encode(constant('JSON_PRETTY_PRINT'))|length > 2 ? log.context|json_encode(constant('JSON_PRETTY_PRINT')) : '-' }}</td>
+                                <td>{{ log.created_at|date('d/m/Y H:i:s') }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📄</div>
+                <h3>Nenhum log encontrado</h3>
+                <p>O sistema ainda não registrou nenhum log.</p>
+            </div>
+        {% endif %}
+    </section>
+    <style>
+        .status-debug { background: #d1ecf1; color: #0c5460; } /* Info-like */
+        .status-info { background: #cce5ff; color: #004085; } /* Primary-like */
+        .status-notice { background: #e2e3e5; color: #383d41; } /* Secondary-like */
+        .status-warning { background: #fff3cd; color: #856404; } /* Warning-like */
+        .status-error { background: #f8d7da; color: #721c24; } /* Danger-like */
+        .status-critical { background: #dc3545; color: #fff; } /* More danger */
+        .status-alert { background: #e0a800; color: #fff; } /* Alert */
+        .status-emergency { background: #343a40; color: #fff; } /* Darker danger */
+    </style>
+{% endblock %}

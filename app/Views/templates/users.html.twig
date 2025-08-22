@@ -19,7 +19,7 @@
 	<div
 		class="box p-5 mb-5">
 		{# Usando uma box Bulma para envolver o campo de busca #}
-		<form id="searchForm" action="/admin/products" method="GET">
+		<form id="searchForm" action="/admin/usuarios" method="GET">
 			<div class="field has-addons">
 				<div class="control has-icons-left is-expanded">
 					<input class="input" type="text" name="b" placeholder="Buscar produtos por nome ou categoria..." value="{{ busca_param | default('') }}">
@@ -32,7 +32,7 @@
 				</div>
 				{% if busca_param is not empty %}
 					<div class="control">
-						<a href="/admin/products" class="button is-light">Limpar</a>
+						<a href="/admin/usuarios" class="button is-light">Limpar</a>
 					</div>
 				{% endif %}
 			</div>

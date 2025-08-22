@@ -79,6 +79,11 @@ class Response
 
     public function send(): void
     {
+        // Limpar qualquer buffer de saída antes de enviar os cabeçalhos
+        if (ob_get_length() > 0) {
+            ob_clean();
+        }
+
         // Enviar código de status
         http_response_code($this->statusCode);
 
@@ -125,16 +130,6 @@ class Response
     public static function redirectResponse(string $url, int $statusCode = 302): self
     {
         return (new self('', $statusCode))->setHeader('Location', $url);
-    }
-
-    public static function redirect(string $url)
-    {
-        if (!isset($_SESSION)) {
-            session_start();
-        }
-        
-        header('Location: ' . $url);
-        return new static();
     }
 
     public function with(string $key, string $message)

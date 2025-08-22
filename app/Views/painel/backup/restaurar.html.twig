@@ -1,0 +1,30 @@
+{% extends "painel/layout.twig" %}
+
+{% block title %}Restaurar Backup{% endblock %}
+{% block page_title %}Restaurar Backup do Sistema{% endblock %}
+
+{% block content %}
+    <section class="section">
+        <div class="section-header">
+            <h2 class="section-title">Confirmação de Restauração</h2>
+            <a href="{{ url('painel.backup') }}" class="btn btn-secondary">Voltar para Backups</a>
+        </div>
+        
+        <div class="card">
+            <div class="card-body">
+                <p>Você está prestes a restaurar o backup <strong>{{ nomeArquivo }}</strong>.</p>
+                <p>Este arquivo foi criado em <strong>{{ dataCriacao }}</strong> e possui <strong>{{ tamanho }}</strong>.</p>
+                <p class="text-danger"><strong>ATENÇÃO:</strong> A restauração de um backup irá sobrescrever o banco de dados atual com os dados contidos no arquivo de backup. Todas as alterações feitas após a criação deste backup serão PERDIDAS.</p>
+                <p>Para confirmar a restauração, digite <code>CONFIRMO</code> no campo abaixo:</p>
+
+                <form action="{{ url('painel.backup.restaurar', {nomeArquivo: nomeArquivo}) }}" method="POST">
+                    <div class="form-group">
+                        <label for="confirmacao">Confirmação:</label>
+                        <input type="text" id="confirmacao" name="confirmacao" class="form-control" placeholder="Digite CONFIRMO" required>
+                    </div>
+                    <button type="submit" class="btn btn-danger mt-3">Confirmar Restauração</button>
+                </form>
+            </div>
+        </div>
+    </section>
+{% endblock %}

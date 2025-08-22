@@ -1,0 +1,86 @@
+{% extends "layouts/painel.html.twig" %}
+
+{% block title %}Gerenciamento de Backup{% endblock %}
+{% block page_title %}Backups do Sistema{% endblock %}
+
+{% block content %}
+    <section class="section">
+        <div class="section-header">
+            <h2 class="section-title">Backups Disponíveis</h2>
+            <a href="#" class="btn btn-primary" id="executarBackupBtn">Executar Novo Backup</a>
+        </div>
+        
+        {% if backups is not empty %}
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Nome do Arquivo</th>
+                            <th>Tamanho</th>
+                            <th>Data de Criação</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for backup in backups %}
+                            <tr>
+                                <td>{{ backup.nome }}</td>
+                                <td>{{ backup.tamanho }}</td>
+                                <td>{{ backup.data_criacao }}</td>
+                                <td>
+                                    <div class="table-actions">
+                                        <a href="{{ url('painel.backup.download', {nomeArquivo: backup.nome}) }}" class="btn btn-info btn-sm" aria-label="Download Backup">
+                                            Download
+                                        </a>
+                                        <a href="/painel/backup/restaurar/{{ backup.nome }}" class="btn btn-warning btn-sm" aria-label="Restaurar Backup">
+                                            Restaurar
+                                        </a>
+                                        <form action="{{ url('painel.backup.excluir', {nomeArquivo: backup.nome}) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este backup?');" style="display:inline;">
+                                            <button type="submit" class="btn btn-danger btn-sm" aria-label="Excluir Backup">
+                                                Excluir
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">🗄️</div>
+                <h3>Nenhum backup encontrado</h3>
+                <p>Execute um novo backup para começar.</p>
+            </div>
+        {% endif %}
+    </section>
+
+    <script>
+        document.getElementById('executarBackupBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            if (confirm('Deseja realmente executar um novo backup agora? Isso pode levar alguns minutos.')) {
+                fetch('{{ url('painel.backup.executar') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message + '\nArquivo: ' + data.arquivo + '\nTamanho: ' + data.tamanho);
+                        window.location.reload();
+                    } else {
+                        alert('Erro: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao executar backup:', error);
+                    alert('Ocorreu um erro ao executar o backup.');
+                });
+            }
+        });
+    </script>
+{% endblock %}
